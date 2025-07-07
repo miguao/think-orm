@@ -1,0 +1,100 @@
+@use '../../style/themes/default.scss' as *;
+@use '../../style/util.scss' as *;
+@use './css-var.scss' as *;
+
+@include set-drawer-var($ele);
+
+/* 抽屉 */
+.ele-drawer {
+  &.el-overlay {
+    overflow: hidden;
+  }
+
+  & > .el-drawer {
+    background: eleVar('drawer', 'bg');
+
+    & > .el-drawer__header {
+      margin: 0;
+      padding: 0;
+      color: inherit;
+      display: block;
+      flex-shrink: 0;
+      border: none;
+    }
+
+    & > .el-drawer__body {
+      padding: 0;
+    }
+
+    & > .el-drawer__footer {
+      padding: 0;
+      flex-shrink: 0;
+      border: none;
+    }
+  }
+}
+
+.ele-drawer-header {
+  display: flex;
+  align-items: center;
+  padding: eleVar('drawer', 'header-padding');
+  border-bottom: eleVar('drawer', 'header-border');
+  box-sizing: border-box;
+}
+
+.ele-drawer-title {
+  flex: 1;
+  color: eleVar('drawer', 'header-color');
+  font-size: eleVar('drawer', 'header-font-size');
+  line-height: eleVar('drawer', 'header-line-height');
+  font-weight: eleVar('drawer', 'header-font-weight');
+  box-sizing: border-box;
+}
+
+.ele-drawer-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: eleVar('drawer', 'icon-size');
+  height: eleVar('drawer', 'icon-size');
+  line-height: eleVar('drawer', 'icon-size');
+  color: eleVar('drawer', 'icon-color');
+  font-size: eleVar('drawer', 'icon-font-size');
+  border-radius: eleVar('drawer', 'icon-radius');
+  transition: (color $transition-base, background-color $transition-base);
+  box-sizing: border-box;
+  cursor: pointer;
+
+  &:hover {
+    color: eleVar('drawer', 'icon-hover-color');
+    background: eleVar('drawer', 'icon-hover-bg');
+  }
+}
+
+.ele-drawer-body {
+  padding: eleVar('drawer', 'body-padding');
+  box-sizing: border-box;
+}
+
+.ele-drawer-footer {
+  padding: eleVar('drawer', 'footer-padding');
+  border-top: eleVar('drawer', 'footer-border');
+  box-sizing: border-box;
+}
+
+/* 失活状态 */
+.ele-drawer-hide {
+  display: none !important;
+}
+
+/* 限制在主体区域 */
+.ele-admin-modals > .ele-drawer {
+  height: auto;
+  pointer-events: auto;
+  position: absolute !important;
+
+  &:not(.el-drawer-fade-leave-active):not(.el-drawer-fade-enter-active) {
+    transition: (width $transition-base, left $transition-base);
+  }
+}

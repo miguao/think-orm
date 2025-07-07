@@ -1,0 +1,8 @@
+@use '../../style/util.scss' as *;
+
+/* 高级表格主题变量 */
+@mixin set-pro-table-var($var) {
+  .ele-tool-column {
+    @include set-ele-var('tool-column', $var);
+  }
+}

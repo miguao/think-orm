@@ -1,0 +1,360 @@
+@use '../../style/themes/default.scss' as *;
+@use '../../style/util.scss' as *;
+
+.ele-split-panel {
+  display: flex;
+  position: relative;
+  --ele-split-size: 200px;
+  --ele-split-space: 16px;
+
+  /* 侧边容器 */
+  & > .ele-split-panel-wrap {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: calc(var(--ele-split-size) + var(--ele-split-space));
+    display: flex;
+    justify-content: flex-end;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+
+    /* 侧边 */
+    & > .ele-split-panel-side {
+      flex-shrink: 0;
+      width: var(--ele-split-size);
+      border: 1px solid elVar('border-color', 'light');
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* 间距 */
+    & > .ele-split-panel-space {
+      flex-shrink: 0;
+      width: var(--ele-split-space);
+      box-sizing: border-box;
+      position: relative;
+
+      /* 拉伸线 */
+      .ele-split-resize-line {
+        width: 12px;
+        height: 100%;
+        position: absolute;
+        left: -6px;
+        z-index: 4;
+        cursor: e-resize;
+
+        &::after {
+          content: '';
+          width: 3px;
+          height: 100%;
+          display: block;
+          margin: 0 auto;
+        }
+
+        &:hover::after {
+          background: elVar('color-primary');
+        }
+      }
+    }
+  }
+
+  /* 内容 */
+  & > .ele-split-panel-body {
+    flex: 1;
+    overflow: auto;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  /* 折叠按钮 */
+  & > .ele-split-collapse-button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: var(--ele-split-size);
+    border-radius: 50%;
+    border: 1px solid elVar('border-color', 'extra-light');
+    box-sizing: border-box;
+    margin: -12px 0 0 -12px;
+    background: elVar('bg-color', 'overlay');
+    box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    z-index: 5;
+
+    .ele-split-collapse-icon {
+      font-size: 14px;
+      color: elVar('text-color', 'secondary');
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: scaleX(1);
+
+      & > svg {
+        stroke-width: 5;
+      }
+    }
+
+    &:hover .ele-split-collapse-icon {
+      color: elVar('text-color', 'primary');
+    }
+  }
+
+  /* 折叠状态 */
+  &.is-collapse {
+    & > .ele-split-panel-wrap {
+      width: 0 !important;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    & > .ele-split-collapse-button {
+      left: 0;
+
+      .ele-split-collapse-icon {
+        transform: scaleX(-1);
+      }
+    }
+  }
+
+  /* 垂直 */
+  &.is-vertical {
+    flex-direction: column;
+
+    & > .ele-split-panel-wrap {
+      flex-direction: column;
+      height: calc(var(--ele-split-size) + var(--ele-split-space));
+      width: auto;
+
+      & > .ele-split-panel-side {
+        height: var(--ele-split-size);
+        width: auto;
+      }
+
+      & > .ele-split-panel-space {
+        height: var(--ele-split-space);
+        width: auto;
+
+        .ele-split-resize-line {
+          width: 100%;
+          height: 12px;
+          left: auto;
+          top: -6px;
+          cursor: n-resize;
+
+          &::after {
+            width: 100%;
+            height: 3px;
+            margin: 4px 0 0 0;
+          }
+        }
+      }
+    }
+
+    & > .ele-split-collapse-button {
+      top: var(--ele-split-size);
+      left: 50%;
+
+      .ele-split-collapse-icon {
+        transform: scaleY(1);
+      }
+    }
+
+    &.is-collapse {
+      & > .ele-split-panel-wrap {
+        width: auto !important;
+        height: 0 !important;
+      }
+
+      & > .ele-split-collapse-button {
+        top: 0;
+
+        .ele-split-collapse-icon {
+          transform: scaleY(-1);
+        }
+      }
+    }
+  }
+
+  /* 反向 */
+  &.is-reverse {
+    flex-direction: row-reverse;
+
+    & > .ele-split-panel-wrap {
+      flex-direction: row-reverse;
+
+      & > .ele-split-panel-space .ele-split-resize-line {
+        left: auto;
+        right: -6px;
+      }
+    }
+
+    & > .ele-split-collapse-button {
+      left: auto;
+      right: var(--ele-split-size);
+      margin: -12px -12px 0 0;
+
+      .ele-split-collapse-icon {
+        transform: scaleX(-1);
+      }
+    }
+
+    &.is-collapse > .ele-split-collapse-button {
+      right: 0;
+
+      .ele-split-collapse-icon {
+        transform: scaleX(1);
+      }
+    }
+
+    &.is-vertical {
+      flex-direction: column-reverse;
+
+      & > .ele-split-panel-wrap {
+        flex-direction: column-reverse;
+
+        & > .ele-split-panel-space .ele-split-resize-line {
+          top: auto;
+          right: auto;
+          bottom: -6px;
+        }
+      }
+
+      & > .ele-split-collapse-button {
+        left: 50%;
+        top: auto;
+        bottom: var(--ele-split-size);
+        margin: 0 0 -12px -12px;
+
+        .ele-split-collapse-icon {
+          transform: scaleY(-1);
+        }
+      }
+
+      &.is-collapse > .ele-split-collapse-button {
+        bottom: 0;
+
+        .ele-split-collapse-icon {
+          transform: scaleY(1);
+        }
+      }
+    }
+  }
+
+  /* 拉伸状态 */
+  &.is-resizing {
+    user-select: none;
+
+    & > .ele-split-panel-wrap,
+    & > .ele-split-collapse-button {
+      transition: none;
+    }
+  }
+
+  /* 遮罩层 */
+  .ele-split-panel-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    backdrop-filter: blur(6px);
+    background: rgba(158, 158, 158, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    display: none;
+    z-index: 2;
+  }
+
+  /* 内部表格弹性布局 */
+  &.is-flex-table {
+    flex: 1;
+    overflow: auto;
+
+    & > .ele-split-panel-body,
+    & > .ele-split-panel-wrap > .ele-split-panel-side {
+      display: flex;
+      flex-direction: column;
+
+      & > .ele-pro-table {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+
+        & > .el-table {
+          flex: 1;
+          height: 100%;
+        }
+      }
+    }
+  }
+}
+
+/* 小屏幕样式 */
+@media screen and (max-width: 768px) {
+  .ele-split-panel.is-responsive:not(.is-vertical) {
+    &:not(.is-collapse) {
+      overflow: hidden !important;
+    }
+
+    & > .ele-split-panel-wrap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+
+      & > .ele-split-panel-side {
+        background: elVar('bg-color');
+        border: none;
+        z-index: 3;
+      }
+    }
+
+    & > .ele-split-panel-body {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    & > .ele-split-panel-mask {
+      display: block;
+    }
+
+    &:not(.is-collapse) {
+      & > .ele-split-panel-mask {
+        left: var(--ele-split-size);
+        pointer-events: all;
+        opacity: 1;
+      }
+
+      & > .ele-split-panel-body {
+        transform: translateX(
+          calc(var(--ele-split-size) + var(--ele-split-space))
+        );
+        z-index: 1;
+      }
+    }
+
+    /* 反向 */
+    &.is-reverse {
+      & > .ele-split-panel-wrap {
+        right: 0;
+        left: auto;
+      }
+
+      &:not(.is-collapse) {
+        & > .ele-split-panel-mask {
+          left: 0;
+          right: var(--ele-split-size);
+        }
+
+        & > .ele-split-panel-body {
+          transform: translateX(
+            calc(0px - var(--ele-split-size) - var(--ele-split-space))
+          );
+        }
+      }
+    }
+  }
+}
