@@ -7,8 +7,8 @@ layui.define(['laytpl', 'layer', 'element', 'util'], function (exports) {
         , engine: '.html' //视图文件后缀名
         , pageTabs: false //是否开启页面选项卡功能。单页版不推荐开启
 
-        , name: '纳米支付 · 智慧运营'
-        , tableName: 'catPayAdmin' //本地存储表名
+        , name: 'Doubee · 智慧运营'
+        , tableName: 'doubeepay' //本地存储表名
         , MOD_NAME: 'admin' //模块事件名
 
         , debug: false //是否开启调试模式。如开启，接口异常时会抛出异常 URL 等信息
