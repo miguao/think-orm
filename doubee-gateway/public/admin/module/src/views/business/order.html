@@ -1,0 +1,542 @@
+<view id="system-business-order">
+    <title>订单管理</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">运营管理</a>
+            <a><cite>订单管理</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-card-header">交易大数据
+            </div>
+            <div class="layui-card-body">
+
+                <div class="layadmin-backlog">
+                    <div>
+                        <ul class="layui-row layui-col-space10">
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body today_order_success_rate_percentage rate-percentage">
+                                    <h3>今日成功率</h3>
+                                    <p><cite class="today_order_success_rate" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body order_success_rate_percentage rate-percentage">
+                                    <h3>实时成功率</h3>
+                                    <p><cite class="order_success_rate" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>成功交易额</h3>
+                                    <p><cite class="order_success_amount" style="color: #ffb355;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>下单金额</h3>
+                                    <p><cite class="order_amount" style="color: #578cbd;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>总订单数量</h3>
+                                    <p><cite class="order_count" style="color: #bd5522;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>成功交易订单数</h3>
+                                    <p><cite class="order_success_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>一分钟内下单数</h3>
+                                    <p><cite class="order_minute_count" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>商户费用</h3>
+                                    <p><cite class="order_merchant_cost" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>码商盈利</h3>
+                                    <p><cite class="order_beneficiary_profit" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>代理盈利</h3>
+                                    <p><cite class="order_agent_profit" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>平台纯盈利</h3>
+                                    <p><cite class="order_profit" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>补单</h3>
+                                    <p><cite class="order_remedy_count" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有订单</li>
+                    <li><a target="_blank" href="/admin/real-time.html">神器 · 无极</a></li>
+                </ul>
+
+
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+                        <div style="margin-bottom: 10px;"></div>
+                        <table id="system-business-order-table" lay-filter="system-business-order-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+<style>
+    #system-business-order .user {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        var $ = layui.$, admin = layui.admin, hex = layui.hex, tableInstance;
+        let appInterface = $('#system-business-order');
+
+        let order = {
+            data: {},
+            timer: {},
+            getExpire(create_date, order_expire) {
+                let date = create_date.substring(0, 19);
+                date = date.replace(/-/g, '/');
+                let timestamp = new Date(date).getTime() / 1000;
+                let now_timestamp = parseInt(new Date().getTime() / 1000);
+                return (parseInt(timestamp) + parseInt(order_expire)) - now_timestamp;
+            },
+            getStatusHtml: function (status, create_date, order_expire, id, remedy) {
+
+                var baseStatus = [
+                    '<span class="layui-badge">未支付(<span class="timer-' + id + '">' + this.getExpire(create_date, order_expire) + '</span>s)</span>',
+                    '<span style="cursor:pointer;" data-id="' + id + '" class="layui-badge layui-bg-green notification">已支付</span>',
+                    '<span class="layui-badge layui-bg-gray">已超时</span>',
+                ];
+
+                if (status == 1 && remedy == 1) {
+                    return '<span class="layui-badge layui-bg-blue">已补单</span>';
+                }
+
+                if (status == 0) {
+                    this.timer["timer_" + id] = setInterval(() => {
+                        let expire = this.getExpire(create_date, order_expire);
+                        if (expire <= 0) {
+                            clearInterval(this.timer["timer_" + id]);
+                        }
+                        $('.timer-' + id).html(expire);
+                    }, 1000);
+                }
+
+                return baseStatus[status];
+            },
+        };
+
+
+        let modal = (values = {}) => {
+            hex.popup('/admin/order/remedy', [
+                {title: "实付金额", name: "poll_amount", type: "input", placeholder: "请输入实际支付金额"},
+                {name: "remedy_type", type: "hidden", default: 1}
+
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+
+        tableInstance = hex.renderTable('system-business-order-table', '/admin/order/getUserOrders', '#system-business-order-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            }
+            , {
+                field: 'trade_no', title: '系统订单号', width: 50
+            }
+            , {
+                field: 'out_trade_no', title: '商户订单号', width: 120
+            }
+
+            , {
+                field: 'merchant_id', title: '下单商户', templet: function (item) {
+                    if (item.merchant == null) {
+                        return '-';
+                    }
+                    return '<span style="color: #ff0b0e;">' + item.merchant.user + '</span><small style="color: #8e5dff;">(' + item.merchant.id + ')</small>';
+                }, width: 110
+            }
+            , {
+                field: 'ca_id', title: '账号备注', templet: function (item) {
+                    if (item.ca == null) {
+                        return '-';
+                    }
+                    return '<span style="color: #3281ff;">' + item.ca.remark + '</span>';
+                }, width: 120
+            }, {
+                field: 'amount', title: '下单金额', templet: function (item) {
+                    let s = '';
+                    let font = '';
+
+                    if (item.amount != item.poll_amount) {
+                        s = ' <span style="color: #ff0b0e;font-size:8px">(' + item.poll_amount + ')</span>';
+                        font = 'font-size:8px';
+                    }
+
+                    return '<b style="color: #01AAED;' + font + '">' + item.amount + '</b>' + s;
+                }, width: 90, align: "center"
+            }, {
+                field: 'pay_amount', title: '实付', templet: function (item) {
+                    if (item.status != 1) {
+                        return '-';
+                    }
+                    return '<b style="color: green">' + item.pay_amount + '</b>';
+                }, width: 75
+            },
+            {
+                field: 'status', title: '订单状态', templet: function (item) {
+                    return order.getStatusHtml(item.status, item.create_date, item.channel.order_expire, item.id, item.remedy);
+                }, width: 115
+            },
+            {
+                field: 'create_device', title: '设备', dict: "business_order_device", dictType: "none", width: 65
+            }
+            , {
+                field: 'pay_date', title: '下单时间', width: 170, templet: function (item) {
+                    return '<span>' + item.create_date + '</span>';
+                }
+            }
+            , {
+                field: 'pay_date', title: '支付时间', width: 170, templet: function (item) {
+                    if (item.pay_date == null) {
+                        return '-';
+                    }
+                    return '<span style="color: green;">' + item.pay_date + '</span>';
+                }
+            }
+            , {
+                field: 'create_ip', title: '客户IP', width: 145, templet: function (item) {
+                    return '<small><a href="javascript:;" data-id="' + item.id + '" class="addressBanned">' + item.create_ip + '(<span style="color:red;">' + item.ipCount + '</span>)</a></small>';
+                }
+            }
+            , {
+                field: 'beneficiary_id', title: '接单码商', templet: function (item) {
+                    if (item.beneficiary == null) {
+                        return '-';
+                    }
+
+                    if (item.type == 2) {
+                        return '<span class="layui-badge layui-bg-green">自运营</span>';
+                    }
+
+                    return '<span style="color: green;">' + item.beneficiary.user + '</span>';
+                }, width: 95
+            }
+            , {
+                field: 'beneficiary_id', title: '支付通道', templet: function (item) {
+                    if (item.channel == null) {
+                        return '-';
+                    }
+
+                    return '<span style="font-size: 8px;">' + item.channel.name + ' [<span style="color: green;">' + item.channel.id + '</span>]' + '</span>';
+                }, width: 150
+            }
+            , {
+                field: 'beneficiary_id', title: '支付子通道', templet: function (item) {
+                    if (item.sub_channel == null) {
+                        return '-';
+                    }
+
+                    return '<span style="font-size: 8px;">' + item.sub_channel.name + ' [<span style="color: green;">' + item.sub_channel.id + '</span>]' + '</span>';
+                }, width: 110
+            }
+            , {
+                field: 'ca_acc', title: '收款账号', templet: function (item) {
+                    if (item.ca == null) {
+                        return '-';
+                    }
+                    return '<span style="color: #3281ff;">' + item.ca.user + '</span>';
+                }, width: 100
+            }
+            , {
+                field: 'merchant_cost', title: '商户费用', width: 75
+            }/*, {
+                field: 'beneficiary_cost', title: '码商盈利', width: 90, templet: function (item) {
+                    if (item.type == 2) {
+                        return '-';
+                    }
+
+                    return item.beneficiary_cost;
+                }
+            }, {
+                field: 'beneficiary_cost', title: '代理盈利', templet: function (item) {
+                    if (item.commission_status != 1) {
+                        return '-';
+                    }
+                    return item.commission;
+                }, width: 90
+            }*/
+            /*  , {
+                  field: 'agent_id', title: '代理商', templet: function (item) {
+                      if (item.agent == null) {
+                          return '-';
+                      }
+                      return item.agent.user + ' [<span style="color: #ff6381;">' + item.agent_id + '</span>]';
+                  }, width: 110
+              }*//*, {
+                field: 'profit', title: '平台盈利', templet: function (item) {
+                    if (item.status != 1) {
+                        return '-';
+                    }
+                    let profit = item.merchant_cost - item.beneficiary_cost;
+                    if (item.commission_status == 1) {
+                        profit = profit - item.commission;
+                    }
+                    return '<b style="color: #26bd00;">' + profit.toFixed(3) + '</b>';
+                }, width: 90
+            }*/, {
+                title: '手动补单', templet: function (item) {
+                    if (item.status == 1) {
+
+                        if (item.remedy == 1 && item.admin != null) {
+                            return '<span style="font-size: 8px;">' + item.admin.user + ' [<span style="color: #ff0b0e;">' + item.admin_id + '</span>]</span>';
+                        }
+
+                        return '-';
+                    }
+
+                    return '<button class="layui-btn layui-btn-xs rescue" data-id="' + item.id + '"><i class="layui-icon layui-icon-print"></i>补单</button>';
+                }
+            }
+        ]], res => {
+            let layerTipsIndex = 0;
+
+            appInterface.find('.order_success_amount').html(res.order_success_amount);
+            appInterface.find('.order_amount').html(res.order_amount);
+            appInterface.find('.order_count').html(res.order_count);
+            appInterface.find('.order_remedy_count').html(res.order_remedy_count);
+            appInterface.find('.order_success_count').html(res.order_success_count);
+            appInterface.find('.order_minute_count').html(res.order_minute_count);
+            appInterface.find('.order_merchant_cost').html(res.order_merchant_cost);
+            appInterface.find('.order_beneficiary_profit').html(res.order_beneficiary_profit);
+            appInterface.find('.order_agent_profit').html(res.order_agent_profit);
+            appInterface.find('.order_profit').html(res.order_profit.toFixed(3));
+            appInterface.find('.today_order_success_rate_percentage').attr('style', 'background-size: ' + res.today_order_success_rate + "% 100%");
+            appInterface.find('.today_order_success_rate').html(res.today_order_success_rate + '%');
+            appInterface.find('.order_success_rate_percentage').attr('style', 'background-size: ' + res.order_success_rate + "% 100%");
+            appInterface.find('.order_success_rate').html(res.order_success_rate + '%');
+
+            res.data.forEach(function (item, index) {
+                order.data[item.id] = item;
+            });
+
+            $('.order_pay_date_hover').hover(function () {
+                var id = $(this).attr('data-id'), data = order.data[id], info = [];
+
+                if (data.pay_date == null) {
+                    return;
+                }
+
+                info.push('<span style="color: #00ff2d;">支付时间：' + data.pay_date + '</span>');
+
+                layerTipsIndex = layer.tips(info.join('<br>'), this, {
+                    tips: [3, '#0c0c0c'],
+                    time: 0,
+                    width: 500
+                });
+
+            }, function () {
+                layer.close(layerTipsIndex);
+            });
+
+
+            $('#system-business-order .rescue').click(function () {
+                let map = hex.getMapItem(this);
+                modal(map);
+            });
+
+            $('#system-business-order .addressBanned').click(function () {
+                let map = hex.getMapItem(this);
+                var ip = map.create_ip;
+                layer.confirm('您是否要封禁<b style="color: red;">' + ip + '</b>该IP，一旦封禁，该IP将无法进下单？', {
+                    btn: ['立即封禁', '取消'] //按钮
+                }, function () {
+                    admin.req({
+                        url: "/admin/blockIp/save",
+                        method: "POST",
+                        data: {ip: ip},
+                        done: res => {
+                            layer.msg(res.msg);
+                        },
+                        load: true
+                    });
+                });
+            });
+
+            $('#system-business-order .notification').click(function () {
+                let map = hex.getMapItem(this);
+                admin.req({
+                    url: '/admin/order/remedy',
+                    method: 'post',
+                    data: {
+                        id: map.id,
+                        remedy_type: 0
+                    },
+                    done: res => {
+                        layer.msg(res.msg);
+                    }
+                });
+            });
+
+        }, null, null, 9, [9, 20, 50, 100, 200]);
+
+
+        $('#system-business-order .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-business-order-table').data);
+            hex.deleteBatchEntity('/system/app/order/delorder', data, res => {
+                tableInstance.instance.reload();
+            });
+        });
+
+
+        hex.query('#system-business-order .query', tableInstance.instance, [
+            {title: "自动刷新秒数", name: "refresh", type: "input", width: 125},
+            {title: "系统订单号", name: "equal-trade_no", type: "input", width: 125},
+            {title: "商户订单号", name: "equal-out_trade_no", type: "input", width: 125},
+            {title: "订单状态", name: "equal-status", type: "select", dict: "business_order_status", width: 125,
+                auto: true},
+            {title: "手动补单", name: "equal-remedy", type: "select", dict: "business_order_remedy", width: 125,
+                auto: true},
+            {
+                title: "选择商户",
+                name: "equal-merchant_id",
+                type: "select",
+                dict: "user->type=0,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            },
+            {title: "商户/自运营ID", name: "equal-merchant_id·mid", type: "input", width: 125},
+            {
+                title: "选择码商",
+                name: "equal-beneficiary_id",
+                type: "select",
+                dict: "user->type=1,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            },
+            {title: "码商ID", name: "equal-beneficiary_id·bid", type: "input", width: 125},
+            {
+                title: "选择代理商",
+                name: "equal-agent_id",
+                type: "select",
+                dict: "user->type=3,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            },
+            {
+                title: "代理返佣状态",
+                name: "equal-commission_status",
+                type: "select",
+                dict: "business_order_commission_status",
+                width: 125,
+                auto: true
+            },
+            {title: "代理ID", name: "equal-agent_id·aid", type: "input", width: 125},
+            {title: "支付应用", name: "equal-app_id", type: "remoteSelect", dict: "user_app,id,name", width: 125},
+            {
+                title: "支付通道",
+                name: "equal-channel_id",
+                type: "select",
+                dict: "pay_channel,id,name",
+                width: 125,
+                auto: true
+            },
+            {title: "下单设备", name: "equal-create_device", type: "select", dict: "business_order_device", width: 125},
+            {
+                title: "操作管理员",
+                name: "equal-admin_id",
+                type: "select",
+                dict: "system_user,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            },
+            {title: "商户订单类型", name: "equal-type", type: "select", dict: "business_order_type", width: 125,
+                auto: true},
+            {title: "开始时间", name: "betweenStart-create_date", type: "date", width: 125},
+            {title: "结束时间", name: "betweenEnd-create_date", type: "date", width: 125},
+            {title: "最小金额", name: "betweenStart-amount", type: "input", width: 125},
+            {title: "最大金额", name: "betweenEnd-amount", type: "input", width: 125},
+            {title: "收款账号", name: "equal-ca_id", type: "remoteSelect", dict: "user_ca,id,user", width: 125, auto: true},
+            {title: "账号备注", name: "equal-ca_id·cid", type: "remoteSelect", dict: "user_ca,id,remark", width: 125,
+                auto: true},
+        ], true);
+
+    });
+</script>

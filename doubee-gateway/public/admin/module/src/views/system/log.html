@@ -1,0 +1,84 @@
+<view id="system-log">
+    <title>操作日志</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">系统管理</a>
+            <a><cite>操作日志</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有日志</li>
+                </ul>
+
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+                        <div style="margin-bottom: 10px;"></div>
+                        <table id="system-log-table" lay-filter="system-log-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        var $ = layui.$, admin = layui.admin, hex = layui.hex, tableInstance;
+
+        tableInstance = hex.renderTable('system-log-table', '/system/log/getLogs', '#system-log-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            }
+            , {
+                field: 'user_id', title: '管理员', templet: function (item) {
+                    if (item.user == null) {
+                        return '-';
+                    }
+                    return '[' + item.user.id + '] <b style="color: #06bd17;">' + item.user.user + '</b>';
+                }, width: 150
+            },
+            {
+                field: 'create_date', title: '操作时间', width: 180
+            },
+            {
+                field: 'create_ip', title: '操作IP', width: 150
+            },
+            {
+                field: 'log', title: '操作日志'
+            }
+        ]], null, null, 720, 20, [20, 30, 40, 50]);
+
+
+        hex.query('#system-log .query', tableInstance.instance, [
+            {
+                title: "搜索日志",
+                name: "search-log",
+                type: "input",
+                width: 200
+            },
+            {
+                title: "搜索操作者",
+                name: "equal-user_id",
+                type: "remoteSelect",
+                dict: "system_user,id,user",
+                width: 151,
+                placeholder: "请输入管理员用户名"
+            }, {
+                title: "操作IP",
+                name: "equal-create_ip",
+                type: "input",
+                width: 151
+            },
+            {title: "操作时间从", name: "betweenStart-create_date", type: "date", width: 151},
+            {title: "操作时间到", name: "betweenEnd-create_date", type: "date", width: 151}
+        ]);
+    });
+</script>

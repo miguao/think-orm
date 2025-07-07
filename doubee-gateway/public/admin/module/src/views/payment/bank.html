@@ -1,0 +1,79 @@
+<view id="payment-bank">
+    <title>银行管理</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">支付管理</a>
+            <a><cite>银行管理</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有银行</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm create">
+                                新增银行
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+
+                        <table id="payment-bank-table"
+                               lay-filter="payment-bank-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        let $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/api/payment/bank/saveBank',
+            admin = layui.admin;
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {title: "银行图标", name: "icon", type: "image", placeholder: "请选择图标"},
+                {title: "银行名称", name: "name", type: "input", placeholder: "请输入银行名称"},
+                {title: "银行代码", name: "code", type: "input", placeholder: "请输入银行代码"},
+                {title: "状态", name: "status", type: "switch", text: "启用"}
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        tableInstance = hex.renderTable('payment-bank-table', '/admin/api/payment/bank/getBankList', '#payment-bank-table', [[
+            {type: 'checkbox', fixed: 'left'},
+            {field: 'icon', title: '图标', dictType: 'image', width: 60},
+            {field: 'name', title: '银行名称'},
+            {field: 'code', title: '银行代码'},
+            {field: 'creation_time', title: '创建时间'},
+            {field: 'status', title: '状态', dictType: "switch", dictText: "启用"},
+            {
+                title: '操作',
+                action: [
+                    {type: "button", icon: "layui-icon-survey", title: "修改", class: "layui-btn-normal edit"}
+                ]
+            }
+        ]], res => {
+            hex.setIdMap(res.data);
+            $('#payment-bank .edit').click(function () {
+                modal(hex.getMapItem(this));
+            });
+        });
+
+        $('#payment-bank .create').click(() => {
+            modal();
+        });
+    });
+</script>

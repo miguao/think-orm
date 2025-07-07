@@ -1,0 +1,67 @@
+<view id="merchant-user-withdraw">
+    <title>银行卡管理</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">商户管理</a>
+            <a><cite>银行卡管理</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有银行卡</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+                        <table id="merchant-user-withdraw-table"
+                               lay-filter="merchant-user-withdraw-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+<script>
+    layui.use(['hex'], function () {
+        var $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/api/merchant/bank/card/saveCard';
+
+        tableInstance = hex.renderTable('merchant-user-withdraw-table', '/admin/api/merchant/bank/card/getCardList', '#merchant-user-withdraw-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            }
+            , {
+                title: '所属商户号', templet: function (item) {
+                    return item.merchant?.merchant_no;
+                }
+            }
+            , {
+                title: '银行名称', templet: function (item) {
+                    return item.bank?.name;
+                }
+            }
+            , {field: 'card_no', title: '银行卡号'}
+            , {field: 'card_image', title: '银行卡图片'}
+            , {field: 'creation_time', title: '创建时间'}
+            , {field: 'status', title: '状态'},
+            {
+                title: '操作',
+                action: [
+                    {type: "button", icon: "layui-icon-survey", title: "通过", class: "layui-btn-normal edit"}
+                ],
+            }
+        ]], res => {
+        }, saveUrl);
+
+        $('#merchant-user-withdraw .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('merchant-user-withdraw-table').data);
+            hex.deleteBatchEntity('/admin/api/merchant/application/deleteApplication', data, res => {
+                tableInstance.instance.reload();
+            });
+        });
+    });
+</script>

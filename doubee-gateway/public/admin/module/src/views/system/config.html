@@ -1,0 +1,178 @@
+<view id="system-config">
+    <title>配置管理</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">系统管理</a>
+            <a><cite>配置管理</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有配置</li>
+                </ul>
+                <div class="layui-tab-content">
+
+                    <div class="layui-tab-item layui-show">
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm create">
+                                新增配置
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+
+                        <table id="system-config-table" lay-filter="system-config-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+<script>
+    layui.use(['hex'], function () {
+        var $ = layui.$, hex = layui.hex, form = layui.form, tableInstance, saveUrl = '/system/config/saveConfig';
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {title: "配置键名", name: "key", type: "input", placeholder: "请输入配置键名"},
+                {title: "中文名称", name: "name", type: "input", placeholder: "请输入配置中文名称"},
+                {title: "公开配置", name: "public", type: "switch", text: "公开"},
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        tableInstance = hex.renderTable('system-config-table', '/admin/api/config/getConfigList', '#system-config-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            }
+            , {
+                field: 'name', title: '配置名称', edit: "text"
+            }
+            , {
+                field: 'key', title: '配置键名'
+            }
+            , {
+                field: 'public', title: '公开配置', dictType: 'switch', dictText: "是"
+            }
+            , {
+                action: [
+                    {type: "button", icon: "layui-icon-survey", title: "修改", class: "layui-btn-normal edit"},
+                    {type: "button", icon: "layui-icon-website", title: "配置", class: "config"}
+                ]
+            }
+        ]], res => {
+            $('#system-config .edit').click(function () {
+                modal(hex.getIdMap(hex.getObjectId(this)));
+            });
+
+            $('#system-config .config').click(function () {
+                let itemData = hex.getMapItem(this);
+
+                let html = `<div class="layui-card-body">`
+                html += `<div style="margin-bottom: 10px;">
+                         <button class="layui-btn layui-btn-sm create">
+                         <i class="layui-icon layui-icon-website"></i> 字段配置
+                         </button>
+                         </div>
+                         <fieldset class="layui-elem-field layui-field-title">
+                         <legend style="font-size: unset !important;font-weight: unset !important;">配置数据</legend>
+                         <div class="layui-field-box">`;
+                html += `<form class="layui-form layui-form-pane hex-config-modal">`;
+
+                itemData.configData.forEach(item => {
+                    switch (item.component_type) {
+                        case 'input':
+                            html += '        <div class="layui-form-item">\n' +
+                                '            <label class="layui-form-label">' + item.title + '</label>\n' +
+                                '            <div class="layui-input-block">\n' +
+                                '                <input name="' + item.key + '" placeholder="请输入' + item.title + '" type="text" class="layui-input ' + item.key + '" value="' + (item.value ? item.value : '') + '"/>' +
+                                '            </div>\n' +
+                                '        </div>';
+                            break;
+                        case 'select':
+                            html += '<div class="layui-form-item">\n' +
+                                '                <label class="layui-form-label">' + item.title + '</label>\n' +
+                                '                <div class="layui-input-block">\n' +
+                                '                    <select lay-filter="hex-' + item.key + '"  class="' + item.key + '" name="' + item.key + '"><option value="">请选择' + item.title + '</option></select>\n' +
+                                '                </div>\n' +
+                                '            </div>';
+                            break;
+                    }
+                });
+
+                html += `</form>`;
+                html += `</div></fieldset>`;
+                html += `</div>`;
+
+                layer.open({
+                    title: `管理配置 | ${itemData.name}(${itemData.key})`,
+                    content: html,
+                    type: 1,
+                    area: ['60%', '60%'],
+                    btn: ["保存", "取消"],
+                    yes: function () {
+                        let serializeArray = $('.hex-config-modal').serializeArray();
+                        let paramsToJSONObject = {};
+                        serializeArray.forEach(item => {
+                            if (item.name.match(RegExp(/\[\]/))) {
+                                let name = item.name.replace("[]", "");
+                                if (!paramsToJSONObject.hasOwnProperty(name)) {
+                                    paramsToJSONObject[name] = [];
+                                }
+                                paramsToJSONObject[name].push(item.value);
+                            } else {
+                                paramsToJSONObject[item.name] = item.value.replace(/\+/g, "%2B").replace(/\&/g, "%26");
+                            }
+                        });
+
+                        console.log(paramsToJSONObject);
+
+                        layer.msg("点击了保存");
+                    },
+                    success: function () {
+                        itemData.configData.forEach(item => {
+                            switch (item.component_type) {
+                                case "select":
+                                    let instance = $('.hex-config-modal .' + item.key);
+
+                                    if (item.data_mode === 1) {
+                                        let componentData = JSON.parse(item.component_data);
+                                        componentData.forEach(s => {
+                                            instance.append(' <option value="' + s.value + '"  ' + ((item.value === s.value ? 'selected' : '')) + '>' + s.label + '</option>');
+                                        });
+                                    } else {
+                                        hex.getDict(item.dict_key, res => {
+                                            res.data.forEach(s => {
+                                                instance.append(' <option value="' + s.id + '"  ' + ((item.value === s.id ? 'selected' : '')) + '>' + s.name + '</option>');
+                                            });
+                                        });
+                                    }
+                                    break;
+                            }
+                        });
+
+                        form.render();
+                    },
+                });
+            });
+        }, saveUrl);
+
+        $('#system-config .create').click(() => {
+            modal();
+        });
+
+        $('#system-config .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-config-table').data);
+            hex.deleteBatchEntity('/system/config/delConfig', data, res => {
+                tableInstance.instance.reload();
+            })
+        });
+    });
+</script>

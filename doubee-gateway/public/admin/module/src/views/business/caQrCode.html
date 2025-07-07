@@ -1,0 +1,140 @@
+<view id="system-business-ca-qrCode">
+    <title>二维码</title>
+
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">收款账号</a>
+            <a><cite>二维码</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">二维码</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm create">
+                                上传二维码
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm refresh">
+                                <i class="layui-icon layui-icon-refresh"></i>刷新
+                            </button>
+                            <div class="layui-input-inline"><input
+                                    style="height: 30px;"
+                                    type="text" required placeholder="输入金额回车查询"
+                                    autocomplete="off" class="layui-input query"></div>
+                        </div>
+                        <table id="system-business-ca-qrCode-table"
+                               lay-filter="system-business-ca-qrCode-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+
+<script>
+    layui.use(['hex'], function () {
+        var $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/ca/qrcode/saveQrCode', id = hex.get('caId'),
+            userId = hex.get('userId');
+        let status = ['<span style="color: green;">未使用</span>', '<span style="color: red;">正在使用</span>'];
+
+        let modal = (values = {}) => {
+            hex.popup('/admin/ca/qrcode/saveQrCodes', [
+                {
+                    title: "收款码包",
+                    name: "path",
+                    type: "file",
+                    placeholder: "请上传zip格式的压缩包",
+                    exts: 'zip',
+                    acceptMime: "application/zip"
+                },
+                {name: 'caId', type: 'hidden', default: id},
+                {name: 'userId', type: 'hidden', default: userId},
+                {name: 'vain', title: "虚浮金额", type: 'input', placeholder: "虚浮金额,通过该金额会自动计算出绑定的金额.."}
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        tableInstance = hex.renderTable('system-business-ca-qrCode-table', '/admin/ca/qrcode/getQrCodes?id=' + id, '#system-business-ca-qrCode-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            }
+            , {
+                field: 'real', title: '绑定金额', width: 110, edit: "text"
+            }
+            , {
+                field: 'amount', title: '二维码金额', width: 110, edit: "text"
+            }
+            , {
+                field: 'image', title: '二维码', dictType: 'image', width: 85
+            }
+            , {
+                field: 'qrcode', title: '二维码内容', edit: "text"
+            }
+            , {
+                field: 'ca_id', title: '所属账号', templet: function (item) {
+                    if (item.ca == null) {
+                        return '-';
+                    }
+                    return item.ca.user;
+                }, width: 130
+            }
+            , {
+                field: 'user_id', title: '所属码商', templet: function (item) {
+                    if (item.beneficiary == null) {
+                        return '-';
+                    }
+                    return item.beneficiary.user + ' [<span style="color: red;">' + item.beneficiary.id + '</span>]';
+                }, width: 130
+            }
+            , {
+                field: 'status', title: '使用状态', width: 90, templet: function (item) {
+                    return status[item.status];
+                }
+            }
+        ]], res => {
+
+        }, saveUrl, 520, 20);
+
+
+        $('#system-business-ca-qrCode .create').click(() => {
+            modal();
+        });
+
+        $('#system-business-ca-qrCode .refresh').click(() => {
+            tableInstance.instance.reload();
+        });
+
+        $('#system-business-ca-qrCode .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-business-ca-qrCode-table').data);
+            hex.deleteBatchEntity('/admin/ca/qrcode/delQrCode', data, res => {
+                tableInstance.instance.reload();
+            });
+        });
+
+        $("#system-business-ca-qrCode .query").keypress(function (even) {
+            if (even.which == 13) {
+                let real = $(this).val();
+                tableInstance.instance.reload({
+                    where: {
+                        'equal-real': real
+                    }
+                    , page: {
+                        curr: 1
+                    }
+                });
+            }
+        });
+    });
+</script>

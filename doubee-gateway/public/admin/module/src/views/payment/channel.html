@@ -1,0 +1,100 @@
+<view id="payment-channel">
+    <title>通道管理</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">支付管理</a>
+            <a><cite>通道管理</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有通道</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm create">
+                                新增通道
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+
+                        <table id="payment-channel-table"
+                               lay-filter="payment-channel-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        let $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/channel/saveChannel', admin = layui.admin;
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {title: "通道名称", name: "name", type: "input", placeholder: "请输入通道名称"},
+                {
+                    title: "选择平台",
+                    name: "platform_id",
+                    type: "select",
+                    dict: "payment_platform,id,name",
+                    placeholder: "请输入选择平台"
+                },
+                {
+                    title: "选择银行",
+                    name: "bank_id",
+                    type: "select",
+                    placeholder: "请输入选择银行",
+                    dict: "payment_bank,id,name"
+                },
+                {
+                    title: "选择终端",
+                    name: "equipment",
+                    type: "",
+                    placeholder: "请选择终端",
+                    dict: "payment_bank,id,name"
+                },
+                {title: "状态", name: "status", type: "switch", text: "启用"}
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        tableInstance = hex.renderTable('payment-channel-table', '/admin/api/payment/channel/getChannelList', '#payment-channel-table', [[
+            {type: 'checkbox', fixed: 'left'},
+            {field: 'name', title: '通道名称'},
+            {field: 'bank_id', title: '银行名称'},
+            {field: 'plugin', title: '插件名称'},
+            {field: 'name', title: '支持设备'},
+            {field: 'name', title: '分成比例'},
+            {field: 'name', title: '固定金额'},
+            {field: 'name', title: '单笔最小'},
+            {field: 'name', title: '单笔最大'},
+            {field: 'sort', title: '排序'},
+            {field: 'creation_time', title: '创建时间'},
+            {field: 'status', title: '状态', dictType: "switch", dictText: "启用"},
+            {
+                title: '操作',
+                action: [
+                    {type: "button", icon: "layui-icon-survey", title: "修改", class: "layui-btn-normal edit"}
+                ]
+            }
+        ]], res => {
+            hex.setIdMap(res.data);
+        });
+
+        $('#payment-channel .create').click(() => {
+            modal();
+        });
+    });
+</script>

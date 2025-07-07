@@ -1,0 +1,390 @@
+<view id="system-funds-withdraw">
+    <title>提现管理</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">运营管理</a>
+            <a><cite>提现管理</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+
+        <div class="layui-card">
+            <div class="layui-card-header">提现数据统计
+            </div>
+            <div class="layui-card-body">
+
+                <div class="layadmin-backlog">
+                    <div>
+                        <ul class="layui-row layui-col-space10">
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>抢单池</h3>
+                                    <p><cite class="withdraw_single_pool_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>正在打款</h3>
+                                    <p><cite class="withdraw_making_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>已出款</h3>
+                                    <p><cite class="withdraw_successfully_count" style="color: #ffb355;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>驳回</h3>
+                                    <p><cite class="withdraw_reject_count" style="color: #578cbd;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>冻结</h3>
+                                    <p><cite class="withdraw_ban_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>总提现次数</h3>
+                                    <p><cite class="withdraw_count" style="color: #bd5522;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>抢单池金额</h3>
+                                    <p><cite class="withdraw_single_pool_amount" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>正在打款金额</h3>
+                                    <p><cite class="withdraw_making_amount" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>已出款金额</h3>
+                                    <p><cite class="withdraw_successfully_amount" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>驳回金额</h3>
+                                    <p><cite class="withdraw_reject_amount" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>冻结金额</h3>
+                                    <p><cite class="withdraw_ban_amount" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>手续费(盈利)</h3>
+                                    <p><cite class="withdraw_cost" style="color: #00bd67;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有提现</li>
+                </ul>
+
+
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+                        <div style="margin-bottom: 10px;"></div>
+                        <table id="system-funds-withdraw-table" lay-filter="system-funds-withdraw-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+<style>
+    #system-funds-withdraw .user {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        var $ = layui.$, admin = layui.admin, hex = layui.hex, tableInstance;
+        let appInterface = $('#system-funds-withdraw');
+
+        let status = [
+            '<span style="color: red;">等待抢单</span>',
+            '<span style="color: #348dff;">正在出款</span>',
+            '<span style="color: #4b563b;">已驳回</span>',
+            '<span style="color: #ff48bc;">等待确认</span>',
+            '<span style="color: #26bd00;">出款成功</span>',
+            '<span style="color: #7f6c7d;">已冻结</span>'
+        ];
+
+        let work = (id, type, reason = '') => {
+            admin.req({
+                url: '/admin/withdraw/work',
+                method: 'post',
+                data: {
+                    id: id,
+                    type: type,
+                    reason: reason
+                },
+                done: res => {
+                    layer.msg(res.msg);
+                    tableInstance.instance.reload();
+                }
+            });
+        }
+
+        tableInstance = hex.renderTable('system-funds-withdraw-table', '/admin/withdraw/getWithdraws', '#system-funds-withdraw-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            },
+            {
+                field: 'trade_no', title: "交易流水号", width: 125
+            }
+            , {
+                field: 'merchant_id', title: '提交商户', templet: function (item) {
+                    if (item.merchant == null) {
+                        return '-';
+                    }
+                    return '<span style="color: #ff0b0e;">' + item.merchant.user + '</span>';
+                }, width: 110
+            }
+            , {
+                field: 'beneficiary_id', title: '接单码商', templet: function (item) {
+                    if (item.beneficiary == null && item.admin == null) {
+                        return '-';
+                    } else if (item.beneficiary) {
+                        return '<span style="color: green;">' + item.beneficiary.user + '</span>';
+                    } else if (item.admin) {
+                        return '<small style="font-size: 8px;"> [管理员]</small><span style="color: green;">' + item.admin.user + '</span>';
+                    }
+
+                }, width: 125
+            }
+            , {
+                field: 'amount', title: '提现金额', templet: function (item) {
+                    return '<b style="color: green">' + item.amount + '</b>';
+                }, width: 115
+            },
+            {
+                field: 'status', title: '提现状态', templet: function (item) {
+                    return status[item.status];
+                }, width: 110
+            },
+            {
+                field: 'card', title: '银行卡号', width: 120, templet: function (item) {
+                    return item.card;
+                }
+            },
+            {
+                field: 'bank_name', title: '开户行名称', width: 120, templet: function (item) {
+                    return item.bank_name;
+                }
+            },
+            {
+                field: 'full_name', title: '持卡人姓名', width: 120, templet: function (item) {
+                    return item.full_name;
+                }
+            },
+            {
+                field: 'create_date', title: '提交时间', width: 160
+            },
+            {
+                field: 'deal_date', title: '处理时间', width: 160, templet: function (item) {
+                    if (item.deal_date == null) {
+                        return '-';
+                    }
+                    return '<span style="color: green;">' + item.deal_date + '</span>';
+                }
+            },
+            {
+                field: 'cost', title: '手续费', width: 85, templet: function (item) {
+                    return '<span style="color: red;">' + item.cost + '</span>';
+                }
+            }
+            , {
+                templet: function (item) {
+                    let html = '';
+                    if (item.status == 0) {
+                        html += '<button class="layui-btn layui-btn-xs layui-btn-primary grab" data-id="' + item.id + '">抢单</button>';
+                    }
+                    if (item.status == 1) {
+                        html += '<button class="layui-btn layui-btn-xs confirm" data-id="' + item.id + '">已出款</button>';
+                        html += '<button class="layui-btn layui-btn-xs layui-btn-normal rollback" data-id="' + item.id + '">回滚</button>';
+                        html += '<button class="layui-btn layui-btn-xs layui-btn-warm banned" data-id="' + item.id + '">冻结</button>';
+                        html += '<button class="layui-btn layui-btn-xs layui-btn-danger reject" data-id="' + item.id + '">驳回</button>';
+                    }
+                    if (item.status == 3) {
+                        html += '<button class="layui-btn layui-btn-xs layui-btn-danger commit" data-id="' + item.id + '">代替商户确认订单</button>';
+                    }
+                    return html;
+                }
+            }
+        ]], res => {
+            hex.setIdMap(res.data);
+            let layerTipsIndex = 0;
+            appInterface.find('.withdraw_single_pool_count').html(res.withdraw_single_pool_count);
+            appInterface.find('.withdraw_single_pool_amount').html(res.withdraw_single_pool_amount);
+            appInterface.find('.withdraw_making_count').html(res.withdraw_making_count);
+            appInterface.find('.withdraw_making_amount').html(res.withdraw_making_amount);
+            appInterface.find('.withdraw_successfully_count').html(res.withdraw_successfully_count);
+            appInterface.find('.withdraw_successfully_amount').html(res.withdraw_successfully_amount);
+            appInterface.find('.withdraw_reject_count').html(res.withdraw_reject_count);
+            appInterface.find('.withdraw_reject_amount').html(res.withdraw_reject_amount);
+            appInterface.find('.withdraw_ban_count').html(res.withdraw_ban_count);
+            appInterface.find('.withdraw_ban_amount').html(res.withdraw_ban_amount);
+            appInterface.find('.withdraw_count').html(res.withdraw_count);
+            appInterface.find('.withdraw_cost').html(res.withdraw_cost);
+
+            $('#system-funds-withdraw .grab').click(function () {
+                let map = hex.getMapItem(this);
+                layer.confirm('您确认要以管理员的方式处理该订单吗？', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    work(map.id, 0);
+                });
+            });
+
+            $('#system-funds-withdraw .confirm').click(function () {
+                let map = hex.getMapItem(this);
+                layer.confirm('请再次确认是否已经进行过打款操作？', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    work(map.id, 2);
+                });
+            });
+
+            $('#system-funds-withdraw .commit').click(function () {
+                let map = hex.getMapItem(this);
+                layer.confirm('您确认要代替该提交的商户确认此提现？确认后资金将自动加款至码商余额，请谨慎操作！', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    work(map.id, 3);
+                });
+            });
+
+            $('#system-funds-withdraw .rollback').click(function () {
+                let map = hex.getMapItem(this);
+                layer.confirm('该操作会将该提现重新放到抢单池中给众多码商进行抢单，请问是否要执行该操作？', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    work(map.id, 5);
+                });
+            });
+
+            $('#system-funds-withdraw .banned').click(function () {
+                let map = hex.getMapItem(this);
+                layer.confirm('该操作将冻结该提现的资金，并且不会退还给商户，请问是否要执行该操作？', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    layer.prompt({title: '请填写冻结理由：', formType: 0}, function (text, index) {
+                        layer.close(index);
+                        work(map.id, 4, text);
+                    });
+                });
+            });
+
+            $('#system-funds-withdraw .reject').click(function () {
+                let map = hex.getMapItem(this);
+                layer.confirm('该操作会将本次提现的金额返还给商户，但是不会退还手续费，请问是否要执行该操作？', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    layer.prompt({title: '请填写驳回理由：', formType: 0}, function (text, index) {
+                        layer.close(index);
+                        work(map.id, 1, text);
+                    });
+                });
+            });
+
+        }, null, null, 11, [11, 20, 30, 40, 50]);
+
+
+        hex.query('#system-funds-withdraw .query', tableInstance.instance, [
+            {title: "交易流水号", name: "equal-trade_no", type: "input", width: 151},
+            {title: "提现状态", name: "equal-status", type: "select", dict: "funds_withdraw_status", width: 151},
+            {
+                title: "选择商户",
+                name: "equal-merchant_id",
+                type: "select",
+                dict: "user->type=0,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            },
+            {title: "商户ID", name: "equal-merchant_id·mid", type: "input", width: 151},
+            {
+                title: "选择码商",
+                name: "equal-beneficiary_id",
+                type: "select",
+                dict: "user->type=1,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            }
+            ,{
+                title: "选择管理员",
+                name: "equal-admin_id",
+                type: "select",
+                dict: "system_user,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            },
+            {title: "提现时间从", name: "betweenStart-create_date", type: "date", width: 151},
+            {title: "提现时间到", name: "betweenEnd-create_date", type: "date", width: 151}
+        ], true);
+    });
+</script>

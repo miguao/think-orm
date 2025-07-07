@@ -1,0 +1,351 @@
+<view id="system-business-ca">
+    <title>收款账号</title>
+
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">运营管理</a>
+            <a><cite>收款账号</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+
+        <div class="layui-card">
+            <div class="layui-card-header">大数据统计
+            </div>
+            <div class="layui-card-body">
+
+                <div class="layadmin-backlog">
+                    <div>
+                        <ul class="layui-row layui-col-space10">
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>正在收款</h3>
+                                    <p><cite class="ca_collecting_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>账号有人</h3>
+                                    <p><cite class="ca_disturb_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>已就绪</h3>
+                                    <p><cite class="ca_ready_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>已启用</h3>
+                                    <p><cite class="ca_activated_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>已停用</h3>
+                                    <p><cite class="ca_terminated_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="layui-col-xs2">
+                                <div class="layadmin-backlog-body">
+                                    <h3>全部账号</h3>
+                                    <p><cite class="ca_all_count" style="color: #07bd03;">...</cite>
+                                    </p>
+                                </div>
+                            </li>
+
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有账号</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm start">
+                                启用选中
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm stop">
+                                停用选中
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+
+                        <table id="system-business-ca-table" lay-filter="system-business-ca-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+
+<script>
+    layui.use(['hex'], function () {
+        var $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/ca/saveCa';
+        let appInterface = $('#system-business-ca');
+        let merchantConfig = hex.getConfigSync('order_trade_merchant_config');
+
+        let busy = ['<span style="color: green;">空闲</span>', '<span style="color: red;">占用</span>'];
+        let receiv = ['<span style="color: green;">等待</span>', '<span style="color: red;">进单</span>'];
+        let disturb = ['<span style="color: green;">无人</span>', '<span style="color: red;">有人</span>'];
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {title: "收款码", name: "image", type: "image", placeholder: "请上传收款码", width: 120},
+                {title: "账号", name: "user", type: "input", placeholder: "请输入帐号"},
+                {title: "密码", name: "pass", type: "input", placeholder: "请输入该账号密码,可留空"},
+                {title: "备注", name: "remark", type: "input", placeholder: "备注,可留空"},
+                {title: "商户授权", name: "auth", type: "input", placeholder: "当商户在指定使用收款账号时，该功能即生效，商户ID以英文逗号分隔"},
+                {title: "金额列表", name: "list", type: "input", placeholder: "固定金额列表，只在支付通道启用时有效"},
+                {title: "公钥", name: "public_key", type: "textarea", placeholder: "公钥,不要填"},
+                {title: "私钥", name: "private_key", type: "textarea", placeholder: "私钥,不要填"},
+                {title: "状态", name: "status", type: "switch", text: "启用"}
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        let trade = (values = {}) => {
+            hex.popup('/admin/channel/testChannel', [
+                {title: "支付通道", name: "channel_id", type: "hidden"},
+                {title: "商户ID", name: "merchant_id", type: "hidden"},
+                {title: "应用ID", name: "app_id", type: "hidden"},
+                {title: "账号ID", name: "ca_id", type: "hidden"},
+                {title: "下单金额", name: "amount", type: "input", placeholder: "请输入要测试的金额"}
+            ], res => {
+                $.post('/order/trade', res.data, ret => {
+                    layer.msg(ret.msg);
+                    if (ret.code == 200) {
+                        window.open(ret.data.url);
+                    }
+                });
+            }, values, '460px', '支付通道测试');
+        }
+
+        tableInstance = hex.renderTable('system-business-ca-table', '/admin/ca/getCas', '#system-business-ca-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            }
+            , {
+                field: 'id', title: 'ID', width: 60
+            }
+            , {
+                field: 'user', title: '用户名', width: 150, templet: function (item) {
+                    return '<a href="javascript:;" data-id="' + item.id + '" class="testTrade">' + item.user + '</a>';
+                }
+            }
+            , {
+                field: 'remark', title: '备注', edit: "text", width: 100
+            }
+            , {
+                field: 'busy', title: '占用', templet: function (item) {
+                    if (item.status == 0) {
+                        return '-';
+                    }
+                    return busy[item.busy];
+                }, width: 65
+            }
+            , {
+                field: 'receiv', title: '进单', templet: function (item) {
+                    if (item.status == 0) {
+                        return '-';
+                    }
+                    return receiv[item.receiv];
+                }, width: 65
+            }
+            , {
+                field: 'disturb', title: '接客', templet: function (item) {
+                    if (item.status == 0 || item.disturb == null) {
+                        return '-';
+                    }
+                    return disturb[item.disturb];
+                }, width: 65
+            }
+            , {
+                field: 'rate', title: '成功率', width: 80, templet: function (item) {
+                    return hex.percentageHtml((item.order_today_success_count == 0 ? 0 : ((item.order_today_success_count / item.order_today_count) * 100).toFixed(2)));
+                }
+            }, {
+                field: 'order_today_count', title: '今日订单', width: 95, templet: function (item) {
+                    return '<span style="color: green;">' + item.order_today_success_count + '</span>/' + item.order_today_count;
+                }
+            }
+            , {
+                field: 'order_today_amount', title: '今日收款', templet: function (item) {
+                    return '<span style="color: green;">' + item.order_today_amount + '</span>';
+                }, width: 100
+            }
+            , {
+                field: 'order_yesterday_amount', title: '昨日收款', templet: function (item) {
+                    return '<span style="color: blue;">' + item.order_yesterday_amount + '</span>';
+                }, width: 100
+            }
+            , {
+                field: 'order_all_amount', title: '总收款', templet: function (item) {
+                    return '<span style="color: #00a0ff;">' + item.order_all_amount + '</span>';
+                }, width: 100
+            }
+            , {
+                field: 'user_id', title: '所属码商', templet: function (item) {
+                    if (item.beneficiary == null) {
+                        return '-';
+                    }
+                    return '<span style="color: red;">' + item.beneficiary.user + '</span>';
+                }, width: 100
+            }
+            , {
+                field: 'channel_id', title: '支付通道', templet: function (item) {
+                    if (item.channel == null) {
+                        return '-';
+                    }
+                    return item.channel.name + ' [<span style="color: #ffac15;">' + item.channel.id + '</span>]';
+                }, width: 130
+            }
+            /*  , {
+                  field: 'app_id', title: '所属应用', templet: function (item) {
+                      if (item.app == null) {
+                          return '-';
+                      }
+                      return item.app.name + ' [<span style="color: #ff48bc;">' + item.app.id + '</span>]';
+                  }, width: 120
+              }*/, {
+                field: 'status', title: '状态', dictType: "switch", dictText: "启用", width: 110
+            }, {
+                field: 'login', title: '登录', dictType: "switch", dictText: "是", width: 95
+            }
+            ,
+            {
+                templet: function (item) {
+                    let html = '<button class="layui-btn layui-btn-xs layui-btn-normal edit" data-id="' + item.id + '"><i class="layui-icon layui-icon-survey"></i>修改</button>';
+                    if (item.channel && item.channel.type == 3) {
+                        html += ' <button class="layui-btn layui-btn-xs qrcode" data-id="' + item.id + '"><i class="layui-icon layui-icon-cols"></i>二维码</button>';
+                    }
+                    return html;
+                }
+            }
+        ]], res => {
+
+            appInterface.find('.ca_collecting_count').html(res.ca_collecting_count);
+            appInterface.find('.ca_ready_count').html(res.ca_ready_count);
+            appInterface.find('.ca_activated_count').html(res.ca_activated_count);
+            appInterface.find('.ca_terminated_count').html(res.ca_terminated_count);
+            appInterface.find('.ca_all_count').html(res.ca_all_count);
+            appInterface.find('.ca_disturb_count').html(res.ca_disturb_count);
+
+            hex.setIdMap(res.data);
+
+            $('#system-business-ca .edit').click(function () {
+                modal(hex.getMapItem(this));
+            });
+
+            $('#system-business-ca .testTrade').click(function () {
+                let map = hex.getMapItem(this);
+                let options = {
+                    channel_id: map.channel_id,
+                    ca_id: map.id,
+                    merchant_id: merchantConfig.merchant_id,
+                    app_id: merchantConfig.app_id
+                };
+
+                if (map.beneficiary.type == 2) {
+                    options.merchant_id = map.beneficiary.id;
+                    options.app_id = map.app.id;
+                }
+
+                trade(options);
+            });
+
+            $('#system-business-ca .qrcode').click(function () {
+                let objectId = hex.getObjectId(this);
+                var map = hex.getIdMap(objectId);
+                hex.set('caId', objectId);
+                hex.set('userId', map.beneficiary.id);
+                hex.remoteViewOpen('module/src/views/business/caQrCode.html', '二维码管理', ['960px', '720px']);
+            });
+        }, saveUrl);
+
+
+        $('#system-business-ca .create').click(() => {
+            modal();
+        });
+
+        $('#system-business-ca .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-business-ca-table').data);
+            hex.deleteBatchEntity('/admin/ca/delCa', data, res => {
+                tableInstance.instance.reload();
+            });
+        });
+
+        $('#system-business-ca .start').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-business-ca-table').data);
+            data.forEach(id => {
+                admin.req({
+                    url: saveUrl,
+                    method: "post",
+                    data: {id: id, status: 1}
+                });
+            });
+            tableInstance.instance.reload();
+            layer.msg('启用完成..');
+        });
+
+        $('#system-business-ca .stop').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-business-ca-table').data);
+            data.forEach(id => {
+                admin.req({
+                    url: saveUrl,
+                    method: "post",
+                    data: {id: id, status: 0}
+                });
+            });
+            tableInstance.instance.reload();
+            layer.msg('停用完成..');
+        });
+
+        hex.query('#system-business-ca .query', tableInstance.instance, [
+            {title: "收款账号", name: "search-user", type: "input", width: 151},
+            {title: "备注", name: "search-remark", type: "input", width: 151},
+            {
+                title: "选择码商/自运营",
+                name: "equal-user_id",
+                type: "select",
+                dict: "user->(type=1 or type=2),id,user",
+                cache: false,
+                search: true,
+                width: 151
+            },
+            {title: "支付应用", name: "equal-app_id", type: "remoteSelect", dict: "user_app,id,name", width: 151},
+            {title: "支付通道", name: "equal-channel_id", type: "select", dict: "pay_channel,id,name", width: 151},
+            {title: "选择状态", name: "equal-status", type: "select", dict: "common_switch_status", width: 151},
+            {title: "收款状态", name: "equal-busy", type: "select", dict: "business_ca_busy", width: 151},
+            {title: "接客状态", name: "equal-disturb", type: "select", dict: "business_ca_disturb", width: 151}
+        ], true);
+
+    });
+</script>

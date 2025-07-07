@@ -1,0 +1,116 @@
+<view id="system-funds-capital">
+    <title>流水记录</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">资金管理</a>
+            <a><cite>流水记录</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有记录</li>
+                </ul>
+
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+                        <div style="margin-bottom: 10px;"></div>
+                        <table id="system-funds-capital-table" lay-filter="system-funds-capital-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        var $ = layui.$, admin = layui.admin, hex = layui.hex, tableInstance;
+        var role = ['<span style="color: #06bd17">商户</span>', '<span style="color: #4e8bff">码商</span>', '<span style="color:#ff89f0;">自运营</span>', '<span style="color:#ff7507;">代理</span>'];
+
+        tableInstance = hex.renderTable('system-funds-capital-table', '/admin/capital/getCapitals', '#system-funds-capital-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            },
+            {
+                field: 'trade_no', title: "流水号", width: 230
+            }
+            , {
+                field: 'user_id', title: '用户', templet: function (item) {
+                    if (item.user == null) {
+                        return '-';
+                    }
+                    return '[' + role[item.user.type] + '] <b style="color: #ff0b0e;">' + item.user.user + '</b>';
+                }, width: 150
+            }
+            , {
+                field: 'amount', title: '金额', templet: function (item) {
+                    if (item.type == 0) {
+                        //收入
+                        return '<b style="color: green">+' + item.amount + '</b>';
+                    }
+
+                    return '<b style="color: red">-' + item.amount + '</b>';
+                }, width: 120
+            },
+            {
+                field: 'balance', title: '账变前余额', width: 120
+            },
+            {
+                field: 'wallet', title: '钱包类型', width: 120, templet: function (item) {
+                    if (item.wallet == 0) {
+                        return '<b style="color: darkorange;">余额</b>';
+                    }
+                    return '<b style="color: #ff48bc;">消费额</b>';
+                }
+            },
+            {
+                field: 'create_date', title: '产生时间', width: 180
+            },
+            {
+                field: 'log', title: '日志'
+            }
+        ]], null, null, 720, 20, [20, 30, 40, 50]);
+
+
+        hex.query('#system-funds-capital .query', tableInstance.instance, [
+            {title: "流水号", name: "equal-trade_no", type: "input", width: 151},
+            {title: "用户ID", name: "equal-user_id·uid", type: "input", width: 151},
+            {
+                title: "选择用户",
+                name: "equal-user_id",
+                type: "select",
+                dict: "user->type=0,id,user",
+                cache: false,
+                search: true,
+                width: 125,
+                auto: true
+            }, {
+                title: "钱包类型",
+                name: "equal-wallet",
+                type: "select",
+                dict: "funds_capital_wallet",
+                width: 151,
+                auto: true
+            }, {
+                title: "账变类型",
+                name: "equal-type",
+                type: "select",
+                dict: "funds_capital_type",
+                width: 151,
+                auto: true
+            },
+            {title: "产生时间从", name: "betweenStart-create_date", type: "date", width: 151},
+            {title: "产生时间到", name: "betweenEnd-create_date", type: "date", width: 151},
+            {title: "最低金额", name: "betweenStart-amount", type: "input", width: 151},
+            {title: "最高金额", name: "betweenEnd-amount", type: "input", width: 151}
+        ], true);
+
+    });
+</script>

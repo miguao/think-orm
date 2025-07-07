@@ -1,0 +1,89 @@
+<view id="system-business-message">
+    <title>系统公告</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">运营管理</a>
+            <a><cite>系统公告</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">公告列表</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm create">
+                                发布公告
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+
+                        <table id="system-business-message-table" lay-filter="system-business-message-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+
+<script>
+    layui.use(['hex'], function () {
+        var $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/message/save';
+        let type = ['商户', '码商', '自运营', '代理商', '全部人'];
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {title: "通知类型", name: "type", type: "select", dict: "business_user_type", placeholder: "不选择则为全部发送"},
+                {title: "通知内容", name: "message", type: "textarea", placeholder: "公告内容"},
+                {title: "显示公告", name: "status", type: "switch", text: "显示"}
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        tableInstance = hex.renderTable('system-business-message-table', '/admin/message/data', '#system-business-message-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            }
+            , {
+                field: 'message', title: '公告内容', width: 1250
+            }
+            , {
+                field: 'type', title: '通知群体', templet: function (item) {
+                    return type[item.type];
+                }, width: 90
+            }
+            , {
+                field: 'status', title: '状态', dictType: "switch", dictText: "显示", width: 110
+            },
+            {
+                action: [
+                    {type: "button", icon: "layui-icon-survey", title: "修改", class: "layui-btn-normal edit"}
+                ]
+            }
+        ]], res => {
+            $('#system-business-message .edit').click(function () {
+                modal(hex.getMapItem(this));
+            });
+        }, saveUrl);
+
+        $('#system-business-message .create').click(() => {
+            modal();
+        });
+
+        $('#system-business-message .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-business-message-table').data);
+            hex.deleteBatchEntity('/admin/message/del', data, res => {
+                tableInstance.instance.reload();
+            })
+        });
+    });
+</script>

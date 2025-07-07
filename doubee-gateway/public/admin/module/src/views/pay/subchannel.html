@@ -1,0 +1,118 @@
+<view id="system-pay-subchannel">
+    <title>支付通道</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">子通道管理</a>
+            <a><cite>支付通道</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm add-subchannel">
+                                新增子通道
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+                        <table id="system-pay-subchannel-table" lay-filter="system-pay-subchannel-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+
+<script>
+    layui.use(['hex'], function () {
+        var $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/subchannel/save',
+            channelId = hex.get('channelId');
+        var appInterface = $('#system-pay-subchannel');
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {name: 'channel_id', type: 'hidden', default: channelId},
+                {name: 'name', title: "通道名称", type: 'input', placeholder: "请输入子通道名称.."},
+                {name: 'code', title: "通道CODE", type: 'input', placeholder: "请输入该通道的CODE.."},
+                {name: 'processor', title: "处理器", type: 'input', placeholder: "请填写事件处理器,可留空.."},
+                {name: 'merchant_rate', title: "商户费率", type: 'input', placeholder: "请输入商户费率", default: 0.04},
+                {name: 'onself_rate', title: "自运营费率", type: 'input', placeholder: "请填写自运营商户费率", default: 0.04},
+                {name: 'beneficiary_rate', title: "码商费率", type: 'input', placeholder: "请输入码商盈利费率", default: 0.015},
+                {name: 'agent_rate', title: "代理费率", type: 'input', placeholder: "请输入代理提成费率", default: 0.01},
+                {name: 'min', title: "最小金额", type: 'input', placeholder: "请输入单笔最小下单金额", default: 0},
+                {name: 'max', title: "最大金额", type: 'input', placeholder: "请输入单笔最大下单金额", default: 10000},
+                {name: 'fixed', title: "固定金额", type: 'switch', text: "开启"},
+                {name: 'list', title: "金额列表", type: 'input', placeholder: "请输入固定金额列表,逗号分隔"},
+                {name: 'status', title: "通道状态", type: 'switch', text: "开启", default: 1},
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        tableInstance = hex.renderTable('system-pay-subchannel-table', '/admin/subchannel/data?id=' + channelId, '#system-pay-subchannel-table', [[
+                {
+                    type: 'checkbox', fixed: 'left'
+                }
+                , {
+                    field: 'id', title: '子通道ID', width: 90
+                }
+                , {
+                    field: 'name', title: '子通道名称', width: 110, edit: "text"
+                }
+                , {
+                    field: 'code', title: '通道CODE', width: 110, edit: "text"
+                }
+                , {
+                    field: 'view', title: '视图', width: 110, edit: "text"
+                }
+                , {
+                    field: 'merchant_rate', title: '商户费率', edit: "text", width: 90
+                }
+                , {
+                    field: 'onself_rate', title: '自运营费率', edit: "text", width: 90
+                }
+                , {
+                    field: 'beneficiary_rate', title: '码商费率', edit: "text", width: 90
+                }
+                , {
+                    field: 'agent_rate', title: '代理费率', edit: "text", width: 90
+                }
+                , {
+                    field: 'min', title: '单笔最小', edit: "text", width: 90
+                }
+                , {
+                    field: 'max', title: '单笔最大', edit: "text", width: 90
+                }
+                , {
+                    field: 'fixed', title: '固定金额', dictType: "switch", width: 110, dictText: "启用"
+                }
+                , {
+                    field: 'list', title: '金额列表', edit: "text", width: 160
+                }
+                , {
+                    field: 'status', title: '支付状态', dictType: "switch", dictText: "启用", width: 120
+                }
+            ]], res => {
+
+            }, saveUrl, 480
+        );
+
+        $('#system-pay-subchannel .add-subchannel').click(function () {
+            modal();
+        });
+
+        $('#system-pay-subchannel .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-pay-subchannel-table').data);
+            hex.deleteBatchEntity('/admin/subchannel/del', data, res => {
+                tableInstance.instance.reload();
+            });
+        });
+    });
+</script>

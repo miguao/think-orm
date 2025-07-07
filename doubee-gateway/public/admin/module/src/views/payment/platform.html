@@ -1,0 +1,88 @@
+<view id="payment-platform">
+    <title>平台管理</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">支付管理</a>
+            <a><cite>平台管理</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有平台</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <form class="query"></form>
+
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm create">
+                                新增平台
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+
+                        <table id="payment-platform-table"
+                               lay-filter="payment-platform-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</view>
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        let $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/api/payment/platform/savePlatform',
+            admin = layui.admin;
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {title: "平台图标", name: "icon", type: "image", placeholder: "请选择图标"},
+                {title: "平台名称", name: "name", type: "input", placeholder: "请输入平台名称"},
+                {title: "唯一键名", name: "key", type: "input", placeholder: "请输入唯一键名"},
+                {
+                    title: "配置表单", name: "form", type: "json", default: [
+                        {title: "商户号", name: "merchant_no", type: "input", placeholder: "请输入商户号"},
+                    ]
+                },
+                {
+                    title: "自定义选项", name: "options", type: "json", default: [
+                        {face: "当面付"},
+                        {wap: "手机网站支付"},
+                        {pc: "电脑网站支付"},
+                    ]
+                },
+            ], res => {
+                tableInstance.instance.reload();
+            }, values);
+        }
+
+        tableInstance = hex.renderTable('payment-platform-table', '/admin/api/payment/platform/getPlatformList', '#payment-platform-table', [[
+            {type: 'checkbox', fixed: 'left'},
+            {field: 'icon', title: '图标', dictType: 'image', width: 60},
+            {field: 'name', title: '平台名称'},
+            {field: 'creation_time', title: '创建时间'},
+            {
+                title: '操作',
+                action: [
+                    {type: "button", icon: "layui-icon-survey", title: "修改", class: "layui-btn-normal edit"}
+                ]
+            }
+        ]], res => {
+            hex.setIdMap(res.data);
+            $('#payment-platform .edit').click(function () {
+                modal(hex.getMapItem(this));
+            });
+        });
+
+        $('#payment-platform .create').click(() => {
+            modal();
+        });
+    });
+</script>

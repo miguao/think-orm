@@ -1,0 +1,244 @@
+<view id="system-pay-channel">
+    <title>支付通道</title>
+
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb">
+            <a lay-href="">支付管理</a>
+            <a><cite>支付通道</cite></a>
+        </div>
+    </div>
+
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">所有通道</li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <div style="margin-bottom: 10px;">
+                            <button class="layui-btn layui-btn-primary layui-btn-sm create">
+                                新增通道
+                            </button>
+                            <button class="layui-btn layui-btn-primary layui-btn-sm del">
+                                删除选中
+                            </button>
+                        </div>
+                        <table id="system-pay-channel-table" lay-filter="system-pay-channel-table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</view>
+
+
+<script>
+    layui.use(['hex', 'admin'], function () {
+        var $ = layui.$, hex = layui.hex, tableInstance, saveUrl = '/admin/channel/saveChannel', admin = layui.admin;
+        let merchantConfig = hex.getConfigSync('order_trade_merchant_config');
+
+        let modal = (values = {}) => {
+            hex.popup(saveUrl, [
+                {title: "通道图标", name: "face", type: "image", placeholder: "请选择图标"},
+                {title: "通道名称", name: "name", type: "input", placeholder: "请输入通道名称"},
+                {title: "处理器", name: "processor", type: "input", placeholder: "请填写事件处理器,可留空.."},
+                {title: "视图", name: "view", type: "input", placeholder: "请填写渲染支付界面的视图文件路径.."},
+                {title: "支付状态", name: "status", type: "switch", text: "启用", default: 1},
+                {title: "码商状态", name: "beneficiary_status", type: "switch", text: "启用", default: 1},
+                {title: "商户状态", name: "merchant_status", type: "switch", text: "启用", default: 1},
+                {title: "自运营状态", name: "onself_status", type: "switch", text: "启用", default: 1},
+                {title: "商户费率", name: "merchant_rate", type: "input", placeholder: "请填写商户费率", default: 0.045},
+                {title: "自运营费率", name: "onself_rate", type: "input", placeholder: "请填写自运营商户费率", default: 0.006},
+                {title: "码商费率", name: "beneficiary_rate", type: "input", placeholder: "请填写码商费率", default: 0.015},
+                {title: "代理商费率", name: "agent_rate", type: "input", placeholder: "请填写代理商费率", default: 0.5},
+                {title: "单笔最小", name: "min", type: "input", placeholder: "请填写单笔最小支付金额..", default: 0},
+                {title: "单笔最大", name: "max", type: "input", placeholder: "请填写单笔最大支付金额..", default: 50000},
+                {title: "固定金额", name: "fixed", type: "switch", text: "启用"},
+                {title: "金额列表", name: "list", type: "input", placeholder: "此处填写固定金额列表,使用'英文'逗号分隔"},
+                {title: "通道模式", name: "type", type: "select", placeholder: "请选择通道模式", dict: "pay_channel_type"},
+                {title: "订单过期", name: "order_expire", type: "input", placeholder: "请输入订单过期秒数", default: 300},
+                {title: "监控下载", name: "download", type: "input", placeholder: "请输入监控下载地址", default: '#'},
+                {title: "文档地址", name: "docs", type: "input", placeholder: "请输入文档地址", default: '#'},
+                {title: "通道简介", name: "synopsis", type: "textarea", placeholder: "请输入支付通道简介.."},
+                {title: "定时开关", name: "regularly_close", type: "switch", text: "启用"},
+                {title: "启动时间", name: "start_date", type: "input", placeholder: "启动时间,最高精确到分钟,如:00:00"},
+                {title: "停止时间", name: "close_date", type: "input", placeholder: "停止时间,最高精确到分钟,如:12:30"},
+                {title: "时间限制", name: "max_runtime", type: "input", placeholder: "单位分,收款账号每次登录最大运行时间,从登录开始计算", default: 0},
+                {title: "订单限制", name: "max_order", type: "input", placeholder: "收款账号每日最多收款订单数量,超过自动停止", default: 0},
+                {title: "收额限制", name: "max_amount", type: "input", placeholder: "收款账号每日最多收款金额,超过自动停止", default: 0},
+                {title: "最大失败", name: "max_continuous", type: "input", placeholder: "收款账号连续失败次数自动停止账号收款", default: 0},
+                {title: "最长占用", name: "max_busy", type: "input", placeholder: "单位秒,收款账号最长占用时间,超过自动解锁", default: 1000},
+                {
+                    title: "回调方式",
+                    name: "callback_type",
+                    type: "select",
+                    dict: "pay_channel_callback_type",
+                    placeholder: "请选择回调方式"
+                },
+                {
+                    title: "回调参数", name: "callback", type: "json", default: {
+                        tradeNo: 'tradeNo',
+                        other: 'other',
+                        amount: 'amount',
+                        account: 'account',
+                        status: 'status',
+                        sign: 'sign',
+                        freedStatus: 'code',
+                        freedOpenContent: 2,
+                        freedCloseContent: 1
+                    }
+                },
+                {title: "回调验签", name: "callback_signature", type: "switch", text: "启用"},
+                {
+                    title: "验签算法类",
+                    name: "callback_signature_class",
+                    type: "input",
+                    placeholder: "请实现[App\\Signature\\SignatureInterface]签名接口"
+                },
+                {title: "状态验证", name: "callback_status_check", type: "switch", text: "启用"},
+                {title: "成功状态", name: "callback_status_field", type: "input", placeholder: "请填写回调参数status字段的成功信息"},
+                {title: "版本号", name: "version", type: "input", placeholder: "1.0.0"},
+                {
+                    title: "额外配置", name: "config", type: "json", default: {
+                        order_address_daily: 0, //每日每个IP最多支付多少笔
+                    }
+                }, {
+                    title: "界面配置", name: "account_config", type: "json", default: [
+                        {title: "收款码", name: "image", type: "image", placeholder: "请上传收款码", width: 100},
+                        {title: "账号", name: "user", type: "input", placeholder: "请输入账号"},
+                        {title: "密码", name: "pass", type: "input", placeholder: "密码,可为空"},
+                        {title: "备注", name: "remark", type: "input", placeholder: "备注,可为空"},
+                        {title: "商户授权", name: "auth", type: "input", placeholder: "当商户在指定使用收款账号时，该功能即生效，商户ID以英文逗号分隔"},
+                        {title: "公钥", name: "public_key", type: "textarea", placeholder: "公钥,不要填"},
+                        {title: "私钥", name: "private_key", type: "textarea", placeholder: "私钥,不要填"},
+                        {title: "状态", name: "status", type: "switch", text: "启用"}
+                    ]
+                },
+                {title: "开启日志", name: "log", type: "switch", text: "启用"},
+
+            ], res => {
+                tableInstance.instance.reload();
+            }, values, ['660px', '720px']);
+        }
+
+        let trade = (values = {}) => {
+            hex.popup('/admin/channel/testChannel', [
+                {title: "支付通道", name: "channel_id", type: "hidden"},
+                {title: "商户ID", name: "merchant_id", type: "hidden"},
+                {title: "应用ID", name: "app_id", type: "hidden"},
+                {title: "账号ID", name: "ca_id", type: "hidden", default: 0},
+                {title: "下单金额", name: "amount", type: "input", placeholder: "请输入要测试的金额"}
+            ], res => {
+                $.post('/order/trade', res.data, ret => {
+                    layer.msg(ret.msg);
+                    if (ret.code == 200) {
+                        window.open(ret.data.url);
+                    }
+                });
+            }, values, '460px', '支付通道测试');
+        }
+
+        tableInstance = hex.renderTable('system-pay-channel-table', '/admin/channel/getChannels', '#system-pay-channel-table', [[
+            {
+                type: 'checkbox', fixed: 'left'
+            },
+            {
+                field: 'face', title: '图标', dictType: 'image', width: 60
+            }
+            , {
+                field: 'id', title: '通道ID', width: 75, templet: function (item) {
+                    return '<a href="javascript:;" data-id="' + item.id + '" class="testTrade" style="color: red;">' + item.id + '</a>';
+                }
+            }
+            , {
+                field: 'type', title: '通道模式', dict: "pay_channel_type", dictType: "none", width: 200
+            }
+            , {
+                field: 'name', title: '名称', edit: "text", width: 200
+            }
+            , {
+                field: 'merchant_rate', title: '商户费率', edit: "text", width: 90
+            }
+            , {
+                field: 'onself_rate', title: '自运营费率', edit: "text", width: 100
+            },
+            {
+                field: 'beneficiary_rate', title: '码商费率', edit: "text", width: 90
+            }
+            , {
+                field: 'agent_rate', title: '代理费率', edit: "text", width: 90
+            }
+            , {
+                field: 'min', title: '单笔最小', edit: "text", width: 90
+            }
+            , {
+                field: 'max', title: '单笔最大', edit: "text", width: 90
+            }
+            /*     , {
+                     field: 'fixed', title: '固定金额', dictType: "switch", width: 110, dictText: "启用"
+                 }*/
+            /*      , {
+                      field: 'list', title: '金额列表', edit: "text", width: 100
+                  }*/
+            , {
+                field: 'status', title: '支付状态', dictType: "switch", width: 110, dictText: "启用"
+            }
+            , {
+                field: 'beneficiary_status', title: '码商状态', dictType: "switch", width: 110, dictText: "启用"
+            }, {
+                field: 'merchant_status', title: '商户状态', dictType: "switch", width: 110, dictText: "启用"
+            }, {
+                field: 'onself_status', title: '自运营状态', dictType: "switch", width: 110, dictText: "启用"
+            }
+            , {
+                field: 'regularly_close', title: '定时开关', dictType: "switch", width: 110, dictText: "启用"
+            }
+            , {
+                field: 'version', title: '版本号', edit: "text", width: 85
+            }
+            ,
+            {
+                templet: function (item) {
+                    let html = '<button class="layui-btn layui-btn-xs layui-btn-normal edit" data-id="' + item.id + '"><i class="layui-icon layui-icon-survey"></i>修改</button>';
+                    // if (item.type == 0) {
+                    //     html += '<button class="layui-btn layui-btn-xs subchannel" data-id="' + item.id + '"><i class="layui-icon layui-icon-component"></i>子通道</button>';
+                    // }
+                    html += '<button class="layui-btn layui-btn-xs subchannel" data-id="' + item.id + '"><i class="layui-icon layui-icon-component"></i>子通道</button>';
+                    return html;
+                }, width: 170
+            }
+        ]], res => {
+            $('#system-pay-channel .edit').click(function () {
+                modal(hex.getMapItem(this));
+            });
+
+            $('#system-pay-channel .testTrade').click(function () {
+                let map = hex.getMapItem(this);
+                trade({
+                    channel_id: map.id,
+                    merchant_id: merchantConfig.merchant_id,
+                    app_id: merchantConfig.app_id
+                });
+            });
+
+            $('#system-pay-channel .subchannel').click(function () {
+                let id = hex.getObjectId(this);
+                hex.set('channelId', id);
+                hex.remoteViewOpen('module/src/views/pay/subchannel.html', '子通道管理', ['1270px', '640px']);
+            });
+        }, saveUrl);
+
+        $('#system-pay-channel .create').click(() => {
+            modal();
+        });
+
+        $('#system-pay-channel .del').click(() => {
+            var data = hex.listObjectToArray(tableInstance.table.checkStatus('system-pay-channel-table').data);
+            hex.deleteBatchEntity('/admin/channel/delChannel', data, res => {
+                tableInstance.instance.reload();
+            });
+        });
+    });
+</script>
