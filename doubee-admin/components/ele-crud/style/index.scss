@@ -1,0 +1,50 @@
+@use '../../style/themes/default.scss' as *;
+@use '../../style/util.scss' as *;
+
+/* 折叠面板 */
+.ele-crud-split-panel.ele-split-panel {
+  height: 100%;
+
+  &.is-flex-table {
+    overflow: hidden;
+  }
+
+  & > .ele-split-panel-wrap > .ele-split-panel-side {
+    border-width: 0 1px 0 0;
+  }
+
+  &.is-responsive > .ele-split-panel-wrap > div.ele-split-panel-side {
+    background: none;
+  }
+
+  & > .ele-split-panel-body {
+    overflow: hidden;
+  }
+
+  &.is-collapse > .ele-split-collapse-button {
+    margin-left: 2px;
+  }
+}
+
+/* 侧栏搜索栏 */
+.ele-crud-search-bar {
+  flex-shrink: 0;
+  padding: 16px 16px 12px 16px;
+  box-sizing: border-box;
+
+  & > .el-input .el-input__prefix-inner > .el-input__icon {
+    transform: translateY(-0.5px);
+  }
+}
+
+/* 侧栏树组件 */
+.ele-crud-tree-wrapper {
+  flex: 1;
+  padding: 0 16px 16px 16px;
+  box-sizing: border-box;
+  overflow: auto;
+
+  & > .ele-crud-tree {
+    #{eleVarName('tree', 'item-height')}: 34px;
+  }
+}

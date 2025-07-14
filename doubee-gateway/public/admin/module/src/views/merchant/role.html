@@ -41,6 +41,13 @@
         let modal = (values = {}) => {
             hex.popup(saveUrl, [
                 {title: "角色名称", name: "name", type: "input", placeholder: "请输入角色名称"},
+                {
+                    title: "选择通道",
+                    name: "channel",
+                    type: "treeCheckbox",
+                    dict: "system_user_permission,id,name,parent_id",
+                    cache: false
+                },
                 {title: "状态", name: "status", type: "switch", text: "启用"}
             ], res => {
                 tableInstance.instance.reload();

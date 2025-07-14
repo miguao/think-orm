@@ -1,32 +1,27 @@
-# Doubee 豆付 · 轻量、安全、灵活的聚合支付系统
+# Vue 3 + Typescript + Vite
 
-> 🚀 让支付更简单！一站式聚合支付平台，支持扫码收款、小额支付、钱包账户、API 集成等功能。
+This template should help get you started developing with Vue 3 and Typescript in Vite.
 
----
+## Recommended IDE Setup
 
-## 🧩 项目简介
+[VSCode](https://code.visualstudio.com/) + [Vetur](https://marketplace.visualstudio.com/items?itemName=octref.vetur). Make sure to enable `vetur.experimental.templateInterpolationService` in settings!
 
-**豆付（Doubee）** 是一套基于现代架构设计的聚合支付系统，旨在为商户、平台方、SaaS 产品提供一套轻量、高扩展性的支付解决方案。
+### If Using `<script setup>`
 
-特点包括：
+[`<script setup>`](https://github.com/vuejs/rfcs/pull/227) is a feature that is currently in RFC stage. To get proper IDE support for the syntax, use [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) instead of Vetur (and disable Vetur).
 
-- 🧾 支持多通道支付（微信、支付宝、云闪付、自定义通道）
-- 📦 简洁模块化设计，支持快速二次开发
-- 💳 钱包系统支持余额、充值、提现、冻结
-- 🔐 安全设计，支持签名校验、RSA 加密、接口防刷
-- 📡 API 接入简洁，适用于 App / 小程序 / Web / 第三方平台
+## Type Support For `.vue` Imports in TS
 
----
+Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can use the following:
 
-## ✨ 功能特性
+### If Using Volar
 
-| 功能模块          | 描述                                 |
-| ----------------- | ------------------------------------ |
-| 🧾 聚合支付       | 支持扫码支付、H5 支付、公众号支付等  |
-| 💳 钱包账户系统   | 用户余额、账变记录、提现、冻结等     |
-| 🧑‍💻 商户系统       | 商户入驻、应用管理、回调设置         |
-| 📊 支付记录与对账 | 交易明细、订单状态查询、对账导出     |
-| 🔐 安全机制       | 接口签名、RSA 加解密、IP 白名单      |
-| ⚙️ API 接口       | RESTful 设计，统一签名接入，快速对接 |
+Run `Volar: Switch TS Plugin on/off` from VSCode command palette.
 
----
+### If Using Vetur
+
+1. Install and add `@vuedx/typescript-plugin-vue` to the [plugins section](https://www.typescriptlang.org/tsconfig#plugins) in `tsconfig.json`
+2. Delete `src/shims-vue.d.ts` as it is no longer needed to provide module info to Typescript
+3. Open `src/main.ts` in VSCode
+4. Open the VSCode command palette
+5. Search and run "Select TypeScript version" -> "Use workspace version"
