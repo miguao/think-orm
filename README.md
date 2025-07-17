@@ -4,7 +4,7 @@
 
 <div align="center" style="font-size: 15px;">
 
-Doubee 豆付 · 轻量、安全、灵活的聚合支付系统
+豆付 · 轻量、安全、灵活的聚合支付系统
 
 </div>
 
