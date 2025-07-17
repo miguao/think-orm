@@ -55,9 +55,7 @@
   const { locale } = useI18n();
 
   const items = ref([
-    { title: '简体中文', command: 'zh_CN', icon: markRaw(h('span', {}, 'CN')) },
-    { title: '繁體中文', command: 'zh_TW', icon: markRaw(h('span', {}, 'HK')) },
-    { title: 'English', command: 'en', icon: markRaw(h('span', {}, 'US')) }
+    { title: '简体中文', command: 'zh_CN', icon: markRaw(h('span', {}, 'CN')) }
   ]);
 
   /** 切换语言 */
