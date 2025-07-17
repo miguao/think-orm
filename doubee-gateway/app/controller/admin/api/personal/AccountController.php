@@ -7,7 +7,6 @@ namespace app\controller\admin\api\personal;
 use app\controller\AbstractAdminController;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\service\admin\UserService;
-use app\utils\TreeUtils;
 use think\annotation\Inject;
 use think\annotation\route\Group;
 use think\annotation\route\Middleware;
@@ -26,7 +25,7 @@ class AccountController extends AbstractAdminController
     {
         $user = $this->getUserInfo();
         $permissions = $this->userService->findByUserPermissions($this->getUserId());
-        $user['menus'] = TreeUtils::generate($permissions['menus']);
+        $user['menus'] = $permissions['menus'];
 
         return $this->json(data: $user);
     }
