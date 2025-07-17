@@ -8,6 +8,17 @@
   🚀 让支付更简单！一站式聚合支付平台，支持扫码收款、小额支付、钱包账户、API 集成等功能。
 </p>
 
+<div align="center">
+
+[官网](https://www.crmeb.com/) |
+[在线体验](http://v4.crmeb.net/admin/) |
+[帮助文档](https://doc.crmeb.com/single_open) |
+[应用市场](https://www.crmeb.com/market/) |
+[技术社区](https://www.crmeb.com/ask/thread/list/147) |
+[宽屏预览](https://gitee.com/ZhongBangKeJi/CRMEB/blob/master/README.md)
+
+</div>
+
 ---
 
 ## 📝 简介
