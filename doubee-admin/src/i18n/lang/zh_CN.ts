@@ -127,35 +127,6 @@ export const zh_CN = {
         limitedWidth: '内容固定宽度'
       }
     }
-  },
-  login: {
-    title: '用户登录',
-    username: '请输入登录账号',
-    password: '请输入登录密码',
-    code: '请输入验证码',
-    remember: '记住密码',
-    login: '登录',
-    passwordType: '密码登录',
-    qrcodeType: '扫码登录',
-    refreshQrcode: '刷新二维码'
-  },
-  list: {
-    // 基础列表
-    basic: {
-      table: {
-        avatar: '头像',
-        username: '用户账号',
-        nickname: '用户名',
-        organizationName: '组织机构',
-        phone: '手机号',
-        email: '邮箱',
-        roles: '角色',
-        sexName: '性别',
-        createTime: '创建时间',
-        status: '状态',
-        action: '操作'
-      }
-    }
   }
 };
 

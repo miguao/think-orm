@@ -3,18 +3,18 @@
     <div class="login-main">
       <ele-card shadow="always" class="login-card">
         <div class="login-cover">
-          <h1 class="login-title">EleAdmin Plus</h1>
+          <h1 class="login-title">{{ PROJECT_NAME }}</h1>
           <h4 class="login-subtitle">界面美观组件丰富的中后台前端解决方案</h4>
         </div>
         <div class="login-body">
           <ele-text type="heading" style="font-size: 24px; margin-bottom: 18px">
-            {{ t('login.title') }}
+            用户登录
           </ele-text>
           <ele-segmented
             v-model="tabActive"
             :items="[
-              { label: t('login.passwordType'), value: 1 },
-              { label: t('login.qrcodeType'), value: 2 }
+              { label: '账密登录', value: 1 },
+              { label: '验证码登录', value: 2 }
             ]"
             style="margin-bottom: 18px"
             @change="handleTabChange"
@@ -32,7 +32,7 @@
               <el-input
                 clearable
                 v-model="form.username"
-                :placeholder="t('login.username')"
+                placeholder="请输入登录用户名"
                 :prefix-icon="UserOutlined"
               />
             </el-form-item>
@@ -40,7 +40,7 @@
               <el-input
                 show-password
                 v-model="form.password"
-                :placeholder="t('login.password')"
+                placeholder="请输入登录密码"
                 :prefix-icon="LockOutlined"
               />
             </el-form-item>
@@ -49,7 +49,7 @@
                 <el-input
                   clearable
                   v-model="form.code"
-                  :placeholder="t('login.code')"
+                  placeholder="请输入验证码"
                   :prefix-icon="ProtectOutlined"
                 />
                 <div class="login-captcha" @click="changeCaptcha">
@@ -58,9 +58,7 @@
               </div>
             </el-form-item>
             <el-form-item>
-              <el-checkbox v-model="form.remember">
-                {{ t('login.remember') }}
-              </el-checkbox>
+              <el-checkbox v-model="form.remember"> 记住密码 </el-checkbox>
             </el-form-item>
             <el-form-item>
               <el-button
@@ -70,7 +68,7 @@
                 style="width: 100%"
                 @click="submit"
               >
-                {{ t('login.login') }}
+                立即登录
               </el-button>
             </el-form-item>
           </el-form>
@@ -93,7 +91,7 @@
               >
                 <ReloadOutlined />
               </el-icon>
-              <span>{{ t('login.refreshQrcode') }}</span>
+              <span>刷新二维码</span>
             </el-link>
           </div>
         </div>
@@ -114,13 +112,12 @@
     ProtectOutlined,
     ReloadOutlined
   } from '@/components/icons';
+  import { PROJECT_NAME } from '@/config/setting';
   import { getToken } from '@/utils/token-util';
   import { usePageTab } from '@/utils/use-page-tab';
   import { login, getCaptcha } from '@/api/login';
   import PageFooter from '@/layout/components/page-footer.vue';
-  import { useI18n } from 'vue-i18n';
 
-  const { t } = useI18n();
   const { currentRoute } = useRouter();
   const { goHomeRoute, cleanPageTabs } = usePageTab();
 
@@ -148,7 +145,7 @@
       username: [
         {
           required: true,
-          message: t('login.username'),
+          message: '请输入登录用户名',
           type: 'string',
           trigger: 'blur'
         }
@@ -156,7 +153,7 @@
       password: [
         {
           required: true,
-          message: t('login.password'),
+          message: '请输入登录密码',
           type: 'string',
           trigger: 'blur'
         }
@@ -164,7 +161,7 @@
       code: [
         {
           required: true,
-          message: t('login.code'),
+          message: '请输入验证码',
           type: 'string',
           trigger: 'blur'
         }

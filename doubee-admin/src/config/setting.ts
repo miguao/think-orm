@@ -5,7 +5,7 @@ export const API_BASE_URL: string = import.meta.env.VITE_API_URL;
 export const PROJECT_NAME: string = import.meta.env.VITE_APP_NAME;
 
 /** 不需要登录的路由 */
-export const WHITE_LIST: string[] = ['/login', '/forget'];
+export const WHITE_LIST: string[] = ['/login'];
 
 /** 首页路径, 为空则取第一个菜单的地址 */
 export const HOME_PATH: string | undefined = void 0;
