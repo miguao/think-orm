@@ -1,13 +1,13 @@
-<div style="text-align: center;">
+<div align="center">
     <img src="/docs/static/images/logo.png"  alt="logo"/>
 </div>
 
-<div style="text-align: center; font-size: 15px;">
+<div align="center" style="font-size: 15px;">
 
 Doubee 豆付 · 轻量、安全、灵活的聚合支付系统
 </div>
 
-<div style="text-align: center; font-size: 15px;">
+<div align="center" style="font-size: 15px;">
   🚀 让支付更简单！一站式聚合支付平台，支持扫码收款、小额支付、钱包账户、API 集成等功能。
 </div>
 
