@@ -59,10 +59,11 @@
     <router-layout />
     <!-- logo -->
     <template #logo>
-      <img src="@/assets/logo.svg" style="width: 30px; height: 30px" />
-    </template>
-    <template #logoTitle>
-      <h1>{{ PROJECT_NAME }}</h1>
+      <img
+        src="@/assets/logo.svg"
+        style="width: 180px; height: 30px"
+        alt="logo"
+      />
     </template>
     <!-- 顶栏左侧按钮 -->
     <template #left="{ sidebar }">
@@ -207,7 +208,7 @@
     MoonOutlined,
     SunOutlined
   } from '@/components/icons';
-  import { PROJECT_NAME, HOME_PATH, REDIRECT_PATH } from '@/config/setting';
+  import { HOME_PATH, REDIRECT_PATH } from '@/config/setting';
   import { doWithTransition } from '@/utils/common';
   import { useUserStore } from '@/store/modules/user';
   import { useThemeStore } from '@/store/modules/theme';
