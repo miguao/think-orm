@@ -2,11 +2,11 @@
   <img src="./docs/assets/images/logo.png" alt="logo"/>
 </div>
 
-<div align="center" style="font-size: 15px;">豆付 · 轻量、安全、灵活的聚合支付系统</div>
+<h5 align="center" style="font-size: 15px;">豆付 · 轻量、安全、灵活的聚合支付系统</h5>
 
-<div align="center" style="font-size: 15px;">
+<p align="center" style="font-size: 15px;">
   🚀 让支付更简单！一站式聚合支付平台，支持扫码收款、小额支付、钱包账户、API 集成等功能。
-</div>
+</p>
 
 ---
 
