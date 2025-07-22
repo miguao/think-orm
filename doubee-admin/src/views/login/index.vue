@@ -28,12 +28,12 @@
             @keyup.enter="submit"
             @submit.prevent=""
           >
-            <el-form-item prop="username">
+            <el-form-item prop="email">
               <el-input
                 clearable
-                v-model="form.username"
-                placeholder="请输入登录用户名"
-                :prefix-icon="UserOutlined"
+                v-model="form.email"
+                placeholder="请输入登录邮箱"
+                :prefix-icon="MailOutlined"
               />
             </el-form-item>
             <el-form-item prop="password">
@@ -43,19 +43,6 @@
                 placeholder="请输入登录密码"
                 :prefix-icon="LockOutlined"
               />
-            </el-form-item>
-            <el-form-item prop="code">
-              <div class="login-captcha-group">
-                <el-input
-                  clearable
-                  v-model="form.code"
-                  placeholder="请输入验证码"
-                  :prefix-icon="ProtectOutlined"
-                />
-                <div class="login-captcha" @click="changeCaptcha">
-                  <img v-if="captcha" :src="captcha" />
-                </div>
-              </div>
             </el-form-item>
             <el-form-item>
               <el-checkbox v-model="form.remember"> 记住密码 </el-checkbox>
@@ -72,28 +59,6 @@
               </el-button>
             </el-form-item>
           </el-form>
-          <div v-else class="login-qrcode-group">
-            <ele-qr-code-svg
-              :size="180"
-              :margin="2"
-              :value="qrcode"
-              class="login-qrcode"
-            />
-            <el-link
-              type="primary"
-              underline="never"
-              style="margin-top: 16px; user-select: none"
-              @click="refreshQrCode"
-            >
-              <el-icon
-                :size="15"
-                style="transform: translateY(-1px); margin-right: 6px"
-              >
-                <ReloadOutlined />
-              </el-icon>
-              <span>刷新二维码</span>
-            </el-link>
-          </div>
         </div>
       </ele-card>
     </div>
@@ -106,16 +71,11 @@
   import { useRouter } from 'vue-router';
   import { EleMessage } from 'ele-admin-plus';
   import type { FormInstance, FormRules } from 'element-plus';
-  import {
-    UserOutlined,
-    LockOutlined,
-    ProtectOutlined,
-    ReloadOutlined
-  } from '@/components/icons';
+  import { LockOutlined, MailOutlined } from '@/components/icons';
   import { PROJECT_NAME } from '@/config/setting';
   import { getToken } from '@/utils/token-util';
   import { usePageTab } from '@/utils/use-page-tab';
-  import { login, getCaptcha } from '@/api/login';
+  import { login } from '@/api/login';
   import PageFooter from '@/layout/components/page-footer.vue';
 
   const { currentRoute } = useRouter();
@@ -132,20 +92,18 @@
 
   /** 表单数据 */
   const form = reactive({
-    tenantId: 4, // 租户id, 不需要可去掉
-    username: 'admin',
-    password: 'admin',
-    code: '',
+    email: '',
+    password: '',
     remember: true
   });
 
   /** 表单验证规则 */
   const rules = computed<FormRules>(() => {
     return {
-      username: [
+      email: [
         {
           required: true,
-          message: '请输入登录用户名',
+          message: '请输入登录邮箱',
           type: 'string',
           trigger: 'blur'
         }
@@ -157,26 +115,9 @@
           type: 'string',
           trigger: 'blur'
         }
-      ],
-      code: [
-        {
-          required: true,
-          message: '请输入验证码',
-          type: 'string',
-          trigger: 'blur'
-        }
       ]
     };
   });
-
-  /** 图形验证码 */
-  const captcha = ref('');
-
-  /** 验证码内容, 实际项目去掉 */
-  const text = ref('');
-
-  /** 二维码 */
-  const qrcode = ref('');
 
   /** 提交 */
   const submit = () => {
@@ -184,10 +125,7 @@
       if (!valid) {
         return;
       }
-      if (form.code.toLowerCase() !== text.value) {
-        EleMessage.error({ message: '验证码错误', plain: true });
-        return;
-      }
+
       loading.value = true;
       login(form)
         .then((msg) => {
@@ -198,36 +136,13 @@
         .catch((e: Error) => {
           loading.value = false;
           EleMessage.error({ message: e.message, plain: true });
-          changeCaptcha();
         });
     });
-  };
-
-  /** 获取图形验证码 */
-  const changeCaptcha = () => {
-    getCaptcha()
-      .then((data) => {
-        captcha.value = data.base64;
-        // 实际项目后端一般会返回验证码的key而不是直接返回验证码的内容, 登录用key去验证, 可以根据自己后端接口修改
-        text.value = data.text;
-        // 自动回填验证码, 实际项目去掉
-        form.code = data.text;
-        formRef.value?.clearValidate?.();
-      })
-      .catch((e) => {
-        EleMessage.error({ message: e.message, plain: true });
-      });
-  };
-
-  /** 刷新二维码 */
-  const refreshQrCode = () => {
-    qrcode.value = `https://api.eleadmin.com/v2/auth/login?code=${Date.now()}`;
   };
 
   /** 选项卡切换事件 */
   const handleTabChange = (active: number) => {
     if (active === 2) {
-      refreshQrCode();
     }
   };
 
@@ -240,8 +155,6 @@
   // 如果已登录直接进入首页
   if (getToken()) {
     goHome();
-  } else {
-    changeCaptcha();
   }
 </script>
 
@@ -274,7 +187,7 @@
       :deep(.ele-card-body) {
         display: flex;
         padding: 0;
-        height: 462px;
+        height: 380px;
       }
     }
   }
