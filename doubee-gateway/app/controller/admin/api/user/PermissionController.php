@@ -28,7 +28,7 @@ class PermissionController extends AbstractAdminController
         $map = $this->request->get();
         $get = new Get(SystemUserPermission::class);
         $get->setWhere((array)$map);
-        $get->setOrderBy("sort", "asc");
+        $get->setOrderBy("sort", "desc");
         $data = $this->database->get($get);
 
         return $this->json(data: $data);
