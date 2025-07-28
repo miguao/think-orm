@@ -28,6 +28,7 @@ class InstitutionController extends AbstractAdminController
         $map = $this->request->get();
         $get = new Get(SystemInstitution::class);
         $get->setWhere((array)$map);
+        $get->setOrderBy("sort", "desc");
         $get->setColumn("id", "parent_id", "name", "full_name", "code", "type", "sort", "creation_time", "status");
         $data = $this->database->get($get);
 
