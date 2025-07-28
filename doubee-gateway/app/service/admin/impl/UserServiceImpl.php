@@ -90,7 +90,7 @@ class UserServiceImpl implements UserService
                     ];
                 }
 
-                if ($permission->type == SystemUserPermissionType::MENU->value) {
+                if ($permission->type == SystemUserPermissionType::MENU->value || $permission->type == SystemUserPermissionType::DIRECTORY->value) {
                     $menus[] = [
                         'id' => $permission->id,
                         'parent_id' => $permission->parent_id,

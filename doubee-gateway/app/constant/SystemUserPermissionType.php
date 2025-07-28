@@ -6,6 +6,7 @@ namespace app\constant;
 
 enum SystemUserPermissionType: int
 {
-    case API = 0;
+    case DIRECTORY = 0;
     case MENU = 1;
+    case API = 2;
 }
