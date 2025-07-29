@@ -39,9 +39,9 @@ class DataController extends AbstractAdminController
     {
         $map = $this->request->post();
         $this->validator((array)$map, [
-            'dict_id' => 'require|integer'
+            'dictionary_id' => 'require|integer'
         ], [
-            'dict_id.require' => '数据ID不能为空',
+            'dictionary_id.require' => '数据ID不能为空',
         ]);
 
         $save = new Save(SystemDictionaryData::class);
