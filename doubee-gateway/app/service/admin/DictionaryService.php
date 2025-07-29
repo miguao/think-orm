@@ -4,14 +4,14 @@ declare (strict_types=1);
 
 namespace app\service\admin;
 
-interface DictService
+interface DictionaryService
 {
     /**
      * 获取字典
-     * @param string $dictName
+     * @param string $dictionaryName
      * @param string $keywords
      * @param string $where
      * @return array|null
      */
-    public function getDict(string $dictName, string $keywords = '', string $where = ''): ?array;
+    public function getDictionary(string $dictionaryName, string $keywords = '', string $where = ''): ?array;
 }

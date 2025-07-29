@@ -5,31 +5,31 @@ declare (strict_types=1);
 namespace app\service\admin\impl;
 
 use app\model\SystemDictionary;
-use app\service\admin\DictService;
+use app\service\admin\DictionaryService;
 use app\utils\TreeUtils;
 use think\db\Query;
 use think\facade\Db;
 
-class DictServiceImpl implements DictService
+class DictionaryServiceImpl implements DictionaryService
 {
-    public function getDict(string $dictName, string $keywords = '', string $where = ''): ?array
+    public function getDictionary(string $dictionaryName, string $keywords = '', string $where = ''): ?array
     {
-        $dict = explode(",", $dictName);
+        $dict = explode(",", $dictionaryName);
 
         $dictLength = count($dict);
 
         if ($dictLength == 1) {
             //普通字典查询
-            $list = SystemDictionary::with(['dictData' => function (Query $query) use ($keywords) {
+            $list = SystemDictionary::with(['dictionaryData' => function (Query $query) use ($keywords) {
                 if ($keywords != '') {
                     $query->whereRaw("name like '%{$keywords}%'");
                 }
                 $query->where("status", 1)
-                    ->field(['value as id', 'dict_id', 'name'])
+                    ->field(['value as id', 'dictionary_id', 'name'])
                     ->select();
             }])->where("code", $dict[0])->find();
 
-            return $list->dictData->toArray();
+            return $list->dictionaryData->toArray();
         } elseif ($dictLength >= 3) {
             //远程表字典查询
             $prefix = env('DB_PREFIX');

@@ -12,7 +12,7 @@ use app\exception\JsonException;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemDictionary;
 use app\utils\DateUtils;
-use app\service\admin\DictService;
+use app\service\admin\DictionaryService;
 use Exception;
 use think\annotation\Inject;
 use think\annotation\route\Group;
@@ -26,15 +26,15 @@ use think\response\Json;
 class DictionaryController extends AbstractAdminController
 {
     #[Inject]
-    protected DictService $dictService;
+    protected DictionaryService $dictService;
 
     #[Route("GET", "getDictionaryByCode")]
     public function getDictionaryByCode(): Json
     {
         $map = $this->request->get();
-        $this->validator((array)$map, ['dict' => 'require'], ['dict.require' => '字典编码不能为空']);
+        $this->validator((array)$map, ['code' => 'require'], ['code.require' => '字典编码不能为空']);
 
-        $data = $this->dictService->getDict((string)$map['dict'], (string)$this->request->get("keywords"));
+        $data = $this->dictService->getDictionary((string)$map['code'], (string)$this->request->get("keywords"));
         return $this->json(data: (array)$data);
     }
 
@@ -46,7 +46,7 @@ class DictionaryController extends AbstractAdminController
         $get->setWhere((array)$map);
         $get->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
         $data = $this->database->get($get, function (Query $query) {
-            return $query->with(['dictData']);
+            return $query->with(['dictionaryData']);
         });
 
         return $this->json(data: $data);
