@@ -10,14 +10,14 @@ use think\model\relation\HasMany;
 /**
  * @property int $id
  */
-class SystemDict extends Model
+class SystemDictionary extends Model
 {
     /**
      * 字典数据
      * @return HasMany
      */
-    public function dictData(): HasMany
+    public function dictionaryData(): HasMany
     {
-        return $this->hasMany(SystemDictData::class, 'dict_id', 'id');
+        return $this->hasMany(SystemDictionaryData::class, 'dictionary_id', 'id');
     }
 }

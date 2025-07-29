@@ -4,7 +4,7 @@ declare (strict_types=1);
 
 namespace app\service\admin\impl;
 
-use app\model\SystemDict;
+use app\model\SystemDictionary;
 use app\service\admin\DictService;
 use app\utils\TreeUtils;
 use think\db\Query;
@@ -20,7 +20,7 @@ class DictServiceImpl implements DictService
 
         if ($dictLength == 1) {
             //普通字典查询
-            $list = SystemDict::with(['dictData' => function (Query $query) use ($keywords) {
+            $list = SystemDictionary::with(['dictData' => function (Query $query) use ($keywords) {
                 if ($keywords != '') {
                     $query->whereRaw("name like '%{$keywords}%'");
                 }

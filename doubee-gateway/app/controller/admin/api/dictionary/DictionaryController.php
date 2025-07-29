@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\controller\admin\api\dict;
+namespace app\controller\admin\api\dictionary;
 
 use app\controller\AbstractAdminController;
 use app\entity\database\Delete;
@@ -10,7 +10,7 @@ use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
 use app\middleware\admin\AuthenticationMiddleware;
-use app\model\SystemDict;
+use app\model\SystemDictionary;
 use app\utils\DateUtils;
 use app\service\admin\DictService;
 use Exception;
@@ -21,9 +21,9 @@ use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/dict")]
+#[Group("/admin/api/dictionary")]
 #[Middleware(AuthenticationMiddleware::class)]
-class DictController extends AbstractAdminController
+class DictionaryController extends AbstractAdminController
 {
     #[Inject]
     protected DictService $dictService;
@@ -38,11 +38,11 @@ class DictController extends AbstractAdminController
         return $this->json(data: (array)$data);
     }
 
-    #[Route("GET", "getDictList")]
-    public function getDictList(): Json
+    #[Route("GET", "getDictionaryList")]
+    public function getDictionaryList(): Json
     {
         $map = $this->request->get();
-        $get = new Get(SystemDict::class);
+        $get = new Get(SystemDictionary::class);
         $get->setWhere((array)$map);
         $get->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
         $data = $this->database->get($get, function (Query $query) {
@@ -52,11 +52,11 @@ class DictController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveDict")]
-    public function saveDict(): Json
+    #[Route("*", "saveDictionary")]
+    public function saveDictionary(): Json
     {
         $map = $this->request->post();
-        $save = new Save(SystemDict::class);
+        $save = new Save(SystemDictionary::class);
         $save->setMap($map);
         $save->addForceMap("creation_time", DateUtils::current());
         try {
@@ -68,10 +68,10 @@ class DictController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteDict")]
-    public function deleteDict(): Json
+    #[Route("DELETE", "deleteDictionary")]
+    public function deleteDictionary(): Json
     {
-        $delete = new Delete(SystemDict::class, (array)$this->request->post("list"));
+        $delete = new Delete(SystemDictionary::class, (array)$this->request->post("list"));
         $this->database->delete($delete);
         return $this->json(message: "删除成功");
     }
