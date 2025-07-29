@@ -31,6 +31,7 @@
             :prefix-icon="SearchOutlined"
           />
         </div>
+
         <ele-loading
           :loading="loading"
           :spinner-style="{ background: 'none' }"
@@ -40,8 +41,8 @@
             ref="treeRef"
             :data="data"
             highlight-current
-            node-key="organizationId"
-            :props="{ label: 'organizationName' }"
+            node-key="id"
+            :props="{ label: 'name' }"
             :expand-on-click-node="false"
             :default-expand-all="true"
             :filter-node-method="filterNode"
@@ -49,10 +50,11 @@
             @node-click="handleNodeClick"
           />
         </ele-loading>
+
         <template #body>
           <user-list
-            v-if="current && current.organizationId"
-            :organization-id="current.organizationId"
+            v-if="current && current.id"
+            :institutionId="current.id"
           />
         </template>
       </ele-split-panel>
@@ -67,8 +69,8 @@
   import { SearchOutlined } from '@/components/icons';
   import { useMobile } from '@/utils/use-mobile';
   import UserList from './components/user-list.vue';
-  import { listOrganizations } from '@/api/system/organization';
-  import type { Organization } from '@/api/system/organization/model';
+  import type { Institution } from '@/api/system/institution/model';
+  import { getInstitutionList } from '@/api/system/institution';
 
   defineOptions({ name: 'SystemUser' });
 
@@ -85,10 +87,10 @@
   const loading = ref(true);
 
   /** 树形数据 */
-  const data = ref<Organization[]>([]);
+  const data = ref<Institution[]>([]);
 
   /** 选中数据 */
-  const current = ref<Organization | null>(null);
+  const current = ref<Institution | null>(null);
 
   /** 机构搜索关键字 */
   const keywords = ref('');
@@ -96,13 +98,14 @@
   /** 查询 */
   const query = () => {
     loading.value = true;
-    listOrganizations()
+
+    getInstitutionList({})
       .then((list) => {
         loading.value = false;
         data.value = toTree({
           data: list,
-          idField: 'organizationId',
-          parentIdField: 'parentId'
+          idField: 'id',
+          parentIdField: 'parent_id'
         });
         nextTick(() => {
           handleNodeClick(data.value[0]);
@@ -115,24 +118,26 @@
   };
 
   /** 选择数据 */
-  const handleNodeClick = (row?: Organization) => {
+  const handleNodeClick = (row?: Institution) => {
     // 移动端自动收起左侧
     if (current.value != null && mobile.value) {
       collapse.value = true;
     }
-    if (row && row.organizationId) {
+
+    if (row && row.id) {
       current.value = row;
-      treeRef.value?.setCurrentKey?.(row.organizationId);
+      treeRef.value?.setCurrentKey?.(row.id);
     } else {
       current.value = null;
     }
   };
 
   /** 树过滤方法 */
-  const filterNode = (value: string, data: Organization) => {
+  const filterNode = (value: string, data: Institution) => {
     if (value) {
-      return !!(data.organizationName && data.organizationName.includes(value));
+      return !!(data.name && data.name.includes(value));
     }
+
     return true;
   };
 

@@ -1,4 +1,3 @@
-<!-- 用户编辑弹窗 -->
 <template>
   <ele-modal
     form
@@ -16,58 +15,34 @@
     >
       <el-row :gutter="16">
         <el-col :sm="12" :xs="24">
-          <el-form-item label="所属机构">
-            <organization-select v-model="form.organizationId" />
+          <el-form-item label="所属机构" prop="institution_id">
+            <institution-select v-model="form.institution_id" />
           </el-form-item>
-          <el-form-item label="用户账号" prop="username">
+
+          <el-form-item label="登录邮箱" prop="email">
             <el-input
               clearable
               :maxlength="20"
-              v-model="form.username"
-              placeholder="请输入用户账号"
+              v-model="form.email"
+              placeholder="请输入登录邮箱"
               :disabled="isUpdate"
             />
           </el-form-item>
-          <el-form-item label="用户名" prop="nickname">
+
+          <el-form-item label="用户昵称" prop="nickname">
             <el-input
               clearable
               :maxlength="20"
               v-model="form.nickname"
-              placeholder="请输入用户名"
-            />
-          </el-form-item>
-          <el-form-item label="性别" prop="sex">
-            <dict-data code="sex" v-model="form.sex" placeholder="请选择性别" />
-          </el-form-item>
-          <el-form-item label="角色" prop="roles">
-            <role-select v-model="form.roles" />
-          </el-form-item>
-          <el-form-item label="邮箱" prop="email">
-            <el-input
-              clearable
-              :maxlength="100"
-              v-model="form.email"
-              placeholder="请输入邮箱"
+              placeholder="请输入用户昵称"
             />
           </el-form-item>
         </el-col>
         <el-col :sm="12" :xs="24">
-          <el-form-item label="手机号" prop="phone">
-            <el-input
-              clearable
-              :maxlength="11"
-              v-model="form.phone"
-              placeholder="请输入手机号"
-            />
+          <el-form-item label="角色" prop="roles">
+            <role-select v-model="form.roles" />
           </el-form-item>
-          <el-form-item label="出生日期">
-            <el-date-picker
-              v-model="form.birthday"
-              value-format="YYYY-MM-DD"
-              placeholder="请选择出生日期"
-              class="ele-fluid"
-            />
-          </el-form-item>
+
           <el-form-item v-if="!isUpdate" label="登录密码" prop="password">
             <el-input
               show-password
@@ -77,20 +52,12 @@
               placeholder="请输入登录密码"
             />
           </el-form-item>
+
           <el-form-item label="状态">
             <el-radio-group v-model="form.status">
-              <el-radio :value="0" label="正常" />
-              <el-radio :value="1" label="冻结" />
+              <el-radio :value="0" label="停用" />
+              <el-radio :value="1" label="启用" />
             </el-radio-group>
-          </el-form-item>
-          <el-form-item label="个人简介">
-            <el-input
-              type="textarea"
-              :rows="3"
-              :maxlength="200"
-              v-model="form.introduction"
-              placeholder="请输入个人简介"
-            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -107,10 +74,10 @@
 <script lang="ts" setup>
   import { ref, reactive, watch } from 'vue';
   import type { FormInstance, FormRules } from 'element-plus';
-  import { EleMessage, emailReg, phoneReg } from 'ele-admin-plus';
+  import { EleMessage, emailReg } from 'ele-admin-plus';
   import { useFormData } from '@/utils/use-form-data';
-  import RoleSelect from './role-select.vue';
-  import OrganizationSelect from '@/views/system/organization/components/organization-select.vue';
+  import RoleSelect from '@/views/system/role/components/role-select.vue';
+  import InstitutionSelect from '@/views/system/institution/components/institution-select.vue';
   import { addUser, updateUser, checkExistence } from '@/api/system/user';
   import type { User } from '@/api/system/user/model';
 
@@ -118,7 +85,7 @@
     /** 修改回显的数据 */
     data?: User | null;
     /** 添加时机构id */
-    organizationId?: number;
+    institutionId?: number;
   }>();
 
   const emit = defineEmits<{
@@ -139,32 +106,35 @@
 
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<User>({
-    userId: void 0,
-    username: '',
-    nickname: '',
-    sex: void 0,
-    roles: [],
+    id: void 0,
+    institution_id: void 0,
     email: '',
-    phone: '',
+    nickname: '',
+    roles: [],
     password: '',
-    introduction: '',
-    birthday: '',
-    organizationId: void 0,
     status: 0
   });
 
   /** 表单验证规则 */
   const rules = reactive<FormRules>({
-    username: [
+    institution_id: [
       {
         required: true,
-        message: '请输入用户账号',
+        message: '请选择所属机构',
+        type: 'number',
+        trigger: 'change'
+      }
+    ],
+    email: [
+      {
+        required: true,
+        message: '请输入登录邮箱',
         type: 'string',
         trigger: 'blur'
       },
       {
-        min: 4,
-        message: '账号长度最少为4位',
+        pattern: emailReg,
+        message: '邮箱格式不正确',
         type: 'string',
         trigger: 'blur'
       },
@@ -186,36 +156,12 @@
         }
       }
     ],
-    nickname: [
-      {
-        required: true,
-        message: '请输入用户名',
-        type: 'string',
-        trigger: 'blur'
-      }
-    ],
-    sex: [
-      {
-        required: true,
-        message: '请选择性别',
-        type: 'string',
-        trigger: 'change'
-      }
-    ],
     roles: [
       {
         required: true,
         message: '请选择角色',
         type: 'array',
         trigger: 'change'
-      }
-    ],
-    email: [
-      {
-        pattern: emailReg,
-        message: '邮箱格式不正确',
-        type: 'string',
-        trigger: 'blur'
       }
     ],
     password: [
@@ -235,20 +181,6 @@
           callback(new Error('密码必须为5-18位非空白字符'));
         }
       }
-    ],
-    phone: [
-      {
-        required: true,
-        message: '请输入手机号',
-        type: 'string',
-        trigger: 'blur'
-      },
-      {
-        pattern: phoneReg,
-        message: '手机号格式不正确',
-        type: 'string',
-        trigger: 'blur'
-      }
     ]
   });
 
@@ -264,11 +196,18 @@
         return;
       }
       loading.value = true;
+
       const saveOrUpdate = isUpdate.value ? updateUser : addUser;
-      saveOrUpdate(form)
-        .then((msg) => {
+      const payload = {
+        ...form,
+        roles: (form.roles ?? []).map((role: any) =>
+          typeof role === 'object' ? role.id : role
+        )
+      };
+      saveOrUpdate(payload)
+        .then((message) => {
           loading.value = false;
-          EleMessage.success({ message: msg, plain: true });
+          EleMessage.success({ message: message, plain: true });
           handleCancel();
           emit('done');
         })
@@ -287,7 +226,7 @@
         isUpdate.value = true;
       } else {
         resetFields();
-        form.organizationId = props.organizationId;
+        form.institution_id = props.institutionId;
         isUpdate.value = false;
       }
     }

@@ -1,4 +1,3 @@
-<!-- 角色选择下拉框 -->
 <template>
   <el-select
     multiple
@@ -9,10 +8,10 @@
     @update:modelValue="updateValue"
   >
     <el-option
-      v-for="item in data"
-      :key="item.roleId"
-      :value="(item as any).roleId"
-      :label="item.roleName"
+      v-for="item in roleData"
+      :key="item.id"
+      :value="(item as any).id"
+      :label="item.name"
     />
   </el-select>
 </template>
@@ -20,8 +19,8 @@
 <script lang="ts" setup>
   import { ref, computed } from 'vue';
   import { EleMessage } from 'ele-admin-plus';
-  import { listRoles } from '@/api/system/role';
   import type { Role } from '@/api/system/role/model';
+  import { getDictionaryByCode } from '@/api/system/dictionary';
 
   const props = withDefaults(
     defineProps<{
@@ -41,24 +40,27 @@
 
   /** 选中的角色id */
   const roleIds = computed(() =>
-    props.modelValue?.map?.((d) => d.roleId as number)
+    props.modelValue?.map?.((d) => d.id as number)
   );
 
   /** 角色数据 */
-  const data = ref<Role[]>([]);
+  const roleData = ref<Role[]>([]);
 
   /** 更新选中数据 */
   const updateValue = (value: number[]) => {
     emit(
       'update:modelValue',
-      value.map((v) => ({ roleId: v }))
+      value.map((v) => ({ id: v }))
     );
   };
 
   /** 获取角色数据 */
-  listRoles()
-    .then((list) => {
-      data.value = list;
+  getDictionaryByCode('system_user_role,id,name')
+    .then((data) => {
+      roleData.value = data.map((item: any) => ({
+        id: item.id,
+        name: item.name
+      }));
     })
     .catch((e) => {
       EleMessage.error({ message: e.message, plain: true });

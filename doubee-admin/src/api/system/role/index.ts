@@ -1,7 +1,21 @@
 import request from '@/utils/request';
 import type { ApiResult, PageResult } from '@/api';
-import type { Role, RoleParam } from './model';
-import type { Menu } from '../menu/model';
+import type { Role, RoleParam, SearchParam } from './model';
+import type { Permission } from '../permission/model';
+
+/**
+ * 获取角色列表
+ * @param params 查询参数
+ * @returns Promise<Role[]>
+ */
+export async function getRoleList(params: SearchParam) {
+  const response = await request.get<ApiResult<Role[]>>('/user/role/getRoleList', { params });
+  if (response.data.code === 200 && response.data.data) {
+    return response.data.data;
+  }
+
+  return Promise.reject(new Error(response.data.message));
+}
 
 /**
  * 分页查询角色
@@ -80,7 +94,7 @@ export async function removeRoles(data: (number | undefined)[]) {
  * 获取角色分配的菜单
  */
 export async function listRoleMenus(roleId?: number) {
-  const res = await request.get<ApiResult<Menu[]>>(
+  const res = await request.get<ApiResult<Permission[]>>(
     '/system/role-menu/' + roleId
   );
   if (res.data.code === 0) {

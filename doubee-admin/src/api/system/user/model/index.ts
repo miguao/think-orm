@@ -4,6 +4,7 @@ import type { Permission } from '../../permission/model';
 
 export interface User {
   id?: number;
+  institution_id?: number;
   email?: string;
   password?: string;
   nickname?: string;
@@ -41,4 +42,10 @@ export interface UserParam extends PageParam {
   createTimeStart?: string;
   /** 创建时间截止时间 */
   createTimeEnd?: string;
+}
+
+export interface SearchParam extends PageParam {
+  'search-email'?: string;
+  'search-nickname'?: string;
+  'equal-institution_id'?: number;
 }

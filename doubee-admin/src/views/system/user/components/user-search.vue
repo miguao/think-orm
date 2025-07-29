@@ -1,30 +1,26 @@
-<!-- 搜索表单 -->
 <template>
   <el-form label-width="72px" @keyup.enter="search" @submit.prevent="">
     <el-row :gutter="8">
       <el-col :lg="6" :md="12" :sm="12" :xs="24">
-        <el-form-item label="用户账号">
+        <el-form-item label="登录邮箱">
           <el-input
             clearable
-            v-model.trim="form.username"
-            placeholder="请输入"
+            v-model.trim="form['search-email']"
+            placeholder="请输入登录邮箱"
           />
         </el-form-item>
       </el-col>
+
       <el-col :lg="6" :md="12" :sm="12" :xs="24">
-        <el-form-item label="用户名">
+        <el-form-item label="用户昵称">
           <el-input
             clearable
-            v-model.trim="form.nickname"
-            placeholder="请输入"
+            v-model.trim="form['search-nickname']"
+            placeholder="请输入用户昵称"
           />
         </el-form-item>
       </el-col>
-      <el-col :lg="6" :md="12" :sm="12" :xs="24">
-        <el-form-item label="性别">
-          <dict-data code="sex" v-model="form.sex" placeholder="请选择" />
-        </el-form-item>
-      </el-col>
+
       <el-col :lg="6" :md="12" :sm="12" :xs="24">
         <el-form-item label-width="16px">
           <el-button type="primary" @click="search">查询</el-button>
@@ -37,17 +33,16 @@
 
 <script lang="ts" setup>
   import { useFormData } from '@/utils/use-form-data';
-  import type { UserParam } from '@/api/system/user/model';
+  import type { SearchParam } from '@/api/system/user/model';
 
   const emit = defineEmits<{
-    (e: 'search', where?: UserParam): void;
+    (e: 'search', where?: SearchParam): void;
   }>();
 
   /** 表单数据 */
-  const [form, resetFields] = useFormData<UserParam>({
-    username: '',
-    nickname: '',
-    sex: void 0
+  const [form, resetFields] = useFormData<SearchParam>({
+    'search-email': '',
+    'search-nickname': ''
   });
 
   /** 搜索 */
