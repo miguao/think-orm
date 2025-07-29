@@ -25,7 +25,7 @@ class AccountController extends AbstractAdminController
     {
         $user = $this->getUserInfo();
         $permissions = $this->userService->findByUserPermissions($this->getUserId());
-        $user['authorities'] = $permissions['menus'];
+        $user['menus'] = $permissions['menus'];
 
         return $this->json(data: $user);
     }
