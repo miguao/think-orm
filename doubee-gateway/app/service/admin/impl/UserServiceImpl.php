@@ -95,10 +95,11 @@ class UserServiceImpl implements UserService
                         'id' => $permission->id,
                         'parent_id' => $permission->parent_id,
                         'icon' => $permission->icon,
-                        'name' => $permission->name,
+                        'title' => $permission->name,
                         'path' => $permission->path,
                         'component' => $permission->component,
                         'hide' => $permission->hide,
+                        'meta' => $permission->metadata,
                     ];
                 }
             }
