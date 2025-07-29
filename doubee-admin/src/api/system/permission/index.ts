@@ -18,7 +18,7 @@ export async function getPermissionList(params: SearchParam) {
 
 /**
  * 添加权限
- * @param data 表单数据
+ * @param data 权限数据
  * @returns Promise<string>
  */
 export async function addPermission(data: Permission) {
@@ -32,7 +32,7 @@ export async function addPermission(data: Permission) {
 
 /**
  * 更新权限
- * @param data 表单数据
+ * @param data 权限数据
  * @returns Promise<string>
  */
 export async function updatePermission(data: Permission) {
