@@ -14,6 +14,8 @@ export interface Permission {
     creation_time?: string;
     status?: number;
     children?: Permission[];
+    redirect?: string;
+    checked?: boolean;
 }
 
 export interface SearchParam {
