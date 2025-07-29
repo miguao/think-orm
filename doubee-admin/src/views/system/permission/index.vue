@@ -165,8 +165,7 @@
   } from '@/components/icons';
   import PermissionSearch from './components/permission-search.vue';
   import PermissionEdit from './components/permission-edit.vue';
-  import { removeMenu } from '@/api/system/menu';
-  import { getPermissionList } from '@/api/system/permission';
+  import { deletePermission, getPermissionList } from '@/api/system/permission';
   import type { Permission, SearchParam } from '@/api/system/permission/model';
 
   defineOptions({ name: 'SystemPermission' });
@@ -279,24 +278,23 @@
     ElMessageBox.confirm('确定要删除“' + row.name + '”吗?', '系统提示', {
       type: 'warning',
       draggable: true
-    })
-      .then(() => {
-        const loading = EleMessage.loading({
-          message: '请求中..',
-          plain: true
+    }).then(() => {
+      const loading = EleMessage.loading({
+        message: '请求中..',
+        plain: true
+      });
+
+      deletePermission(row.id)
+        .then((message) => {
+          loading.close();
+          EleMessage.success({ message: message, plain: true });
+          reload();
+        })
+        .catch((e) => {
+          loading.close();
+          EleMessage.error({ message: e.message, plain: true });
         });
-        removeMenu(row.id)
-          .then((msg) => {
-            loading.close();
-            EleMessage.success({ message: msg, plain: true });
-            reload();
-          })
-          .catch((e) => {
-            loading.close();
-            EleMessage.error({ message: e.message, plain: true });
-          });
-      })
-      .catch(() => {});
+    });
   };
 
   /** 展开全部 */
