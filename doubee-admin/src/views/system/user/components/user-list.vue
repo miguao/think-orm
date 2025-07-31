@@ -69,12 +69,14 @@
       </ele-dropdown>
     </template>
   </ele-pro-table>
+
   <user-edit
     :data="current"
     v-model="showEdit"
     :institution_id="institutionId"
     @done="reload"
   />
+
   <user-import v-model="showImport" @done="reload" />
 </template>
 
