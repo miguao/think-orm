@@ -119,22 +119,7 @@
         </template>
 
         <template #status="{ row }">
-          <el-tag
-            v-if="row.status === 1"
-            size="small"
-            type="success"
-            :disable-transitions="true"
-          >
-            启用
-          </el-tag>
-          <el-tag
-            v-else-if="row.status === 0"
-            size="small"
-            type="info"
-            :disable-transitions="true"
-          >
-            禁用
-          </el-tag>
+          <el-switch v-model="row.status" :active-value="1" :inactive-value="0" @change="(value: number) => updateStatus(row.id, value)" />
         </template>
       </ele-pro-table>
     </ele-card>
@@ -165,7 +150,7 @@
   } from '@/components/icons';
   import PermissionSearch from './components/permission-search.vue';
   import PermissionEdit from './components/permission-edit.vue';
-  import { deletePermission, getPermissionList } from '@/api/system/permission';
+  import { deletePermission, getPermissionList, updatePermission } from '@/api/system/permission';
   import type { Permission, SearchParam } from '@/api/system/permission/model';
 
   defineOptions({ name: 'SystemPermission' });
@@ -269,6 +254,19 @@
     showEdit.value = true;
   };
 
+  /**
+   * 更新权限状态
+   * @param id 权限ID
+   * @param status 权限状态
+   */
+  const updateStatus = (id: number, status: number) => {
+    updatePermission({ id, status }).then((message) => {
+      EleMessage.success({ message: message, plain: true });
+    }).catch((exception) => {
+      EleMessage.error({ message: exception.message, plain: true });
+    });
+  };
+
   /** 删除单个 */
   const remove = (row: Permission) => {
     if (row.children?.length) {
@@ -296,7 +294,7 @@
         });
     });
   };
-
+  
   /** 展开全部 */
   const expandAll = () => {
     tableRef.value?.toggleRowExpansionAll?.(true);
