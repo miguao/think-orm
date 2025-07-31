@@ -362,12 +362,8 @@
       }
       loading.value = true;
       const saveOrUpdate = isUpdate.value ? updatePermission : addPermission;
-      saveOrUpdate({
-        ...form,
-        // menuType 对应的值与后端不一致在前端处理
-        type: form.type === 2 ? 1 : 0,
-        parent_id: form.parent_id || 0
-      })
+
+      saveOrUpdate(form)
         .then((message) => {
           loading.value = false;
           EleMessage.success({ message: message, plain: true });
