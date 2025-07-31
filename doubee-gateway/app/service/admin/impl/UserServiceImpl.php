@@ -71,7 +71,7 @@ class UserServiceImpl implements UserService
     {
         $user = SystemUser::query()->with(['roles' => function (Query $query) {
             $query->with(['permissions' => function (Query $query) {
-                $query->where("status", 1)->order("sort", "asc");
+                $query->where("status", 1)->order("sort", "desc");
             }]);
         }])->find($userId);
 
