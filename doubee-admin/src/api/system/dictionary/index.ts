@@ -3,6 +3,21 @@ import type { ApiResult } from '@/api';
 import type { Dictionary, DictionaryParam } from './model';
 
 /**
+ * 根据字典编码获取字典数据
+ * @returns Promise<Dictionary[]>
+ */
+export async function getDictionaryByCode(code: string) {
+  const response = await request.get<ApiResult<Dictionary[]>>('/dictionary/getDictionaryByCode', {
+    params: { code }
+  });
+  if (response.data.code === 200 && response.data.data) {
+    return response.data.data;
+  }
+
+  return Promise.reject(new Error(response.data.message));
+}
+
+/**
  * 分页查询字典列表
  */
 export async function pageDictionaries(params: DictionaryParam) {
