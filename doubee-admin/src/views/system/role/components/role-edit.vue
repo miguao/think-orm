@@ -1,4 +1,3 @@
-<!-- 角色编辑弹窗 -->
 <template>
   <ele-modal
     form
@@ -14,28 +13,12 @@
       label-width="80px"
       @submit.prevent=""
     >
-      <el-form-item label="角色名称" prop="roleName">
+      <el-form-item label="角色名称" prop="name">
         <el-input
           clearable
           :maxlength="20"
-          v-model="form.roleName"
+          v-model="form.name"
           placeholder="请输入角色名称"
-        />
-      </el-form-item>
-      <el-form-item label="角色标识" prop="roleCode">
-        <el-input
-          clearable
-          :maxlength="20"
-          v-model="form.roleCode"
-          placeholder="请输入角色标识"
-        />
-      </el-form-item>
-      <el-form-item label="备注">
-        <el-input
-          :rows="4"
-          type="textarea"
-          v-model="form.comments"
-          placeholder="请输入备注"
         />
       </el-form-item>
     </el-form>
@@ -79,26 +62,16 @@
 
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<Role>({
-    roleId: void 0,
-    roleName: '',
-    roleCode: '',
-    comments: ''
+    id: void 0,
+    name: ''
   });
 
   /** 表单验证规则 */
   const rules = reactive<FormRules>({
-    roleName: [
+    name: [
       {
         required: true,
         message: '请输入角色名称',
-        type: 'string',
-        trigger: 'blur'
-      }
-    ],
-    roleCode: [
-      {
-        required: true,
-        message: '请输入角色标识',
         type: 'string',
         trigger: 'blur'
       }
@@ -119,15 +92,15 @@
       loading.value = true;
       const saveOrUpdate = isUpdate.value ? updateRole : addRole;
       saveOrUpdate(form)
-        .then((msg) => {
+        .then((message) => {
           loading.value = false;
-          EleMessage.success({ message: msg, plain: true });
+          EleMessage.success({ message: message, plain: true });
           handleCancel();
           emit('done');
         })
-        .catch((e) => {
+        .catch((exception) => {
           loading.value = false;
-          EleMessage.error({ message: e.message, plain: true });
+          EleMessage.error({ message: exception.message, plain: true });
         });
     });
   };
