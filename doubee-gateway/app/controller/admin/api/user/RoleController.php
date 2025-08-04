@@ -72,6 +72,7 @@ class RoleController extends AbstractAdminController
 
         $get = new Get(SystemUserPermission::class);
         $get->setWhere((array)$map);
+        $get->setOrderBy('sort', 'desc');
         $data = $this->database->get($get);
 
         $roleId = (int)$map['role_id'];
