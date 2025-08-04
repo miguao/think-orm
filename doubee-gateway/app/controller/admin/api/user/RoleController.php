@@ -99,6 +99,7 @@ class RoleController extends AbstractAdminController
             return [
                 'id' => $item['id'],
                 'parent_id' => $item['parent_id'],
+                'icon' => $item['icon'],
                 'name' => $item['name'],
                 'checked' => $item['checked'] ?? false,
             ];
