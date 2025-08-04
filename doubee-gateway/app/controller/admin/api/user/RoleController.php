@@ -10,6 +10,7 @@ use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
 use app\middleware\admin\AuthenticationMiddleware;
+use app\model\SystemUserPermission;
 use app\model\SystemUserPermissionRelation;
 use app\model\SystemUserRole;
 use app\utils\DateUtils;
@@ -61,5 +62,48 @@ class RoleController extends AbstractAdminController
         $delete = new Delete(SystemUserRole::class, (array)$this->request->post("list"));
         $this->database->delete($delete);
         return $this->json(message: "删除成功");
+    }
+
+    #[Route("GET", "getRolePermissions")]
+    public function getRolePermissions(): Json
+    {
+        $map = $this->request->get();
+        $this->validator((array)$map, ['role_id' => 'require', ['role_id.require' => '角色ID不能为空']]);
+
+        $get = new Get(SystemUserPermission::class);
+        $get->setWhere((array)$map);
+        $data = $this->database->get($get);
+
+        $roleId = (int)$map['role_id'];
+        $roleData = SystemUserRole::query()->with(['permissions'])->find($roleId);
+        if (!$roleData) {
+            throw new JsonException("角色不存在");
+        }
+
+        $roleData = $roleData->toArray();
+        if (!empty($roleData['permissions'])) {
+            foreach ($roleData['permissions'] as $value) {
+                foreach ($data as $key => $permission) {
+                    if ($value['id'] == $permission['id']) {
+                        $data[$key]['checked'] = true;
+                    } else {
+                        if (!isset($permission['checked'])) {
+                            $data[$key]['checked'] = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        $data = array_map(function ($item) {
+            return [
+                'id' => $item['id'],
+                'parent_id' => $item['parent_id'],
+                'name' => $item['name'],
+                'checked' => $item['checked'] ?? false,
+            ];
+        }, $data);
+
+        return $this->json(data: $data);
     }
 }
