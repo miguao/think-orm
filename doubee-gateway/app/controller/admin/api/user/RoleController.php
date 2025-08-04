@@ -68,7 +68,7 @@ class RoleController extends AbstractAdminController
     public function getRolePermissions(): Json
     {
         $map = $this->request->get();
-        $this->validator((array)$map, ['role_id' => 'require', ['role_id.require' => '角色ID不能为空']]);
+        $this->validator((array)$map, ['role_id' => 'require'], ['role_id.require' => '角色ID不能为空']);
 
         $get = new Get(SystemUserPermission::class);
         $get->setWhere((array)$map);
