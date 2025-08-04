@@ -273,6 +273,7 @@
       EleMessage.error({ message: '请先删除子节点', plain: true });
       return;
     }
+    
     ElMessageBox.confirm('确定要删除“' + row.name + '”吗?', '系统提示', {
       type: 'warning',
       draggable: true
