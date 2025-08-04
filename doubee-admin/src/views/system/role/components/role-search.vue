@@ -1,4 +1,3 @@
-<!-- 搜索表单 -->
 <template>
   <ele-card :body-style="{ paddingBottom: '2px' }">
     <el-form
@@ -11,17 +10,8 @@
           <el-form-item label="角色名称">
             <el-input
               clearable
-              v-model.trim="form.roleName"
-              placeholder="请输入"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :lg="6" :md="8" :sm="12" :xs="24">
-          <el-form-item label="角色标识">
-            <el-input
-              clearable
-              v-model.trim="form.roleCode"
-              placeholder="请输入"
+              v-model.trim="form.name"
+              placeholder="请输入角色名称"
             />
           </el-form-item>
         </el-col>
@@ -46,9 +36,7 @@
 
   /** 表单数据 */
   const [form, resetFields] = useFormData<RoleParam>({
-    roleName: '',
-    roleCode: '',
-    comments: ''
+    name: ''
   });
 
   /** 搜索 */
