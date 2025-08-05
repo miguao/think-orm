@@ -55,7 +55,7 @@
   import { ref, nextTick } from 'vue';
   import type { ElTree } from 'element-plus';
   import { EleMessage, toTree, eachTree } from 'ele-admin-plus';
-  import { getRolePermissions, updateRole } from '@/api/system/role';
+  import { getPermissionsByRoleId, updateRole } from '@/api/system/role';
   import type { Role } from '@/api/system/role/model';
   import type { Permission } from '@/api/system/permission/model';
 
@@ -89,9 +89,9 @@
     if (!props.data) {
       return;
     }
-    authLoading.value = true;
 
-    getRolePermissions(props.data.id)
+    authLoading.value = true;
+    getPermissionsByRoleId(props.data.id)
       .then((data) => {
         authLoading.value = false;
 
