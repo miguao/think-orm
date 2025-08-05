@@ -1,4 +1,3 @@
-<!-- 字典编辑弹窗 -->
 <template>
   <ele-modal
     form
@@ -14,39 +13,29 @@
       label-width="80px"
       @submit.prevent=""
     >
-      <el-form-item label="字典名称" prop="dictName">
+      <el-form-item label="字典名称" prop="name">
         <el-input
           clearable
           :maxlength="20"
-          v-model="form.dictName"
+          v-model="form.name"
           placeholder="请输入字典名称"
         />
       </el-form-item>
-      <el-form-item label="字典值" prop="dictCode">
+      <el-form-item label="字典代码" prop="code">
         <el-input
           clearable
           :maxlength="20"
-          v-model="form.dictCode"
-          placeholder="请输入字典值"
+          v-model="form.code"
+          placeholder="请输入字典代码"
         />
       </el-form-item>
-      <el-form-item label="排序号" prop="sortNumber">
-        <el-input-number
-          :min="0"
-          :max="9999"
-          v-model="form.sortNumber"
-          placeholder="请输入排序号"
-          controls-position="right"
-          class="ele-fluid"
-        />
-      </el-form-item>
-      <el-form-item label="备注">
+      <el-form-item label="备注信息">
         <el-input
           :rows="4"
           type="textarea"
           :maxlength="200"
-          v-model="form.comments"
-          placeholder="请输入备注"
+          v-model="form.remark"
+          placeholder="请输入备注信息"
         />
       </el-form-item>
     </el-form>
@@ -90,16 +79,15 @@
 
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<Dictionary>({
-    dictId: void 0,
-    dictName: '',
-    dictCode: '',
-    sortNumber: void 0,
-    comments: ''
+    id: void 0,
+    name: '',
+    code: '',
+    remark: ''
   });
 
   /** 表单验证规则 */
   const rules = reactive<FormRules>({
-    dictName: [
+    name: [
       {
         required: true,
         message: '请输入字典名称',
@@ -107,19 +95,11 @@
         trigger: 'blur'
       }
     ],
-    dictCode: [
+    code: [
       {
         required: true,
-        message: '请输入字典值',
+        message: '请输入字典代码',
         type: 'string',
-        trigger: 'blur'
-      }
-    ],
-    sortNumber: [
-      {
-        required: true,
-        message: '请输入排序号',
-        type: 'number',
         trigger: 'blur'
       }
     ]
@@ -136,18 +116,19 @@
       if (!valid) {
         return;
       }
+
       loading.value = true;
       const saveOrUpdate = isUpdate.value ? updateDictionary : addDictionary;
       saveOrUpdate(form)
-        .then((msg) => {
+        .then((message) => {
           loading.value = false;
-          EleMessage.success({ message: msg, plain: true });
+          EleMessage.success({ message: message, plain: true });
           handleCancel();
           emit('done');
         })
-        .catch((e) => {
+        .catch((exception) => {
           loading.value = false;
-          EleMessage.error({ message: e.message, plain: true });
+          EleMessage.error({ message: exception.message, plain: true });
         });
     });
   };
