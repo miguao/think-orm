@@ -68,8 +68,8 @@
             ref="treeRef"
             :data="data"
             highlight-current
-            node-key="dictId"
-            :props="{ label: 'dictName' }"
+            node-key="id"
+            :props="{ label: 'name' }"
             :expand-on-click-node="false"
             :default-expand-all="true"
             :filter-node-method="filterNode"
@@ -85,22 +85,22 @@
                 class="el-tree-node__label"
                 style="display: flex; align-items: center"
               >
-                <div style="margin-right: 4px">{{ d.dictName }}</div>
+                <div style="margin-right: 4px">{{ d.name }}</div>
                 <div style="font-size: 12px; opacity: 0.8; font-weight: normal">
-                  ({{ d.dictCode }})
+                  ({{ d.code }})
                 </div>
               </div>
             </template>
           </el-tree>
         </ele-loading>
+
         <template #body>
-          <dict-data-list
-            v-if="current && current.dictId"
-            :dict-id="current.dictId"
-          />
+          <dict-data-list v-if="current && current.id" :dict-id="current.id" />
         </template>
       </ele-split-panel>
     </ele-card>
+
+    <!-- 编辑弹窗 -->
     <dict-edit v-model="showEdit" :data="editData" @done="query" />
   </ele-page>
 </template>
@@ -119,7 +119,10 @@
   import { useMobile } from '@/utils/use-mobile';
   import DictDataList from './components/dict-data-list.vue';
   import DictEdit from './components/dict-edit.vue';
-  import { listDictionaries, removeDictionary } from '@/api/system/dictionary';
+  import {
+    getAllDictionaryList,
+    deleteDictionary
+  } from '@/api/system/dictionary';
   import type { Dictionary } from '@/api/system/dictionary/model';
 
   defineOptions({ name: 'SystemDictionary' });
@@ -154,7 +157,7 @@
   /** 查询 */
   const query = () => {
     loading.value = true;
-    listDictionaries()
+    getAllDictionaryList()
       .then((list) => {
         loading.value = false;
         data.value = list ?? [];
@@ -162,9 +165,9 @@
           handleNodeClick(data.value[0]);
         });
       })
-      .catch((e) => {
+      .catch((exception) => {
         loading.value = false;
-        EleMessage.error({ message: e.message, plain: true });
+        EleMessage.error({ message: exception.message, plain: true });
       });
   };
 
@@ -174,9 +177,10 @@
     if (current.value != null && mobile.value) {
       collapse.value = true;
     }
-    if (row && row.dictId) {
+
+    if (row && row.id) {
       current.value = row;
-      treeRef.value?.setCurrentKey?.(row.dictId);
+      treeRef.value?.setCurrentKey?.(row.id);
     } else {
       current.value = null;
     }
@@ -194,33 +198,33 @@
     if (!row) {
       return;
     }
-    ElMessageBox.confirm(`确定要删除“${row.dictName}”吗?`, '系统提示', {
+
+    ElMessageBox.confirm(`确定要删除“${row.name}”吗?`, '系统提示', {
       type: 'warning',
       draggable: true
-    })
-      .then(() => {
-        const loading = EleMessage.loading({
-          message: '请求中..',
-          plain: true
+    }).then(() => {
+      const loading = EleMessage.loading({
+        message: '请求中..',
+        plain: true
+      });
+
+      deleteDictionary(row.id)
+        .then((message) => {
+          loading.close();
+          EleMessage.success({ message: message, plain: true });
+          query();
+        })
+        .catch((exception) => {
+          loading.close();
+          EleMessage.error({ message: exception.message, plain: true });
         });
-        removeDictionary(row.dictId)
-          .then((msg) => {
-            loading.close();
-            EleMessage.success({ message: msg, plain: true });
-            query();
-          })
-          .catch((e) => {
-            loading.close();
-            EleMessage.error({ message: e.message, plain: true });
-          });
-      })
-      .catch(() => {});
+    });
   };
 
   /** 树过滤方法 */
   const filterNode = (value: string, data: Dictionary) => {
     if (value) {
-      return !!(data.dictName && data.dictName.includes(value));
+      return !!(data.name && data.name.includes(value));
     }
     return true;
   };
