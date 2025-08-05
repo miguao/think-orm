@@ -18,7 +18,7 @@ use think\annotation\route\Middleware;
 use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/dict/data")]
+#[Group("/admin/api/dictionary/data")]
 #[Middleware(AuthenticationMiddleware::class)]
 class DataController extends AbstractAdminController
 {
