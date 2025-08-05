@@ -45,7 +45,7 @@ export async function updateUser(data: User) {
 
 /**
  * 删除用户
- * @param list 用户列表
+ * @param list 删除列表
  * @returns Promise<string>
  */
 export async function deleteUser(list: number[]) {
