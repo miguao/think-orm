@@ -1,4 +1,3 @@
-<!-- 角色权限分配弹窗 -->
 <template>
   <ele-modal
     :width="460"
@@ -23,9 +22,9 @@
         ref="treeRef"
         show-checkbox
         :data="authData"
-        node-key="menuId"
+        node-key="id"
         :default-expand-all="true"
-        :props="{ label: 'title' }"
+        :props="{ label: 'name' }"
         :default-checked-keys="checkedKeys"
         :style="{ '--ele-tree-item-height': '28px' }"
       >
@@ -38,7 +37,7 @@
             >
               <component :is="scope.data.icon" />
             </el-icon>
-            <span style="vertical-align: -2px">{{ scope.data.title }}</span>
+            <span style="vertical-align: -2px">{{ scope.data.name }}</span>
           </div>
         </template>
       </el-tree>
@@ -56,9 +55,9 @@
   import { ref, nextTick } from 'vue';
   import type { ElTree } from 'element-plus';
   import { EleMessage, toTree, eachTree } from 'ele-admin-plus';
-  import { listRoleMenus, updateRoleMenus } from '@/api/system/role';
+  import { getRolePermissions, updateRole } from '@/api/system/role';
   import type { Role } from '@/api/system/role/model';
-  import type { Menu } from '@/api/system/menu/model';
+  import type { Permission } from '@/api/system/permission/model';
 
   const props = defineProps<{
     /** 当前角色数据 */
@@ -72,7 +71,7 @@
   const treeRef = ref<InstanceType<typeof ElTree> | null>(null);
 
   /** 权限数据 */
-  const authData = ref<Menu[]>([]);
+  const authData = ref<Permission[]>([]);
 
   /** 权限数据请求状态 */
   const authLoading = ref(false);
@@ -91,29 +90,31 @@
       return;
     }
     authLoading.value = true;
-    listRoleMenus(props.data.roleId)
+
+    getRolePermissions(props.data.id)
       .then((data) => {
         authLoading.value = false;
-        // 转成树形结构的数据
+
         authData.value = toTree({
           data: data,
-          idField: 'menuId',
-          parentIdField: 'parentId'
+          idField: 'id',
+          parentIdField: 'parent_id'
         });
-        // 回显选中的数据
+
         nextTick(() => {
           const cks: number[] = [];
           eachTree(authData.value, (d) => {
-            if (d.menuId && d.checked && !d.children?.length) {
-              cks.push(d.menuId);
+            if (d.id && d.checked && !d.children?.length) {
+              cks.push(d.id);
             }
           });
+
           checkedKeys.value = cks;
         });
       })
-      .catch((e) => {
+      .catch((exception) => {
         authLoading.value = false;
-        EleMessage.error({ message: e.message, plain: true });
+        EleMessage.error({ message: exception.message, plain: true });
       });
   };
 
@@ -125,19 +126,21 @@
   /** 保存权限分配 */
   const save = () => {
     loading.value = true;
+
     const ids =
       (treeRef.value?.getCheckedKeys?.() ?? []).concat(
         treeRef.value?.getHalfCheckedKeys?.() ?? []
       ) ?? [];
-    updateRoleMenus(props.data?.roleId, ids as unknown as number[])
-      .then((msg) => {
+
+    updateRole({ id: props.data?.id, permissions: ids })
+      .then((message) => {
         loading.value = false;
-        EleMessage.success({ message: msg, plain: true });
+        EleMessage.success({ message: message, plain: true });
         handleCancel();
       })
-      .catch((e) => {
+      .catch((exception) => {
         loading.value = false;
-        EleMessage.error({ message: e.message, plain: true });
+        EleMessage.error({ message: exception.message, plain: true });
       });
   };
 
