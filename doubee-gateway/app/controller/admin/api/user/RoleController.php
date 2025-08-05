@@ -45,8 +45,9 @@ class RoleController extends AbstractAdminController
         $map = $this->request->post();
         $save = new Save(SystemUserRole::class);
         $save->setMap($map);
-        $save->setMiddle("auth", SystemUserPermissionRelation::class, "permission_id", "role_id");
+        $save->setMiddle("permission", SystemUserPermissionRelation::class, "permission_id", "role_id");
         $save->addForceMap("creation_time", DateUtils::current());
+
         try {
             $this->database->save($save);
         } catch (Exception $exception) {
