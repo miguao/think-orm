@@ -1,22 +1,21 @@
-<!-- 搜索表单 -->
 <template>
   <el-form label-width="84px" @keyup.enter="search" @submit.prevent="">
     <el-row :gutter="8">
       <el-col :lg="8" :md="8" :sm="12" :xs="24">
-        <el-form-item label="字典数据名">
+        <el-form-item label="数据名称">
           <el-input
             clearable
-            v-model.trim="form.dictDataName"
-            placeholder="请输入"
+            v-model.trim="form['search-name']"
+            placeholder="请输入数据名称"
           />
         </el-form-item>
       </el-col>
       <el-col :lg="8" :md="8" :sm="12" :xs="24">
-        <el-form-item label="字典数据值">
+        <el-form-item label="数据值">
           <el-input
             clearable
-            v-model.trim="form.dictDataCode"
-            placeholder="请输入"
+            v-model.trim="form['search-value']"
+            placeholder="请输入数据值"
           />
         </el-form-item>
       </el-col>
@@ -32,16 +31,16 @@
 
 <script lang="ts" setup>
   import { useFormData } from '@/utils/use-form-data';
-  import type { DictionaryDataParam } from '@/api/system/dictionary-data/model';
+  import type { SearchParam } from '@/api/system/dictionary-data/model';
 
   const emit = defineEmits<{
-    (e: 'search', where?: DictionaryDataParam): void;
+    (e: 'search', where?: SearchParam): void;
   }>();
 
   /** 表单数据 */
-  const [form, resetFields] = useFormData<DictionaryDataParam>({
-    dictDataName: '',
-    dictDataCode: ''
+  const [form, resetFields] = useFormData<SearchParam>({
+    'search-name': '',
+    'search-value': ''
   });
 
   /** 搜索 */
