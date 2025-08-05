@@ -65,8 +65,8 @@ class RoleController extends AbstractAdminController
         return $this->json(message: "删除成功");
     }
 
-    #[Route("GET", "getRolePermissions")]
-    public function getRolePermissions(): Json
+    #[Route("GET", "getPermissionsByRoleId")]
+    public function getPermissionsByRoleId(): Json
     {
         $map = $this->request->get();
         $this->validator((array)$map, ['role_id' => 'require'], ['role_id.require' => '角色ID不能为空']);
