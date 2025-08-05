@@ -38,6 +38,17 @@ class DictionaryController extends AbstractAdminController
         return $this->json(data: (array)$data);
     }
 
+    #[Route("GET", "getAllDictionaryList")]
+    public function getAllDictionaryList(): Json
+    {
+        $map = $this->request->get();
+        $get = new Get(SystemDictionary::class);
+        $get->setWhere((array)$map);
+
+        $data = $this->database->get($get);
+        return $this->json(data: $data);
+    }
+
     #[Route("GET", "getDictionaryList")]
     public function getDictionaryList(): Json
     {
