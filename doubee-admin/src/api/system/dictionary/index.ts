@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import type { ApiResult } from '@/api';
-import type { Dictionary, DictionaryParam } from './model';
+import type { Dictionary, SearchParam } from './model';
 
 /**
  * 根据字典编码获取字典数据
@@ -18,66 +18,64 @@ export async function getDictionaryByCode(code: string) {
 }
 
 /**
- * 分页查询字典列表
+ * 获取所有字典列表
+ * @param params 查询参数
+ * @returns Promise<Dictionary[]>
  */
-export async function pageDictionaries(params: DictionaryParam) {
-  const res = await request.get<ApiResult<Dictionary[]>>(
-    '/system/dictionary/page',
-    { params }
-  );
-  if (res.data.code === 0) {
-    return res.data.data;
-  }
-  return Promise.reject(new Error(res.data.message));
-}
-
-/**
- * 查询字典列表
- */
-export async function listDictionaries(params?: DictionaryParam) {
-  const res = await request.get<ApiResult<Dictionary[]>>('/system/dictionary', {
+export async function getAllDictionaryList(params?: SearchParam) {
+  const response = await request.get<ApiResult<Dictionary[]>>('/dictionary/getAllDictionaryList', {
     params
   });
-  if (res.data.code === 0) {
-    return res.data.data;
+  if (response.data.code === 200) {
+    return response.data.data;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
  * 添加字典
+ * @param data 字典数据
+ * @returns Promise<string>
  */
 export async function addDictionary(data: Dictionary) {
-  const res = await request.post<ApiResult<unknown>>(
-    '/system/dictionary',
+  const response = await request.post<ApiResult<unknown>>(
+    '/dictionary/saveDictionary',
     data
   );
-  if (res.data.code === 0) {
-    return res.data.message;
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
- * 修改字典
+ * 更新字典
+ * @param data 字典数据
+ * @returns Promise<string>
  */
 export async function updateDictionary(data: Dictionary) {
-  const res = await request.put<ApiResult<unknown>>('/system/dictionary', data);
-  if (res.data.code === 0) {
-    return res.data.message;
+  const response = await request.put<ApiResult<unknown>>('/dictionary/saveDictionary', data);
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
  * 删除字典
+ * @param id 字典ID
+ * @returns Promise<string>
  */
-export async function removeDictionary(id?: number) {
-  const res = await request.delete<ApiResult<unknown>>(
-    '/system/dictionary/' + id
+export async function deleteDictionary(id?: number) {
+  const response = await request.delete<ApiResult<unknown>>(
+    '/system/dictionary/', { data: { list: [id] } }
   );
-  if (res.data.code === 0) {
-    return res.data.message;
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
