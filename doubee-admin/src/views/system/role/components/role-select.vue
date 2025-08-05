@@ -62,7 +62,7 @@
         name: item.name
       }));
     })
-    .catch((e) => {
-      EleMessage.error({ message: e.message, plain: true });
+    .catch((exception) => {
+      EleMessage.error({ message: exception.message, plain: true });
     });
 </script>
