@@ -90,9 +90,9 @@ export async function removeRoles(data: (number | undefined)[]) {
  * @param roleId 角色ID
  * @returns Promise<string>
  */
-export async function getRolePermissions(roleId?: number) {
+export async function getPermissionsByRoleId(roleId?: number) {
   const res = await request.get<ApiResult<Permission[]>>(
-    '/user/role/getRolePermissions', { params: { role_id: roleId } }
+    '/user/role/getPermissionsByRoleId', { params: { role_id: roleId } }
   );
   if (res.data.code === 200) {
     return res.data.data;
