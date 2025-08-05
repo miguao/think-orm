@@ -52,10 +52,7 @@
         </ele-loading>
 
         <template #body>
-          <user-list
-            v-if="current && current.id"
-            :institutionId="current.id"
-          />
+          <user-list v-if="current && current.id" :institutionId="current.id" />
         </template>
       </ele-split-panel>
     </ele-card>
@@ -111,9 +108,9 @@
           handleNodeClick(data.value[0]);
         });
       })
-      .catch((e) => {
+      .catch((exception) => {
         loading.value = false;
-        EleMessage.error({ message: e.message, plain: true });
+        EleMessage.error({ message: exception.message, plain: true });
       });
   };
 
