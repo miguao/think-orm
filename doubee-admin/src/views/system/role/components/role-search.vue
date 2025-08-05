@@ -10,11 +10,12 @@
           <el-form-item label="角色名称">
             <el-input
               clearable
-              v-model.trim="form.name"
+              v-model.trim="form['search-name']"
               placeholder="请输入角色名称"
             />
           </el-form-item>
         </el-col>
+
         <el-col :lg="12" :md="8" :sm="24" :xs="24">
           <el-form-item label-width="16px">
             <el-button type="primary" @click="search">查询</el-button>
@@ -28,15 +29,15 @@
 
 <script lang="ts" setup>
   import { useFormData } from '@/utils/use-form-data';
-  import type { RoleParam } from '@/api/system/role/model';
+  import type { SearchParam } from '@/api/system/role/model';
 
   const emit = defineEmits<{
-    (e: 'search', where?: RoleParam): void;
+    (e: 'search', where?: SearchParam): void;
   }>();
 
   /** 表单数据 */
-  const [form, resetFields] = useFormData<RoleParam>({
-    name: ''
+  const [form, resetFields] = useFormData<SearchParam>({
+    'search-name': ''
   });
 
   /** 搜索 */
