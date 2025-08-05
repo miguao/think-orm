@@ -71,7 +71,7 @@ export async function updateDictionary(data: Dictionary) {
  */
 export async function deleteDictionary(id?: number) {
   const response = await request.delete<ApiResult<unknown>>(
-    '/system/dictionary/', { data: { list: [id] } }
+    '/dictionary/deleteDictionary', { data: { list: [id] } }
   );
   if (response.data.code === 200) {
     return response.data.message;
