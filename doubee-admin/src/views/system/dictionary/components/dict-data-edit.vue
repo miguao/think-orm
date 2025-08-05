@@ -1,4 +1,3 @@
-<!-- 字典数据编辑弹窗 -->
 <template>
   <ele-modal
     form
@@ -14,39 +13,30 @@
       label-width="94px"
       @submit.prevent=""
     >
-      <el-form-item label="字典数据名" prop="dictDataName">
+      <el-form-item label="数据名称" prop="name">
         <el-input
           clearable
           :maxlength="20"
-          v-model="form.dictDataName"
-          placeholder="请输入字典数据名"
+          v-model="form.name"
+          placeholder="请输入数据名称"
         />
       </el-form-item>
-      <el-form-item label="字典数据值" prop="dictDataCode">
+      <el-form-item label="数据值" prop="value">
         <el-input
           clearable
           :maxlength="20"
-          v-model="form.dictDataCode"
-          placeholder="请输入字典数据值"
+          v-model="form.value"
+          placeholder="请输入数据值"
         />
       </el-form-item>
-      <el-form-item label="排序号" prop="sortNumber">
+      <el-form-item label="排序号" prop="sort">
         <el-input-number
           :min="0"
           :max="9999"
-          v-model="form.sortNumber"
+          v-model="form.sort"
           placeholder="请输入排序号"
           controls-position="right"
           class="ele-fluid"
-        />
-      </el-form-item>
-      <el-form-item label="备注">
-        <el-input
-          :rows="4"
-          type="textarea"
-          :maxlength="200"
-          v-model="form.comments"
-          placeholder="请输入备注"
         />
       </el-form-item>
     </el-form>
@@ -95,32 +85,31 @@
 
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<DictionaryData>({
-    dictDataId: void 0,
-    dictDataName: '',
-    dictDataCode: '',
-    sortNumber: void 0,
-    comments: ''
+    id: void 0,
+    name: '',
+    value: '',
+    sort: void 0
   });
 
   /** 表单验证规则 */
   const rules = reactive<FormRules>({
-    dictDataName: [
+    name: [
       {
         required: true,
-        message: '请输入字典数据名',
+        message: '请输入数据名称',
         type: 'string',
         trigger: 'blur'
       }
     ],
-    dictDataCode: [
+    value: [
       {
         required: true,
-        message: '请输入字典数据值',
+        message: '请输入数据值',
         type: 'string',
         trigger: 'blur'
       }
     ],
-    sortNumber: [
+    sort: [
       {
         required: true,
         message: '请输入排序号',
@@ -141,23 +130,25 @@
       if (!valid) {
         return;
       }
+
       loading.value = true;
       const saveOrUpdate = isUpdate.value
         ? updateDictionaryData
         : addDictionaryData;
+
       saveOrUpdate({
         ...form,
-        dictId: props.dictId
+        dictionary_id: props.dictId
       })
-        .then((msg) => {
+        .then((message) => {
           loading.value = false;
-          EleMessage.success({ message: msg, plain: true });
+          EleMessage.success({ message: message, plain: true });
           handleCancel();
           emit('done');
         })
-        .catch((e) => {
+        .catch((exception) => {
           loading.value = false;
-          EleMessage.error({ message: e.message, plain: true });
+          EleMessage.error({ message: exception.message, plain: true });
         });
     });
   };

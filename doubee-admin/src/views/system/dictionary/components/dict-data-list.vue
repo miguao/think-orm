@@ -67,7 +67,7 @@
   import DictDataSearch from './dict-data-search.vue';
   import DictDataEdit from './dict-data-edit.vue';
   import {
-    removeDictionaryDataBatch,
+    deleteData,
     listDictionaryData,
     getDataList
   } from '@/api/system/dictionary-data';
@@ -175,15 +175,19 @@
         plain: true
       });
 
-      removeDictionaryDataBatch(rows.map((d) => d.id))
-        .then((msg) => {
+      const ids = rows
+        .map((d) => d.id)
+        .filter((id): id is number => id !== undefined);
+
+      deleteData(ids)
+        .then((message) => {
           loading.close();
-          EleMessage.success({ message: msg, plain: true });
+          EleMessage.success({ message: message, plain: true });
           reload();
         })
-        .catch((e) => {
+        .catch((exception) => {
           loading.close();
-          EleMessage.error({ message: e.message, plain: true });
+          EleMessage.error({ message: exception.message, plain: true });
         });
     });
   };

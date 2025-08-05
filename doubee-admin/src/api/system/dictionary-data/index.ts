@@ -1,25 +1,28 @@
 import request from '@/utils/request';
 import type { ApiResult, PageResult } from '@/api';
-import type { DictionaryData, DictionaryDataParam } from './model';
+import type { DictionaryData, SearchParam } from './model';
 
 /**
- * 分页查询字典数据
+ * 获取字典数据列表
+ * @param params 查询参数
+ * @returns Promise<DictionaryData[]>
  */
-export async function pageDictionaryData(params: DictionaryDataParam) {
-  const res = await request.get<ApiResult<PageResult<DictionaryData>>>(
-    '/system/dictionary-data/page',
+export async function getDataList(params: SearchParam) {
+  const response = await request.get<ApiResult<PageResult<DictionaryData>>>(
+    '/dictionary/data/getDataList',
     { params }
   );
-  if (res.data.code === 0) {
-    return res.data.data;
+  if (response.data.code === 200) {
+    return response.data.data;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
  * 查询字典数据列表
  */
-export async function listDictionaryData(params: DictionaryDataParam) {
+export async function listDictionaryData(params: SearchParam) {
   const res = await request.get<ApiResult<DictionaryData[]>>(
     '/system/dictionary-data',
     { params }
@@ -32,55 +35,51 @@ export async function listDictionaryData(params: DictionaryDataParam) {
 
 /**
  * 添加字典数据
+ * @param data 字典数据
+ * @returns Promise<string>
  */
 export async function addDictionaryData(data: DictionaryData) {
-  const res = await request.post<ApiResult<unknown>>(
-    '/system/dictionary-data',
+  const response = await request.post<ApiResult<unknown>>(
+    '/dictionary/data/saveData',
     data
   );
-  if (res.data.code === 0) {
-    return res.data.message;
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
- * 修改字典数据
+ * 更新字典数据
+ * @param data 字典数据
+ * @returns Promise<string>
  */
 export async function updateDictionaryData(data: DictionaryData) {
-  const res = await request.put<ApiResult<unknown>>(
-    '/system/dictionary-data',
+  const response = await request.put<ApiResult<unknown>>(
+    '/dictionary/data/saveData',
     data
   );
-  if (res.data.code === 0) {
-    return res.data.message;
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
  * 删除字典数据
+ * @param list 删除列表
+ * @returns Promise<string>
  */
-export async function removeDictionaryData(id?: number) {
-  const res = await request.delete<ApiResult<unknown>>(
-    '/system/dictionary-data/' + id
+export async function deleteData(list: number[]) {
+  const response = await request.delete<ApiResult<unknown>>(
+    '/dictionary/data/deleteData',
+    { data: { list } }
   );
-  if (res.data.code === 0) {
-    return res.data.message;
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
-}
 
-/**
- * 批量删除字典数据
- */
-export async function removeDictionaryDataBatch(data: (number | undefined)[]) {
-  const res = await request.delete<ApiResult<unknown>>(
-    '/system/dictionary-data/batch',
-    { data }
-  );
-  if (res.data.code === 0) {
-    return res.data.message;
-  }
-  return Promise.reject(new Error(res.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
