@@ -4,9 +4,10 @@
     style="margin-bottom: -14px"
     @search="reload"
   />
+
   <ele-pro-table
     ref="tableRef"
-    row-key="dictDataId"
+    row-key="id"
     :columns="columns"
     :datasource="datasource"
     :show-overflow-tooltip="true"
@@ -66,17 +67,16 @@
   import DictDataSearch from './dict-data-search.vue';
   import DictDataEdit from './dict-data-edit.vue';
   import {
-    pageDictionaryData,
     removeDictionaryDataBatch,
-    listDictionaryData
+    listDictionaryData,
+    getDataList
   } from '@/api/system/dictionary-data';
   import type {
     DictionaryData,
-    DictionaryDataParam
+    SearchParam
   } from '@/api/system/dictionary-data/model';
 
   const props = defineProps<{
-    /** 字典id */
     dictId: number;
   }>();
 
@@ -92,32 +92,27 @@
       type: 'selection',
       columnKey: 'selection',
       width: 50,
-      align: 'center' /* ,
-      fixed: 'left' */
+      align: 'center'
     },
     {
-      prop: 'dictDataName',
-      label: '字典数据名',
-      sortable: 'custom',
+      prop: 'name',
+      label: '数据名称',
       minWidth: 120
     },
     {
-      prop: 'dictDataCode',
-      label: '字典数据值',
-      sortable: 'custom',
+      prop: 'value',
+      label: '数据值',
       minWidth: 120
     },
     {
-      prop: 'sortNumber',
-      label: '排序号',
-      sortable: 'custom',
+      prop: 'sort',
+      label: '排序',
       width: 100,
       align: 'center'
     },
     {
-      prop: 'createTime',
+      prop: 'creation_time',
       label: '创建时间',
-      sortable: 'custom',
       width: 180,
       align: 'center'
     },
@@ -125,8 +120,7 @@
       columnKey: 'action',
       label: '操作',
       width: 130,
-      align: 'center' /* ,
-      fixed: 'right' */,
+      align: 'center',
       slot: 'action',
       hideInPrint: true,
       hideInExport: true
@@ -144,16 +138,16 @@
 
   /** 表格数据源 */
   const datasource: DatasourceFunction = ({ pages, where, orders }) => {
-    return pageDictionaryData({
+    return getDataList({
       ...where,
       ...orders,
       ...pages,
-      dictId: props.dictId
+      'equal-dictionary_id': props.dictId
     });
   };
 
   /** 刷新表格 */
-  const reload = (where?: DictionaryDataParam) => {
+  const reload = (where?: SearchParam) => {
     tableRef.value?.reload?.({ page: 1, where });
   };
 
@@ -170,28 +164,28 @@
       EleMessage.error({ message: '请至少选择一条数据', plain: true });
       return;
     }
+
     ElMessageBox.confirm(
-      '确定要删除“' + rows.map((d) => d.dictDataName).join(', ') + '”吗?',
+      '确定要删除“' + rows.map((d) => d.name).join(', ') + '”吗?',
       '系统提示',
       { type: 'warning', draggable: true }
-    )
-      .then(() => {
-        const loading = EleMessage.loading({
-          message: '请求中..',
-          plain: true
+    ).then(() => {
+      const loading = EleMessage.loading({
+        message: '请求中..',
+        plain: true
+      });
+
+      removeDictionaryDataBatch(rows.map((d) => d.id))
+        .then((msg) => {
+          loading.close();
+          EleMessage.success({ message: msg, plain: true });
+          reload();
+        })
+        .catch((e) => {
+          loading.close();
+          EleMessage.error({ message: e.message, plain: true });
         });
-        removeDictionaryDataBatch(rows.map((d) => d.dictDataId))
-          .then((msg) => {
-            loading.close();
-            EleMessage.success({ message: msg, plain: true });
-            reload();
-          })
-          .catch((e) => {
-            loading.close();
-            EleMessage.error({ message: e.message, plain: true });
-          });
-      })
-      .catch(() => {});
+    });
   };
 
   // 监听字典id变化
@@ -208,7 +202,7 @@
     return listDictionaryData({
       ...where,
       ...orders,
-      dictId: props.dictId
+      'equal-dictionary_id': props.dictId
     });
   };
 </script>
