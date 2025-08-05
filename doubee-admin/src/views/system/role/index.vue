@@ -6,7 +6,7 @@
       <!-- 表格 -->
       <ele-pro-table
         ref="tableRef"
-        row-key="roleId"
+        row-key="id"
         :columns="columns"
         :datasource="datasource"
         :show-overflow-tooltip="true"
@@ -34,6 +34,14 @@
             删除
           </el-button>
         </template>
+        <template #status="{ row }">
+          <el-switch
+            v-model="row.status"
+            :active-value="1"
+            :inactive-value="0"
+            @change="(value: number) => updateStatus(row.id, value)"
+          />
+        </template>
         <template #action="{ row }">
           <el-link type="primary" underline="never" @click="openEdit(row)">
             修改
@@ -49,6 +57,7 @@
         </template>
       </ele-pro-table>
     </ele-card>
+
     <!-- 编辑弹窗 -->
     <role-edit v-model="showEdit" :data="current" @done="reload" />
     <!-- 权限分配弹窗 -->
@@ -69,7 +78,12 @@
   import RoleSearch from './components/role-search.vue';
   import RoleEdit from './components/role-edit.vue';
   import RoleAuth from './components/role-auth.vue';
-  import { pageRoles, removeRoles, listRoles } from '@/api/system/role';
+  import {
+    listRoles,
+    getRoleList,
+    updateRole,
+    deleteRole
+  } from '@/api/system/role';
   import type { Role, RoleParam } from '@/api/system/role/model';
 
   defineOptions({ name: 'SystemRole' });
@@ -83,46 +97,30 @@
       type: 'selection',
       columnKey: 'selection',
       width: 50,
-      align: 'center' /* ,
-      fixed: 'left' */
-    },
-    {
-      type: 'index',
-      columnKey: 'index',
-      width: 50,
       align: 'center'
     },
     {
-      prop: 'roleName',
+      prop: 'name',
       label: '角色名称',
-      sortable: 'custom',
       minWidth: 120
     },
     {
-      prop: 'roleCode',
-      label: '角色标识',
-      sortable: 'custom',
-      minWidth: 120
-    },
-    {
-      prop: 'comments',
-      label: '备注',
-      sortable: 'custom',
-      minWidth: 140
-    },
-    {
-      prop: 'createTime',
+      prop: 'creation_time',
       label: '创建时间',
-      sortable: 'custom',
-      width: 180,
-      align: 'center'
+      width: 180
+    },
+    {
+      prop: 'status',
+      label: '状态',
+      width: 100,
+      align: 'center',
+      slot: 'status'
     },
     {
       columnKey: 'action',
       label: '操作',
       width: 200,
-      align: 'center' /* ,
-      fixed: 'right' */,
+      align: 'center',
       slot: 'action',
       hideInPrint: true,
       hideInExport: true
@@ -143,7 +141,7 @@
 
   /** 表格数据源 */
   const datasource: DatasourceFunction = ({ pages, where, orders }) => {
-    return pageRoles({ ...where, ...orders, ...pages });
+    return getRoleList({ ...where, ...orders, ...pages });
   };
 
   /** 搜索 */
@@ -164,6 +162,21 @@
     showAuth.value = true;
   };
 
+  /**
+   * 更新角色状态
+   * @param id 角色ID
+   * @param status 角色状态
+   */
+  const updateStatus = (id: number, status: number) => {
+    updateRole({ id, status })
+      .then((message) => {
+        EleMessage.success({ message: message, plain: true });
+      })
+      .catch((exception) => {
+        EleMessage.error({ message: exception.message, plain: true });
+      });
+  };
+
   /** 删除单个 */
   const remove = (row?: Role) => {
     const rows = row == null ? selections.value : [row];
@@ -171,28 +184,32 @@
       EleMessage.error({ message: '请至少选择一条数据', plain: true });
       return;
     }
+
     ElMessageBox.confirm(
-      '确定要删除“' + rows.map((d) => d.roleName).join(', ') + '”吗?',
+      '确定要删除“' + rows.map((d) => d.name).join(', ') + '”吗?',
       '系统提示',
       { type: 'warning', draggable: true }
-    )
-      .then(() => {
-        const loading = EleMessage.loading({
-          message: '请求中..',
-          plain: true
+    ).then(() => {
+      const loading = EleMessage.loading({
+        message: '请求中..',
+        plain: true
+      });
+
+      const ids = rows
+        .map((d) => d.id)
+        .filter((id): id is number => id !== undefined);
+
+      deleteRole(ids)
+        .then((message) => {
+          loading.close();
+          EleMessage.success({ message: message, plain: true });
+          reload();
+        })
+        .catch((exception) => {
+          loading.close();
+          EleMessage.error({ message: exception.message, plain: true });
         });
-        removeRoles(rows.map((d) => d.roleId))
-          .then((msg) => {
-            loading.close();
-            EleMessage.success({ message: msg, plain: true });
-            reload();
-          })
-          .catch((e) => {
-            loading.close();
-            EleMessage.error({ message: e.message, plain: true });
-          });
-      })
-      .catch(() => {});
+    });
   };
 
   /** 导出和打印全部数据的数据源 */

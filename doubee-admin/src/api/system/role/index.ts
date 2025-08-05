@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import type { ApiResult, PageResult } from '@/api';
+import type { ApiResult } from '@/api';
 import type { Role, RoleParam, SearchParam } from './model';
 import type { Permission } from '../permission/model';
 
@@ -18,17 +18,45 @@ export async function getRoleList(params: SearchParam) {
 }
 
 /**
- * 分页查询角色
+ * 添加角色
+ * @param data 角色数据
+ * @returns Promise<string>
  */
-export async function pageRoles(params: RoleParam) {
-  const res = await request.get<ApiResult<PageResult<Role>>>(
-    '/system/role/page',
-    { params }
-  );
-  if (res.data.code === 0) {
-    return res.data.data;
+export async function addRole(data: Role) {
+  const response = await request.post<ApiResult<unknown>>('/user/role/saveRole', data);
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
+}
+
+/**
+ * 更新角色
+ * @param data 角色数据
+ * @returns Promise<string>
+ */
+export async function updateRole(data: Role) {
+  const response = await request.put<ApiResult<unknown>>('/user/role/saveRole', data);
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
+
+  return Promise.reject(new Error(response.data.message));
+}
+
+/**
+ * 删除角色
+ * @param list 删除列表 
+ * @returns Promise<string>
+ */
+export async function deleteRole(list: number[]) {
+  const response = await request.delete<ApiResult<unknown>>('/user/role/deleteRole', { data: { list } });
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -40,39 +68,6 @@ export async function listRoles(params?: RoleParam) {
   });
   if (res.data.code === 0 && res.data.data) {
     return res.data.data;
-  }
-  return Promise.reject(new Error(res.data.message));
-}
-
-/**
- * 添加角色
- */
-export async function addRole(data: Role) {
-  const res = await request.post<ApiResult<unknown>>('/system/role', data);
-  if (res.data.code === 0) {
-    return res.data.message;
-  }
-  return Promise.reject(new Error(res.data.message));
-}
-
-/**
- * 修改角色
- */
-export async function updateRole(data: Role) {
-  const res = await request.put<ApiResult<unknown>>('/system/role', data);
-  if (res.data.code === 0) {
-    return res.data.message;
-  }
-  return Promise.reject(new Error(res.data.message));
-}
-
-/**
- * 删除角色
- */
-export async function removeRole(id?: number) {
-  const res = await request.delete<ApiResult<unknown>>('/system/role/' + id);
-  if (res.data.code === 0) {
-    return res.data.message;
   }
   return Promise.reject(new Error(res.data.message));
 }
@@ -91,15 +86,18 @@ export async function removeRoles(data: (number | undefined)[]) {
 }
 
 /**
- * 获取角色分配的菜单
+ * 获取角色拥有权限
+ * @param roleId 角色ID
+ * @returns Promise<string>
  */
-export async function listRoleMenus(roleId?: number) {
+export async function getRolePermissions(roleId?: number) {
   const res = await request.get<ApiResult<Permission[]>>(
-    '/system/role-menu/' + roleId
+    '/user/role/getRolePermissions', { params: { role_id: roleId } }
   );
-  if (res.data.code === 0) {
+  if (res.data.code === 200) {
     return res.data.data;
   }
+
   return Promise.reject(new Error(res.data.message));
 }
 
