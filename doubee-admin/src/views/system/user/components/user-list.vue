@@ -39,6 +39,10 @@
       </el-button>
     </template>
 
+    <template #roles="{ row }">
+      <el-tag type="info">{{ row?.roles[0].name }}</el-tag>
+    </template>
+
     <template #status="{ row }">
       <el-switch
         size="small"
@@ -128,6 +132,11 @@
       prop: 'nickname',
       label: '用户昵称',
       minWidth: 110
+    },
+    {
+      label: '角色',
+      minWidth: 110,
+      slot: 'roles'
     },
     {
       prop: 'login_ip',
