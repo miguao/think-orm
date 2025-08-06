@@ -3,8 +3,8 @@ import { computed } from 'vue';
 import { EleMessage } from 'ele-admin-plus';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/modules/user';
-import { listDictionaryData } from '@/api/system/dictionary-data';
 import type { DictionaryData } from '@/api/system/dictionary-data/model';
+import { getDictionaryByCode } from '@/api/system/dictionary';
 
 /**
  * 获取字典数据hook
@@ -23,13 +23,14 @@ export function useDictData(codes: string[]): ComputedRef<DictionaryData[]>[] {
     if (dicts.value[code] != null) {
       return;
     }
+
     userStore.setDicts([], code);
-    listDictionaryData({ dictCode: code })
+    getDictionaryByCode(code)
       .then((list) => {
         userStore.setDicts(list, code);
       })
-      .catch((e) => {
-        EleMessage.error({ message: e.message, plain: true });
+      .catch((exception) => {
+        EleMessage.error({ message: exception.message, plain: true });
       });
   });
 
