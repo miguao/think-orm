@@ -1,25 +1,29 @@
-<!-- 字典组件 -->
 <template>
+  <!-- 文本框组件 -->
   <template v-if="type === 'text'">
     <span
       v-for="item in valueData"
-      :key="item.key"
+      :key="item.id"
       v-bind="componentProps || {}"
     >
-      {{ item.label }}
+      {{ item.name }}
     </span>
   </template>
+
+  <!-- Tag 标签组件 -->
   <template v-else-if="type === 'tag'">
     <el-tag
       v-for="item in valueData"
-      :key="item.key"
+      :key="item.id"
       size="small"
       :disable-transitions="true"
       v-bind="componentProps || {}"
     >
-      {{ item.label }}
+      {{ item.name }}
     </el-tag>
   </template>
+
+  <!-- Radio 单选框组件 -->
   <el-radio-group
     v-else-if="type === 'radio'"
     :disabled="disabled"
@@ -28,11 +32,13 @@
   >
     <el-radio
       v-for="item in data"
-      :key="item.key"
-      :value="item.value"
-      :label="item.label"
+      :key="item.id"
+      :value="item.id"
+      :label="item.name"
     />
   </el-radio-group>
+
+  <!-- Checkbox 多选框组件 -->
   <el-checkbox-group
     v-else-if="type === 'checkbox'"
     :disabled="disabled"
@@ -41,11 +47,13 @@
   >
     <el-checkbox
       v-for="item in data"
-      :key="item.key"
-      :value="item.value"
-      :label="item.label"
+      :key="item.id"
+      :value="item.id"
+      :label="item.name"
     />
   </el-checkbox-group>
+
+  <!-- Select 选择器组件 -->
   <el-select
     v-else
     :disabled="disabled"
@@ -60,9 +68,9 @@
   >
     <el-option
       v-for="item in data"
-      :key="item.key"
-      :value="item.value"
-      :label="item.label"
+      :key="item.id"
+      :value="item.id"
+      :label="item.name"
     />
   </el-select>
 </template>
@@ -72,7 +80,7 @@
   import { EleMessage } from 'ele-admin-plus';
   import { storeToRefs } from 'pinia';
   import { useUserStore } from '@/store/modules/user';
-  import { listDictionaryData } from '@/api/system/dictionary-data';
+  import { getDictionaryByCode } from '@/api/system/dictionary';
 
   defineOptions({ name: 'DictData' });
 
@@ -119,28 +127,28 @@
   const { dicts } = storeToRefs(userStore);
 
   interface DataItem extends Record<string, any> {
-    key: string;
-    value: any;
-    label: string;
+    id: any;
+    name: string;
   }
 
   /** 字典的数据 */
   const data = computed<DataItem[]>(() => {
     const code = props.code;
     const list = (code ? dicts.value[code] : void 0) || [];
+
     return list.map((item) => ({
-      ...item,
-      key: item.dictDataCode,
-      value: (item.dictDataCode == null
-        ? null
-        : props.valueType === 'number'
-          ? Number(item.dictDataCode)
-          : props.valueType === 'boolean'
-            ? Boolean(item.dictDataCode)
-            : item.dictDataCode) as any,
-      label: item.dictDataName
+      id: isNumeric(item.id) ? Number(item.id) : item.id,
+      name: item.name
     }));
   });
+
+  /**
+   * 判断一个值是否是“数字字符串”
+   * @param value 数据值
+   */
+  function isNumeric(value: any): boolean {
+    return typeof value === 'string' && /^[0-9]+$/.test(value);
+  }
 
   /** 绑定值对应的数据 */
   const valueData = computed(() => {
@@ -155,7 +163,7 @@
       if (temp != null) {
         result.push(temp);
       } else {
-        result.push({ key: v, value: v, label: v });
+        result.push({ id: v, name: v });
       }
     });
     return result;
@@ -168,13 +176,14 @@
       if (!code || dicts.value[code] != null) {
         return;
       }
+
       userStore.setDicts([], code);
-      listDictionaryData({ dictCode: code })
+      getDictionaryByCode(code)
         .then((list) => {
           userStore.setDicts(list, code);
         })
-        .catch((e) => {
-          EleMessage.error({ message: e.message, plain: true });
+        .catch((exception) => {
+          EleMessage.error({ message: exception.message, plain: true });
         });
     },
     { immediate: true }
