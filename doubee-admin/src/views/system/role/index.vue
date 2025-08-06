@@ -84,7 +84,7 @@
     updateRole,
     deleteRole
   } from '@/api/system/role';
-  import type { Role, RoleParam } from '@/api/system/role/model';
+  import type { Role, SearchParam } from '@/api/system/role/model';
 
   defineOptions({ name: 'SystemRole' });
 
@@ -145,7 +145,7 @@
   };
 
   /** 搜索 */
-  const reload = (where?: RoleParam) => {
+  const reload = (where?: SearchParam) => {
     selections.value = [];
     tableRef.value?.reload?.({ page: 1, where });
   };

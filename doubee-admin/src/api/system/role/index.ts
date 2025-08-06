@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import type { ApiResult } from '@/api';
-import type { Role, RoleParam, SearchParam } from './model';
+import type { Role, SearchParam } from './model';
 import type { Permission } from '../permission/model';
 
 /**
@@ -62,7 +62,7 @@ export async function deleteRole(list: number[]) {
 /**
  * 查询角色列表
  */
-export async function listRoles(params?: RoleParam) {
+export async function listRoles(params?: SearchParam) {
   const res = await request.get<ApiResult<Role[]>>('/system/role', {
     params
   });

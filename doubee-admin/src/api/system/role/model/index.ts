@@ -13,10 +13,3 @@ export interface Role {
 export interface SearchParam extends PageParam {
   'search-name'?: string;
 }
-
-/**
- * 角色搜索条件
- */
-export interface RoleParam extends PageParam {
-  name?: string;
-}
