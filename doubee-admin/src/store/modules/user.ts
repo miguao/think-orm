@@ -54,7 +54,7 @@ export const useUserStore = defineStore('user', {
       }
 
       // 用户角色
-      this.roles = result.roles?.map?.((d) => d.roleCode) ?? [];
+      this.roles = result.roles?.map?.((d) => d.name) ?? [];
       // 用户菜单, 过滤掉按钮类型并转为children形式
 
       const { menus, homePath } = formatMenus(
