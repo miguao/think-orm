@@ -61,7 +61,7 @@ export async function updateInstitution(data: Institution) {
 export async function deleteInstitution(id?: number) {
     const response = await request.delete<ApiResult<unknown>>(
         'institution/deleteInstitution',
-        { params: { id } }
+        { data: { list: [id] } }
     );
     if (response.data.code === 200) {
         return response.data.message;
