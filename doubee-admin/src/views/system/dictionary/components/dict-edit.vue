@@ -16,7 +16,7 @@
       <el-form-item label="字典名称" prop="name">
         <el-input
           clearable
-          :maxlength="20"
+          :maxlength="32"
           v-model="form.name"
           placeholder="请输入字典名称"
         />
@@ -24,7 +24,7 @@
       <el-form-item label="字典代码" prop="code">
         <el-input
           clearable
-          :maxlength="20"
+          :maxlength="42"
           v-model="form.code"
           placeholder="请输入字典代码"
         />
