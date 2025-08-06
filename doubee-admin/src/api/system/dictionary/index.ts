@@ -1,13 +1,14 @@
 import request from '@/utils/request';
 import type { ApiResult } from '@/api';
 import type { Dictionary, SearchParam } from './model';
+import { DictionaryData } from '../dictionary-data/model';
 
 /**
  * 根据字典编码获取字典数据
  * @returns Promise<Dictionary[]>
  */
 export async function getDictionaryByCode(code: string) {
-  const response = await request.get<ApiResult<Dictionary[]>>('/dictionary/getDictionaryByCode', {
+  const response = await request.get<ApiResult<DictionaryData[]>>('/dictionary/getDictionaryByCode', {
     params: { code }
   });
   if (response.data.code === 200 && response.data.data) {
