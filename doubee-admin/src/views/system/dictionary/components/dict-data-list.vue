@@ -66,11 +66,7 @@
   import { PlusOutlined, DeleteOutlined } from '@/components/icons';
   import DictDataSearch from './dict-data-search.vue';
   import DictDataEdit from './dict-data-edit.vue';
-  import {
-    deleteData,
-    listDictionaryData,
-    getDataList
-  } from '@/api/system/dictionary-data';
+  import { deleteData, getDataList } from '@/api/system/dictionary-data';
   import type {
     DictionaryData,
     SearchParam
@@ -203,7 +199,7 @@
 
   /** 导出和打印全部数据的数据源 */
   const exportSource: DatasourceFunction = ({ where, orders }) => {
-    return listDictionaryData({
+    return getDataList({
       ...where,
       ...orders,
       'equal-dictionary_id': props.dictId
