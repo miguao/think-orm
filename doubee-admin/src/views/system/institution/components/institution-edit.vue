@@ -1,0 +1,201 @@
+<template>
+  <ele-modal
+    form
+    destroy-on-close
+    :width="620"
+    v-model="visible"
+    :title="isUpdate ? '修改机构' : '添加机构'"
+  >
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-width="80px"
+      @submit.prevent=""
+    >
+      <el-row :gutter="16">
+        <el-col :sm="12" :xs="24">
+          <el-form-item label="上级机构" prop="parent_id">
+            <institution-select
+              v-model="form.parent_id"
+              placeholder="请选择上级机构"
+            />
+          </el-form-item>
+
+          <el-form-item label="机构名称" prop="name">
+            <el-input
+              clearable
+              :maxlength="20"
+              v-model="form.name"
+              placeholder="请输入机构名称"
+            />
+          </el-form-item>
+
+          <el-form-item label="机构全称" prop="full_name">
+            <el-input
+              clearable
+              :maxlength="100"
+              v-model="form.full_name"
+              placeholder="请输入机构全称"
+            />
+          </el-form-item>
+
+          <el-form-item label="机构代码">
+            <el-input
+              clearable
+              :maxlength="20"
+              v-model="form.code"
+              placeholder="请输入机构代码"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :sm="12" :xs="24">
+          <el-form-item label="机构类型" prop="type">
+            <dict-data
+              code="system_institution_type"
+              v-model="form.type"
+              placeholder="请选择机构类型"
+            />
+          </el-form-item>
+
+          <el-form-item label="排序号" prop="sort">
+            <el-input-number
+              :min="0"
+              :max="99999"
+              v-model="form.sort"
+              placeholder="请输入排序号"
+              controls-position="right"
+              class="ele-fluid"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+
+    <template #footer>
+      <el-button @click="handleCancel">取消</el-button>
+      <el-button type="primary" :loading="loading" @click="save">
+        保存
+      </el-button>
+    </template>
+  </ele-modal>
+</template>
+
+<script lang="ts" setup>
+  import { ref, reactive, watch } from 'vue';
+  import type { FormInstance, FormRules } from 'element-plus';
+  import { EleMessage } from 'ele-admin-plus';
+  import { useFormData } from '@/utils/use-form-data';
+  import InstitutionSelect from './institution-select.vue';
+  import { addInstitution, updateInstitution } from '@/api/system/institution';
+  import type { Institution } from '@/api/system/institution/model';
+
+  const props = defineProps<{
+    /** 修改回显的数据 */
+    data?: Institution | null;
+    /** 添加时机构id */
+    institutionId?: number;
+  }>();
+
+  const emit = defineEmits<{
+    (e: 'done'): void;
+  }>();
+
+  /** 弹窗是否打开 */
+  const visible = defineModel({ type: Boolean });
+
+  /** 是否是修改 */
+  const isUpdate = ref(false);
+
+  /** 提交状态 */
+  const loading = ref(false);
+
+  /** 表单实例 */
+  const formRef = ref<FormInstance | null>(null);
+
+  /** 表单数据 */
+  const [form, resetFields, assignFields] = useFormData<Institution>({
+    id: void 0,
+    parent_id: void 0,
+    name: '',
+    full_name: '',
+    code: '',
+    type: void 0,
+    sort: void 0,
+    status: void 0
+  });
+
+  /** 表单验证规则 */
+  const rules = reactive<FormRules>({
+    name: [
+      {
+        required: true,
+        message: '请输入机构名称',
+        type: 'string',
+        trigger: 'blur'
+      }
+    ],
+    type: [
+      {
+        required: true,
+        message: '请选择机构类型',
+        type: 'number',
+        trigger: 'change'
+      }
+    ],
+    sort: [
+      {
+        required: true,
+        message: '请输入排序号',
+        type: 'number',
+        trigger: 'blur'
+      }
+    ]
+  });
+
+  /** 关闭弹窗 */
+  const handleCancel = () => {
+    visible.value = false;
+  };
+
+  /** 保存编辑 */
+  const save = () => {
+    formRef.value?.validate?.((valid) => {
+      if (!valid) {
+        return;
+      }
+
+      loading.value = true;
+      const saveOrUpdate = isUpdate.value ? updateInstitution : addInstitution;
+
+      saveOrUpdate({ ...form, parent_id: form.parent_id || 0 })
+        .then((message) => {
+          loading.value = false;
+          EleMessage.success({ message: message, plain: true });
+          handleCancel();
+          emit('done');
+        })
+        .catch((exception) => {
+          loading.value = false;
+          EleMessage.error({ message: exception.message, plain: true });
+        });
+    });
+  };
+
+  /** 监听弹窗打开 */
+  watch(visible, () => {
+    if (visible.value) {
+      if (props.data) {
+        assignFields({
+          ...props.data,
+          parentId: props.data.parent_id || void 0
+        });
+        isUpdate.value = true;
+      } else {
+        resetFields();
+        form.parent_id = props.institutionId;
+        isUpdate.value = false;
+      }
+    }
+  });
+</script>
