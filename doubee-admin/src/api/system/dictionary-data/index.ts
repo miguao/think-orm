@@ -20,20 +20,6 @@ export async function getDataList(params: SearchParam) {
 }
 
 /**
- * 查询字典数据列表
- */
-export async function listDictionaryData(params: SearchParam) {
-  const res = await request.get<ApiResult<DictionaryData[]>>(
-    '/system/dictionary-data',
-    { params }
-  );
-  if (res.data.code === 0 && res.data.data) {
-    return res.data.data;
-  }
-  return Promise.reject(new Error(res.data.message));
-}
-
-/**
  * 添加字典数据
  * @param data 字典数据
  * @returns Promise<string>
