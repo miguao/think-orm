@@ -2,7 +2,7 @@
   <ele-modal
     form
     destroy-on-close
-    :width="460"
+    :width="560"
     v-model="visible"
     :title="isUpdate ? '修改字典数据' : '添加字典数据'"
   >
@@ -21,6 +21,7 @@
           placeholder="请输入数据名称"
         />
       </el-form-item>
+
       <el-form-item label="数据值" prop="value">
         <el-input
           clearable
@@ -29,7 +30,8 @@
           placeholder="请输入数据值"
         />
       </el-form-item>
-      <el-form-item label="排序号" prop="sort">
+
+      <el-form-item label="排序" prop="sort">
         <el-input-number
           :min="0"
           :max="9999"
@@ -37,6 +39,14 @@
           placeholder="请输入排序号"
           controls-position="right"
           class="ele-fluid"
+        />
+      </el-form-item>
+
+      <el-form-item label="状态" prop="status">
+        <dict-data
+          code="general_status"
+          v-model="form.status"
+          placeholder="请选择状态"
         />
       </el-form-item>
     </el-form>
@@ -88,7 +98,8 @@
     id: void 0,
     name: '',
     value: '',
-    sort: void 0
+    sort: void 0,
+    status: 1
   });
 
   /** 表单验证规则 */
@@ -109,10 +120,10 @@
         trigger: 'blur'
       }
     ],
-    sort: [
+    status: [
       {
         required: true,
-        message: '请输入排序号',
+        message: '请选择状态',
         type: 'number',
         trigger: 'blur'
       }
