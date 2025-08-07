@@ -21,6 +21,15 @@
           placeholder="请输入角色名称"
         />
       </el-form-item>
+
+      <el-form-item label="状态" prop="status">
+        <dict-data
+          type="radio"
+          code="general_status"
+          v-model="form.status"
+          placeholder="请选择状态"
+        />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="handleCancel">取消</el-button>
@@ -63,7 +72,8 @@
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<Role>({
     id: void 0,
-    name: ''
+    name: '',
+    status: 0
   });
 
   /** 表单验证规则 */
@@ -73,6 +83,14 @@
         required: true,
         message: '请输入角色名称',
         type: 'string',
+        trigger: 'blur'
+      }
+    ],
+    status: [
+      {
+        required: true,
+        message: '请选择状态',
+        type: 'number',
         trigger: 'blur'
       }
     ]
@@ -89,6 +107,7 @@
       if (!valid) {
         return;
       }
+
       loading.value = true;
       const saveOrUpdate = isUpdate.value ? updateRole : addRole;
       saveOrUpdate(form)
