@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace app\model;
 
 use think\Model;
+use think\model\relation\HasOne;
 
 /**
  * @property int $id
+ * @property int $role_id
  * @property int $merchant_no
+ * @property string $merchant_key
  * @property string $phone
  * @property string $password
  * @property string $salting
@@ -20,5 +23,12 @@ use think\Model;
  */
 class Merchant extends Model
 {
-
+    /**
+     * 角色信息
+     * @return HasOne
+     */
+    public function role(): HasOne
+    {
+        return $this->hasOne(MerchantRole::class, 'id', 'role_id');
+    }
 }

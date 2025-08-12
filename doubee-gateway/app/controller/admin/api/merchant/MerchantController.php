@@ -18,6 +18,7 @@ use think\annotation\Inject;
 use think\annotation\route\Group;
 use think\annotation\route\Middleware;
 use think\annotation\route\Route;
+use think\db\Query;
 use think\response\Json;
 
 #[Group("/admin/api/merchant")]
@@ -34,8 +35,10 @@ class MerchantController extends AbstractAdminController
         $get = new Get(Merchant::class);
         $get->setWhere((array)$map);
         $get->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
-        $get->setColumn("id", "merchant_no", "phone", "email", "balance", "freeze_balance", "creation_time", "status");
-        $data = $this->database->get($get);
+        $get->setColumn("id", "role_id", "merchant_no", "phone", "email", "balance", "freeze_balance", "creation_time", "status");
+        $data = $this->database->get($get, function (Query $query) {
+            return $query->with(['role']);
+        });
 
         return $this->json(data: $data);
     }
