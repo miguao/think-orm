@@ -75,4 +75,10 @@ class UserController extends AbstractAdminController
         $this->database->delete($delete);
         return $this->json(message: "删除成功");
     }
+
+    #[Route("POST", "importUser")]
+    public function importUser(): Json
+    {
+        return $this->json(message: "导入成功");
+    }
 }

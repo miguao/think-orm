@@ -1,4 +1,3 @@
-<!-- 用户导入弹窗 -->
 <template>
   <ele-modal :width="460" title="导入用户" v-model="visible">
     <div v-loading="loading" class="user-import-upload">
@@ -36,7 +35,7 @@
   import { ref } from 'vue';
   import { EleMessage } from 'ele-admin-plus';
   import { CloudUploadOutlined } from '@/components/icons';
-  import { importUsers } from '@/api/system/user';
+  import { importUser } from '@/api/system/user';
 
   const emit = defineEmits<{
     (e: 'done'): void;
@@ -59,22 +58,25 @@
       EleMessage.error({ message: '只能选择 excel 文件', plain: true });
       return false;
     }
+
     if (file.size / 1024 / 1024 > 10) {
       EleMessage.error({ message: '大小不能超过 10MB', plain: true });
       return false;
     }
+
     loading.value = true;
-    importUsers(file)
+    importUser(file)
       .then((msg) => {
         loading.value = false;
         EleMessage.success({ message: msg, plain: true });
         visible.value = false;
         emit('done');
       })
-      .catch((e) => {
+      .catch((exception) => {
         loading.value = false;
-        EleMessage.error({ message: e.message, plain: true });
+        EleMessage.error({ message: exception.message, plain: true });
       });
+
     return false;
   };
 </script>
