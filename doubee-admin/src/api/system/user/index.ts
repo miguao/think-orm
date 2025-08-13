@@ -59,33 +59,20 @@ export async function deleteUser(list: number[]) {
 
 /**
  * 导入用户
+ * @param file 导入文件
+ * @returns Promise<string>
  */
-export async function importUsers(file: File) {
+export async function importUser(file: File) {
   const formData = new FormData();
   formData.append('file', file);
-  const res = await request.post<ApiResult<unknown>>(
-    '/system/user/import',
+
+  const response = await request.post<ApiResult<unknown>>(
+    '/user/importUser',
     formData
   );
-  if (res.data.code === 0) {
-    return res.data.message;
+  if (response.data.code === 200) {
+    return response.data.message;
   }
-  return Promise.reject(new Error(res.data.message));
-}
 
-/**
- * 检查用户是否存在
- */
-export async function checkExistence(
-  field: string,
-  value: string,
-  id?: number
-) {
-  const res = await request.get<ApiResult<unknown>>('/system/user/existence', {
-    params: { field, value, id }
-  });
-  if (res.data.code === 0) {
-    return res.data.message;
-  }
-  return Promise.reject(new Error(res.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
