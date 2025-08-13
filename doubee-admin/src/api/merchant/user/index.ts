@@ -17,6 +17,20 @@ export async function getMerchantList(params: SearchParam) {
 }
 
 /**
+ * 添加商户
+ * @param data 商户数据
+ * @returns Promise<string>
+ */
+export async function addMerchant(data: Merchant) {
+    const response = await request.post<ApiResult<unknown>>('/user/saveUser', data);
+    if (response.data.code === 200) {
+        return response.data.message;
+    }
+
+    return Promise.reject(new Error(response.data.message));
+}
+
+/**
  * 更新商户
  * @param data 商户数据
  * @returns Promise<string>
