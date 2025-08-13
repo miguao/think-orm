@@ -1,4 +1,5 @@
 import { PageParam } from "@/api";
+import { Role } from "../../role/model";
 
 export interface Merchant {
     id?: number;
@@ -11,6 +12,7 @@ export interface Merchant {
     freeze_balance?: number;
     creation_time?: string | Date;
     status?: number;
+    role?: Role[]
 }
 
 export interface SearchParam extends PageParam {
