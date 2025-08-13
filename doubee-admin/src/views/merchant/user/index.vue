@@ -31,6 +31,16 @@
           </el-button>
         </template>
 
+        <template #merchant_no="{ row }">
+          <el-link type="primary" :underline="false" @click="viewKey(row)">{{
+            row.merchant_no
+          }}</el-link>
+        </template>
+
+        <template #role="{ row }">
+          <el-tag type="info">{{ row.role?.name }}</el-tag>
+        </template>
+
         <template #status="{ row }">
           <el-switch
             size="small"
@@ -70,6 +80,9 @@
         </template>
       </ele-pro-table>
     </ele-card>
+
+    <!-- 编辑弹窗 -->
+    <merchant-edit v-model="showEdit" :data="current" @done="reload" />
   </ele-page>
 </template>
 <script lang="ts" setup>
@@ -88,6 +101,7 @@
   import type { Merchant, SearchParam } from '@/api/merchant/user/model';
   import { ElMessageBox } from 'element-plus';
   import merchantSearch from './components/merchant-search.vue';
+  import merchantEdit from './components/merchant-edit.vue';
 
   defineOptions({ name: 'MerchantUser' });
 
@@ -105,17 +119,27 @@
     {
       prop: 'merchant_no',
       label: '商户编号',
-      width: 160
+      width: 160,
+      slot: 'merchant_no'
     },
     {
       prop: 'phone',
       label: '手机号码',
-      width: 120
+      width: 120,
+      align: 'center'
     },
     {
       prop: 'email',
       label: '邮箱号码',
-      width: 180
+      width: 180,
+      align: 'center'
+    },
+    {
+      prop: 'role',
+      label: '角色',
+      width: 150,
+      slot: 'role',
+      align: 'center'
     },
     {
       prop: 'balance',
@@ -130,9 +154,35 @@
       align: 'center'
     },
     {
+      prop: 'login_ip',
+      label: '登录IP',
+      width: 160,
+      align: 'center'
+    },
+    {
+      prop: 'last_login_ip',
+      label: '上次登录IP',
+      width: 160,
+      align: 'center'
+    },
+    {
+      prop: 'login_time',
+      label: '登录时间',
+      width: 180,
+      align: 'center'
+    },
+    {
+      prop: 'last_login_time',
+      label: '上次登录时间',
+      width: 180,
+      align: 'center'
+    },
+    {
       prop: 'creation_time',
       label: '创建时间',
-      width: 180
+      sortable: 'custom',
+      width: 180,
+      align: 'center'
     },
     {
       prop: 'status',
@@ -144,7 +194,7 @@
     {
       columnKey: 'action',
       label: '操作',
-      width: 128,
+      width: 200,
       align: 'center',
       fixed: 'right',
       slot: 'action',
@@ -262,4 +312,6 @@
         break;
     }
   };
+
+  const viewKey = (row: Merchant) => {};
 </script>
