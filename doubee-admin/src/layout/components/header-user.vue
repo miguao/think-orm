@@ -27,12 +27,12 @@
     @command="handleUserDropClick"
   >
     <div class="header-avatar">
-      <el-avatar
+      <!-- <el-avatar
         :size="28"
         :src="loginUser.avatar"
         :icon="loginUser.avatar ? void 0 : UserOutlined"
         style="transform: translateY(-1px)"
-      />
+      /> -->
       <div
         class="hidden-sm-and-down"
         style="margin-left: 4px; line-height: 1.5"
