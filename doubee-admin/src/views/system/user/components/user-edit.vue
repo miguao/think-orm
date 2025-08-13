@@ -78,7 +78,7 @@
   import { useFormData } from '@/utils/use-form-data';
   import RoleSelect from '@/views/system/role/components/role-select.vue';
   import InstitutionSelect from '@/views/system/institution/components/institution-select.vue';
-  import { addUser, updateUser, checkExistence } from '@/api/system/user';
+  import { addUser, updateUser } from '@/api/system/user';
   import type { User } from '@/api/system/user/model';
 
   const props = defineProps<{
@@ -137,23 +137,6 @@
         message: '邮箱格式不正确',
         type: 'string',
         trigger: 'blur'
-      },
-      {
-        type: 'string',
-        trigger: 'blur',
-        validator: (_rule: any, value: string, callback: any) => {
-          if (isUpdate.value) {
-            callback();
-            return;
-          }
-          checkExistence('username', value)
-            .then(() => {
-              callback(new Error('账号已经存在'));
-            })
-            .catch(() => {
-              callback();
-            });
-        }
       }
     ],
     roles: [
