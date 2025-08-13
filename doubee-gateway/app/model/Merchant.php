@@ -11,7 +11,6 @@ use think\model\relation\HasOne;
  * @property int $id
  * @property int $role_id
  * @property int $merchant_no
- * @property string $merchant_key
  * @property string $phone
  * @property string $password
  * @property string $salting
