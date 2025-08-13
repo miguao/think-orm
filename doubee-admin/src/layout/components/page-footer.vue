@@ -1,36 +1,12 @@
-<!-- 全局页脚 -->
 <template>
   <ele-text type="placeholder" class="ele-footer">
-    <el-space :size="24">
-      <el-link underline="never" href="https://eleadmin.com" target="_blank">
-        {{ t('layout.footer.website') }}
-      </el-link>
-      <el-link
-        underline="never"
-        href="https://eleadmin.com/doc/eleadminplus/"
-        target="_blank"
-      >
-        {{ t('layout.footer.document') }}
-      </el-link>
-      <el-link
-        underline="never"
-        href="https://eleadmin.com/goods/11"
-        target="_blank"
-      >
-        {{ t('layout.footer.authorization') }}
-      </el-link>
-    </el-space>
     <div style="margin-top: 8px">
-      {{ t('layout.footer.copyright') }}
+      Copyright © 2025 成都纳米信息科技有限公司
     </div>
   </ele-text>
 </template>
 
-<script lang="ts" setup>
-  import { useI18n } from 'vue-i18n';
-
-  const { t } = useI18n();
-</script>
+<script lang="ts" setup></script>
 
 <style lang="scss" scoped>
   @use 'element-plus/theme-chalk/src/mixins/function.scss' as *;
