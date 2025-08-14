@@ -32,6 +32,7 @@
             删除
           </el-button>
         </template>
+
         <template #status="{ row }">
           <el-switch
             v-model="row.status"
@@ -40,6 +41,7 @@
             @change="(value: number) => updateStatus(row.id, value)"
           />
         </template>
+        
         <template #action="{ row }">
           <el-link type="primary" underline="never" @click="openEdit(row)">
             修改
