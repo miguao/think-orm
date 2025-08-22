@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./设计资源/商标/logo-full-light.svg" alt="logo"/>
+  <img src="./design/商标/logo-full-light.svg" alt="logo"/>
 </div>
 
 <h4 align="center">豆付 · 轻量、安全、灵活的聚合支付系统</h4>

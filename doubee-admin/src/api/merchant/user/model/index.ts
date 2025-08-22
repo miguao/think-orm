@@ -3,6 +3,7 @@ import { Role } from "../../role/model";
 
 export interface Merchant {
     id?: number;
+    role_id?: number;
     merchant_no?: number;
     phone?: string | null;
     password?: string;

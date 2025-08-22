@@ -50,6 +50,10 @@
         </template>
 
         <template #action="{ row }">
+          <el-link type="primary" underline="never" @click="login(row)">
+            登录
+          </el-link>
+          <el-divider direction="vertical" />
           <el-link type="primary" underline="never" @click="openEdit(row)">
             修改
           </el-link>
@@ -313,5 +317,15 @@
     }
   };
 
+  /**
+   * 查看密钥
+   * @param row 商户数据
+   */
   const viewKey = (row: Merchant) => {};
+
+  /**
+   * 登录商户
+   * @param row 商户数据
+   */
+  const login = (row: Merchant) => {};
 </script>

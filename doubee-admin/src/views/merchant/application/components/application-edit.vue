@@ -32,6 +32,7 @@
           code="application_sign_type"
           v-model="form.sign_type"
           placeholder="请选择签名方式"
+          :disabled="isUpdate"
         />
       </el-form-item>
 

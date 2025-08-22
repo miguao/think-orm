@@ -35,8 +35,8 @@
         </el-col>
 
         <el-col :sm="12" :xs="24">
-          <el-form-item label="角色" prop="roles">
-            <role-select v-model="form.roles" />
+          <el-form-item label="角色" prop="role_id">
+            <role-select v-model="form.role_id" />
           </el-form-item>
 
           <el-form-item v-if="!isUpdate" label="登录密码" prop="password">
@@ -99,22 +99,22 @@
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<Merchant>({
     id: void 0,
+    role_id: undefined,
+    merchant_no: undefined,
     email: '',
     phone: '',
-    merchant_no: undefined,
-    roles: [],
     password: '',
     status: 0
   });
 
   /** 表单验证规则 */
   const rules = reactive<FormRules>({
-    roles: [
+    role_id: [
       {
         required: true,
         message: '请选择角色',
-        type: 'array',
-        trigger: 'change'
+        type: 'number',
+        trigger: 'blur'
       }
     ],
     password: [
@@ -151,13 +151,7 @@
       loading.value = true;
 
       const saveOrUpdate = isUpdate.value ? updateMerchant : addMerchant;
-      const payload = {
-        ...form,
-        roles: (form.roles ?? []).map((role: any) =>
-          typeof role === 'object' ? role.id : role
-        )
-      };
-      saveOrUpdate(payload)
+      saveOrUpdate(form)
         .then((message) => {
           loading.value = false;
           EleMessage.success({ message: message, plain: true });

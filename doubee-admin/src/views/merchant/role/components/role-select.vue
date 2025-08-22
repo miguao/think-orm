@@ -1,6 +1,5 @@
 <template>
   <el-select
-    multiple
     clearable
     :model-value="roleIds"
     :placeholder="placeholder"
