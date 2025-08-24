@@ -1,7 +1,7 @@
 <template>
   <el-select
     clearable
-    :model-value="roleIds"
+    :model-value="roleId"
     :placeholder="placeholder"
     class="ele-fluid"
     @update:modelValue="updateValue"
@@ -23,7 +23,7 @@
 
   const props = withDefaults(
     defineProps<{
-      modelValue?: Role[];
+      modelValue?: number;
       placeholder?: string;
     }>(),
     {
@@ -32,23 +32,18 @@
   );
 
   const emit = defineEmits<{
-    (e: 'update:modelValue', value: Role[]): void;
+    (e: 'update:modelValue', value: number | undefined): void;
   }>();
 
   /** 选中的角色id */
-  const roleIds = computed(() =>
-    props.modelValue?.map?.((d) => d.id as number)
-  );
+  const roleId = computed(() => props.modelValue);
 
   /** 角色数据 */
   const roleData = ref<Role[]>([]);
 
   /** 更新选中数据 */
-  const updateValue = (value: number[]) => {
-    emit(
-      'update:modelValue',
-      value.map((v) => ({ id: v }))
-    );
+  const updateValue = (value: number | undefined) => {
+    emit('update:modelValue', value);
   };
 
   /** 获取角色数据 */
