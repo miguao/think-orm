@@ -22,7 +22,7 @@ export async function getMerchantList(params: SearchParam) {
  * @returns Promise<string>
  */
 export async function addMerchant(data: Merchant) {
-    const response = await request.post<ApiResult<unknown>>('/user/saveUser', data);
+    const response = await request.post<ApiResult<unknown>>('/merchant/saveMerchant', data);
     if (response.data.code === 200) {
         return response.data.message;
     }
