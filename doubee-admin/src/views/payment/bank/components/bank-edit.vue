@@ -19,7 +19,7 @@
           :drag="true"
           :item-style="{ width: '64px', height: '64px', margin: 0 }"
           :button-style="{ width: '64px', height: '64px', margin: 0 }"
-          v-model="form.icon"
+          v-model="uploadIcon"
           @upload="onUpload"
           @remove="onRemove"
         />
@@ -68,6 +68,9 @@
   import { useFormData } from '@/utils/use-form-data';
   import type { Bank } from '@/api/payment/bank/model';
   import { addBank, updateBank } from '@/api/payment/bank';
+  import { UploadItem } from 'ele-admin-plus/es/ele-upload-list/types';
+  import { UPLOAD_URL } from '@/config/setting';
+  import { uploadFile } from '@/api/system/file';
 
   const props = defineProps<{
     data?: Bank | null;
@@ -92,7 +95,9 @@
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<Bank>({
     id: void 0,
+    icon: '',
     name: '',
+    code: '',
     status: 0
   });
 
@@ -132,6 +137,9 @@
     ]
   });
 
+  /** 上传图标 */
+  const uploadIcon = ref<UploadItem[]>([]);
+
   /** 关闭弹窗 */
   const handleCancel = () => {
     visible.value = false;
@@ -161,59 +169,70 @@
   };
 
   /** 上传事件 */
-  const onUpload = (d) => {
-    if (!d.file) {
+  const onUpload = (uploadItem: UploadItem) => {
+    if (!uploadItem.file) {
       return;
     }
 
-    if (!d.file.type.startsWith('image')) {
+    if (!uploadItem.file.type.startsWith('image')) {
       EleMessage.error('只能选择图片');
       return;
     }
 
-    if (d.file.size / 1024 / 1024 > 2) {
+    if (uploadItem.file.size / 1024 / 1024 > 2) {
       EleMessage.error('大小不能超过 2MB');
       return;
     }
 
-    form.icon.push({ ...d });
-    const item = form.icon.find((t) => t.key === d.key);
+    uploadIcon.value.push({ ...uploadItem });
+
+    const item = uploadIcon.value.find((t) => t.key === uploadItem.key);
     if (!item) {
       return;
     }
 
     item.status = 'uploading';
-    uploadFile(d.file, {
-      onUploadProgress: (e) => {
-        if (e.total != null) {
-          item.progress = (e.loaded / e.total) * 100;
+    uploadFile(uploadItem.file, {
+      onUploadProgress: (event: any) => {
+        if (event.total != null) {
+          item.progress = (event.loaded / event.total) * 100;
         }
       }
     })
-      .then((res) => {
+      .then((response) => {
         item.status = 'done';
-        item.url = res.url;
-        // 上传后清空验证
+        item.url = UPLOAD_URL + response.path;
+        form.icon = response.path;
         formRef.value?.clearValidate?.('images');
       })
-      .catch((e) => {
+      .catch((exception) => {
         item.status = 'exception';
-        EleMessage.error(e.message);
+        EleMessage.error(exception.message);
       });
   };
 
   /** 删除事件 */
-  const onRemove = (item) => {
-    form.icon.splice(form.icon.indexOf(item), 1);
+  const onRemove = (item: UploadItem) => {
+    form.icon = '';
+    uploadIcon.value.splice(uploadIcon.value.indexOf(item), 1);
   };
 
   /** 监听弹窗打开 */
   watch(visible, () => {
     if (visible.value) {
       if (props.data) {
+        uploadIcon.value = [
+          {
+            key: 1,
+            name: 'icon',
+            url: UPLOAD_URL + props.data.icon,
+            status: 'done'
+          }
+        ];
         assignFields(props.data);
         isUpdate.value = true;
       } else {
+        uploadIcon.value = [];
         resetFields();
         isUpdate.value = false;
       }
