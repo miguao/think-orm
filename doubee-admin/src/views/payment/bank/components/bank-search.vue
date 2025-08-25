@@ -16,6 +16,16 @@
           </el-form-item>
         </el-col>
 
+        <el-col :lg="6" :md="8" :sm="12" :xs="24">
+          <el-form-item label="银行代码">
+            <el-input
+              clearable
+              v-model.trim="form['search-code']"
+              placeholder="请输入银行代码"
+            />
+          </el-form-item>
+        </el-col>
+
         <el-col :lg="12" :md="8" :sm="24" :xs="24">
           <el-form-item label-width="16px">
             <el-button type="primary" @click="search">查询</el-button>
@@ -37,7 +47,8 @@
 
   /** 表单数据 */
   const [form, resetFields] = useFormData<SearchParam>({
-    'search-name': ''
+    'search-name': '',
+    'search-code': ''
   });
 
   /** 搜索 */

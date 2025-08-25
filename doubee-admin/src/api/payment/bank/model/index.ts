@@ -11,4 +11,5 @@ export interface Bank {
 
 export interface SearchParam extends PageParam {
     'search-name'?: string;
+    'search-code'?: string;
 }
