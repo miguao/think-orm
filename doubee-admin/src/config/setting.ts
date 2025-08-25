@@ -1,6 +1,9 @@
 /** 接口地址 */
 export const API_BASE_URL: string = import.meta.env.VITE_API_URL;
 
+/** 上传地址 */
+export const UPLOAD_URL: string = import.meta.env.VITE_UPLOAD_URL;
+
 /** 项目名称 */
 export const PROJECT_NAME: string = import.meta.env.VITE_APP_NAME;
 
