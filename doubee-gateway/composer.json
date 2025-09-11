@@ -30,8 +30,8 @@
         "firebase/php-jwt": "^6.10",
         "wechatpay/wechatpay": "^1.4",
         "symfony/finder": "^6.4",
-        "alipaysdk/openapi": "^3.0",
-        "phpmailer/phpmailer": "^6.9"
+        "phpmailer/phpmailer": "^6.9",
+        "easyalipay/easyalipay": "^0.3.4"
     },
     "require-dev": {
         "symfony/var-dumper": ">=4.2",
