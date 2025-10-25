@@ -51,6 +51,9 @@
         </template>
       </ele-pro-table>
     </ele-card>
+
+    <!-- 编辑弹窗 -->
+    <channel-edit v-model="showEdit" :data="current" @done="reload" />
   </ele-page>
 </template>
 
@@ -70,6 +73,7 @@
   import { SearchParam, type Channel } from '@/api/payment/channel/model';
   import { ElMessageBox } from 'element-plus';
   import ChannelSearch from './components/channel-search.vue';
+  import ChannelEdit from './components/channel-edit.vue';
 
   defineOptions({ name: 'PaymentChannel' });
 

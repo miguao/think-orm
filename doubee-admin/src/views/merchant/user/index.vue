@@ -31,12 +31,6 @@
           </el-button>
         </template>
 
-        <template #merchant_no="{ row }">
-          <el-link type="primary" :underline="false" @click="viewKey(row)">{{
-            row.merchant_no
-          }}</el-link>
-        </template>
-
         <template #role="{ row }">
           <el-tag type="info">{{ row.role?.name }}</el-tag>
         </template>
@@ -50,10 +44,6 @@
         </template>
 
         <template #action="{ row }">
-          <el-link type="primary" underline="never" @click="login(row)">
-            登录
-          </el-link>
-          <el-divider direction="vertical" />
           <el-link type="primary" underline="never" @click="openEdit(row)">
             修改
           </el-link>
@@ -96,7 +86,7 @@
     DatasourceFunction,
     Columns
   } from 'ele-admin-plus/es/ele-pro-table/types';
-  import { PlusOutlined, DeleteOutlined } from '@/components/icons';
+  import { PlusOutlined, DeleteOutlined, ArrowDown } from '@/components/icons';
   import {
     deleteMerchant,
     getMerchantList,
@@ -123,8 +113,7 @@
     {
       prop: 'merchant_no',
       label: '商户编号',
-      width: 160,
-      slot: 'merchant_no'
+      width: 160
     },
     {
       prop: 'phone',
@@ -198,7 +187,7 @@
     {
       columnKey: 'action',
       label: '操作',
-      width: 200,
+      width: 128,
       align: 'center',
       fixed: 'right',
       slot: 'action',
@@ -316,16 +305,4 @@
         break;
     }
   };
-
-  /**
-   * 查看密钥
-   * @param row 商户数据
-   */
-  const viewKey = (row: Merchant) => {};
-
-  /**
-   * 登录商户
-   * @param row 商户数据
-   */
-  const login = (row: Merchant) => {};
 </script>

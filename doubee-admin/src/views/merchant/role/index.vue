@@ -41,10 +41,14 @@
             @change="(value: number) => updateStatus(row.id, value)"
           />
         </template>
-        
+
         <template #action="{ row }">
           <el-link type="primary" underline="never" @click="openEdit(row)">
             修改
+          </el-link>
+          <el-divider direction="vertical" />
+          <el-link type="primary" underline="never" @click="openAuth(row)">
+            分配权限
           </el-link>
           <el-divider direction="vertical" />
           <el-link type="danger" underline="never" @click="remove(row)">
@@ -124,6 +128,9 @@
   /** 是否显示编辑弹窗 */
   const showEdit = ref(false);
 
+  /** 是否显示权限分配弹窗 */
+  const showAuth = ref(false);
+
   /** 表格数据源 */
   const datasource: DatasourceFunction = ({ pages, where, orders }) => {
     return getRoleList({ ...where, ...orders, ...pages });
@@ -139,6 +146,12 @@
   const openEdit = (row?: Role) => {
     current.value = row ?? null;
     showEdit.value = true;
+  };
+
+  /** 打开权限分配弹窗 */
+  const openAuth = (row?: Role) => {
+    current.value = row ?? null;
+    showAuth.value = true;
   };
 
   /**

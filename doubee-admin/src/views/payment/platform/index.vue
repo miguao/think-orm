@@ -10,7 +10,7 @@
         :show-overflow-tooltip="true"
         v-model:selections="selections"
         :highlight-current-row="true"
-        cache-key="paymentChannelTable"
+        cache-key="paymentPlatformTable"
       >
         <template #toolbar>
           <el-button
@@ -38,15 +38,6 @@
           </el-button>
         </template>
 
-        <template #status="{ row }">
-          <el-switch
-            v-model="row.status"
-            :active-value="1"
-            :inactive-value="0"
-            @change="(value: number) => updateStatus(row.id, value)"
-          />
-        </template>
-
         <template #action="{ row }">
           <el-link type="primary" underline="never" @click="openEdit(row)">
             修改
@@ -58,6 +49,9 @@
         </template>
       </ele-pro-table>
     </ele-card>
+
+    <!-- 编辑弹窗 -->
+    <platform-edit v-model="showEdit" :data="current" @done="reload" />
   </ele-page>
 </template>
 
@@ -75,12 +69,9 @@
   } from 'ele-admin-plus/es/ele-pro-table/types';
   import { ElMessageBox } from 'element-plus';
   import PlatformSearch from './components/platform-search.vue';
-  import {
-    deletePlatform,
-    getPlatformList,
-    updatePlatform
-  } from '@/api/payment/platform';
+  import { deletePlatform, getPlatformList } from '@/api/payment/platform';
   import { Platform, type SearchParam } from '@/api/payment/platform/model';
+  import platformEdit from './components/platform-edit.vue';
 
   defineOptions({ name: 'PaymentPlatform' });
 
@@ -104,13 +95,6 @@
       prop: 'creation_time',
       label: '创建时间',
       width: 180
-    },
-    {
-      prop: 'status',
-      label: '状态',
-      width: 100,
-      align: 'center',
-      slot: 'status'
     },
     {
       columnKey: 'action',
@@ -147,21 +131,6 @@
   const reload = (where?: SearchParam) => {
     selections.value = [];
     tableRef.value?.reload?.({ page: 1, where });
-  };
-
-  /**
-   * 更新平台状态
-   * @param id 平台ID
-   * @param status 平台状态
-   */
-  const updateStatus = (id: number, status: number) => {
-    updatePlatform({ id, status })
-      .then((message) => {
-        EleMessage.success({ message: message, plain: true });
-      })
-      .catch((exception) => {
-        EleMessage.error({ message: exception.message, plain: true });
-      });
   };
 
   /** 删除单个 */
