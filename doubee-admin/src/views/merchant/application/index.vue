@@ -77,7 +77,7 @@
   import { PlusOutlined, DeleteOutlined } from '@/components/icons';
   import { ElMessageBox } from 'element-plus';
 
-  defineOptions({ name: 'MerchantRole' });
+  defineOptions({ name: 'MerchantApplication' });
 
   /** 表格实例 */
   const tableRef = ref<InstanceType<typeof EleProTable> | null>(null);
