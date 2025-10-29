@@ -35,7 +35,7 @@ class MerchantController extends AbstractAdminController
         $get = new Get(Merchant::class);
         $get->setWhere((array)$map);
         $get->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
-        $get->setColumn("id", "role_id", "merchant_no", "phone", "email", "balance", "freeze_balance", "creation_time", "status");
+        $get->setColumn("id", "merchant_no", "phone", "email", "balance", "freeze_balance", "creation_time", "status");
         $data = $this->database->get($get, function (Query $query) {
             return $query->with(['role']);
         });
