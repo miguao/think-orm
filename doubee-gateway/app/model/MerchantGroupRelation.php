@@ -6,7 +6,7 @@ namespace app\model;
 
 use think\Model;
 
-class MerchantRoleRelation extends Model
+class MerchantGroupRelation extends Model
 {
 
 }

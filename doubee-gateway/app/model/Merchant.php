@@ -23,11 +23,11 @@ use think\model\relation\HasOne;
 class Merchant extends Model
 {
     /**
-     * 角色信息
+     * 商户组信息
      * @return HasOne
      */
     public function role(): HasOne
     {
-        return $this->hasOne(MerchantRole::class, 'id', 'role_id');
+        return $this->hasOne(MerchantGroup::class, 'id', 'role_id');
     }
 }

@@ -12,7 +12,7 @@ use think\Model;
  * @property string $creation_time
  * @property int $status
  */
-class MerchantRole extends Model
+class MerchantGroup extends Model
 {
 
 }
