@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use app\kernel\plugin\event\PluginEventSubscriber;
+
 return [
     'bind' => [],
     'listen' => [
@@ -11,5 +13,7 @@ return [
         'LogLevel' => [],
         'LogWrite' => [],
     ],
-    'subscribe' => [],
+    'subscribe' => [
+        PluginEventSubscriber::class,
+    ],
 ];
