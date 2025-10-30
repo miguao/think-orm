@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\model;
 
 use think\Model;
+use think\model\relation\BelongsTo;
 use think\model\relation\HasOne;
 
 /**
@@ -26,8 +27,8 @@ class Merchant extends Model
      * 商户组信息
      * @return HasOne
      */
-    public function role(): HasOne
+    public function merchantGroup(): HasOne
     {
-        return $this->hasOne(MerchantGroup::class, 'id', 'role_id');
+        return $this->hasOne(MerchantGroup::class, 'id', 'group_id');
     }
 }
