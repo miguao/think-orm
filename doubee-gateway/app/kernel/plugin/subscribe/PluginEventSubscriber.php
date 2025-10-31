@@ -2,14 +2,14 @@
 
 declare (strict_types=1);
 
-namespace app\kernel\plugin\event;
+namespace app\kernel\plugin\subscribe;
 
 use think\Event;
 
 class PluginEventSubscriber
 {
     /**
-     * 注册订阅事件
+     * 监听插件事件
      * @param Event $event
      * @return void
      */

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use app\kernel\plugin\event\PluginEventSubscriber;
+use app\kernel\plugin\subscribe\PluginEventSubscriber;
 
 return [
     'bind' => [],
