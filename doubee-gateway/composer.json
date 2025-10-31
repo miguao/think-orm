@@ -25,7 +25,6 @@
         "topthink/framework": "8.x-dev",
         "topthink/think-orm": "^3.0",
         "topthink/think-filesystem": "^2.0",
-        "topthink/think-annotation": "^2.0",
         "topthink/think-queue": "^3.0",
         "firebase/php-jwt": "^6.10",
         "wechatpay/wechatpay": "^1.4",
