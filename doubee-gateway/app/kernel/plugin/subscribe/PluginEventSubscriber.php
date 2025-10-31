@@ -18,8 +18,7 @@ class PluginEventSubscriber
         $event->listen('PluginEvent', [$this, 'onPluginEvent']);
     }
 
-    public function onPluginEvent(array $payload): void
+    public function onPluginEvent(array $payload)
     {
-        print_r($payload);
     }
 }

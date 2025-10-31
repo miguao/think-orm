@@ -81,10 +81,10 @@ class PluginFactory
      * 触发事件
      * @param string $hook
      * @param array $params
-     * @return void
+     * @return mixed
      */
-    public function trigger(string $hook, array $params = []): void
+    public function trigger(string $hook, array $params = []): mixed
     {
-        Event::trigger('PluginEvent', ['hook' => $hook, 'params' => $params]);
+        return Event::trigger('PluginEvent', ['hook' => $hook, 'params' => $params]);
     }
 }
