@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace app\service\openapi\impl;
 
 use app\exception\JsonException;
-use app\model\PaymentBank;
 use app\model\Merchant;
 use app\model\MerchantApplication;
 use app\model\PaymentChannel;
 use app\model\PaymentOrder;
-use app\plugin\payment\AliPay\Handler\Payment;
+use app\plugin\AliPay\Handler\Payment;
 use app\service\openapi\OrderService;
 use app\utils\DateUtils;
 use app\utils\StringUtils;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 use think\facade\Db;
 
 class OrderServiceImpl implements OrderService
