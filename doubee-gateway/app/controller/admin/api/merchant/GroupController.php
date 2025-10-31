@@ -9,20 +9,22 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantGroup;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/merchant/group")]
+#[Controller("/admin/api/merchant/group")]
 #[Middleware(AuthenticationMiddleware::class)]
 class GroupController extends AbstractAdminController
 {
-    #[Route("GET", "getGroupList")]
+    #[GetMapping("getGroupList")]
     public function getGroupList(): Json
     {
         $map = $this->request->all();
@@ -34,7 +36,7 @@ class GroupController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveGroup")]
+    #[RequestMapping("saveGroup", ["POST", "PUT"])]
     public function saveGroup(): Json
     {
         $map = $this->request->post();
@@ -50,7 +52,7 @@ class GroupController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteGroup")]
+    #[DeleteMapping("deleteGroup")]
     public function deleteGroup(): Json
     {
         $delete = new Delete(MerchantGroup::class, (array)$this->request->post("list"));

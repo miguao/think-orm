@@ -70,20 +70,21 @@ class RouteAnnotationProvider
                 foreach ($attributes as $attr) {
                     $instance = $attr->newInstance();
 
+                    // 支持数组方法
                     if ($instance instanceof RequestMapping) {
-                        $httpMethod = $instance->method;
+                        $methods = $instance->methods; // 数组
                         $path = $instance->path;
                     } elseif ($instance instanceof GetMapping) {
-                        $httpMethod = 'GET';
+                        $methods = ['GET'];
                         $path = $instance->path;
                     } elseif ($instance instanceof PostMapping) {
-                        $httpMethod = 'POST';
+                        $methods = ['POST'];
                         $path = $instance->path;
                     } elseif ($instance instanceof PutMapping) {
-                        $httpMethod = 'PUT';
+                        $methods = ['PUT'];
                         $path = $instance->path;
                     } elseif ($instance instanceof DeleteMapping) {
-                        $httpMethod = 'DELETE';
+                        $methods = ['DELETE'];
                         $path = $instance->path;
                     } else {
                         continue;
@@ -91,8 +92,6 @@ class RouteAnnotationProvider
 
                     // 自动处理方法路径斜杠
                     $path = '/' . trim($path, '/');
-
-                    // 拼接完整路由
                     $fullPath = $prefix . $path;
 
                     // 获取方法级中间件
@@ -105,12 +104,14 @@ class RouteAnnotationProvider
                     // 合并控制器级和方法级中间件
                     $middlewares = array_merge($classMiddleware, $methodMiddleware);
 
-                    // 注册路由，闭包内自动实例化控制器并注入依赖
-                    Route::rule($fullPath, function (...$params) use ($class, $method) {
-                        $controller = new $class();
-                        Inject::handle($controller);
-                        return $controller->{$method->getName()}(...$params);
-                    }, $httpMethod)->middleware($middlewares);
+                    // 循环方法数组，注册多个方法
+                    foreach ($methods as $httpMethod) {
+                        Route::rule($fullPath, function (...$params) use ($class, $method) {
+                            $controller = new $class();
+                            Inject::handle($controller);
+                            return $controller->{$method->getName()}(...$params);
+                        }, $httpMethod)->middleware($middlewares);
+                    }
                 }
             }
         }

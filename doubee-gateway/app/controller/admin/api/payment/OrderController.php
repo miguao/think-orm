@@ -6,20 +6,19 @@ namespace app\controller\admin\api\payment;
 
 use app\controller\AbstractAdminController;
 use app\entity\database\Get;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\PaymentOrder;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
-use think\model\Relation;
 use think\response\Json;
 
-#[Group("/admin/api/payment/order")]
+#[Controller("/admin/api/payment/order")]
 #[Middleware(AuthenticationMiddleware::class)]
 class OrderController extends AbstractAdminController
 {
-    #[Route("GET", "getOrderList")]
+    #[GetMapping("getOrderList")]
     public function getOrderList(): Json
     {
         $map = $this->request->all();

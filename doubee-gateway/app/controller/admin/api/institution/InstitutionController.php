@@ -9,20 +9,22 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemInstitution;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/institution")]
+#[Controller("/admin/api/institution")]
 #[Middleware(AuthenticationMiddleware::class)]
 class InstitutionController extends AbstractAdminController
 {
-    #[Route("GET", "getInstitutionList")]
+    #[GetMapping("getInstitutionList")]
     public function getInstitutionList(): Json
     {
         $map = $this->request->get();
@@ -36,7 +38,7 @@ class InstitutionController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveInstitution")]
+    #[RequestMapping("saveInstitution", ["POST", "PUT"])]
     public function saveInstitution(): Json
     {
         $map = $this->request->post();
@@ -52,7 +54,7 @@ class InstitutionController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteInstitution")]
+    #[DeleteMapping("deleteInstitution")]
     public function deleteInstitution(): Json
     {
         $delete = new Delete(SystemInstitution::class, (array)$this->request->post("list"));

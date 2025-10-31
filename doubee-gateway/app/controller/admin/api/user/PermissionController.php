@@ -9,20 +9,22 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemUserPermission;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/user/permission")]
+#[Controller("/admin/api/user/permission")]
 #[Middleware(AuthenticationMiddleware::class)]
 class PermissionController extends AbstractAdminController
 {
-    #[Route("GET", "getPermissionList")]
+    #[GetMapping("getPermissionList")]
     public function getPermissionList(): Json
     {
         $map = $this->request->get();
@@ -34,7 +36,7 @@ class PermissionController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "savePermission")]
+    #[RequestMapping("savePermission", ["POST", "PUT"])]
     public function savePermission(): Json
     {
         $map = $this->request->post();
@@ -50,7 +52,7 @@ class PermissionController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deletePermission")]
+    #[DeleteMapping("deletePermission")]
     public function deletePermission(): Json
     {
         $delete = new Delete(SystemUserPermission::class, (array)$this->request->post("list"));

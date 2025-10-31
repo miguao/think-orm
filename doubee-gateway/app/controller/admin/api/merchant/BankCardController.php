@@ -6,19 +6,19 @@ namespace app\controller\admin\api\merchant;
 
 use app\controller\AbstractAdminController;
 use app\entity\database\Get;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantBankCard;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/merchant/bank/card")]
+#[Controller("/admin/api/merchant/bank/card")]
 #[Middleware(AuthenticationMiddleware::class)]
 class BankCardController extends AbstractAdminController
 {
-    #[Route("GET", "getCardList")]
+    #[GetMapping("getCardList")]
     public function getCardList(): Json
     {
         $map = $this->request->all();

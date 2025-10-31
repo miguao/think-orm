@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace app\controller\openapi\api\payment;
 
 use app\controller\AbstractController;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\Inject;
+use app\kernel\route\annotation\PostMapping;
+use app\kernel\route\annotation\RequestMapping;
 use app\service\openapi\OrderService;
-use think\annotation\Inject;
-use think\annotation\route\Group;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/openapi/api/payment/order")]
+#[Controller("/openapi/api/payment/order")]
 class OrderController extends AbstractController
 {
     #[Inject]
     protected OrderService $orderService;
 
-    #[Route("POST", "trade")]
+    #[PostMapping("trade")]
     public function trade(): Json
     {
         $map = $this->request->post();
@@ -45,7 +46,7 @@ class OrderController extends AbstractController
         return $this->json(message: "下单成功", data: $trade);
     }
 
-    #[Route("*", "callback")]
+    #[RequestMapping("callback")]
     public function callback(): Json
     {
         return $this->json();

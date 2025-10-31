@@ -9,21 +9,23 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemConfig;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/config")]
+#[Controller("/admin/api/config")]
 #[Middleware(AuthenticationMiddleware::class)]
 class ConfigController extends AbstractAdminController
 {
-    #[Route("GET", "getConfigList")]
+    #[GetMapping("getConfigList")]
     public function getConfigList(): Json
     {
         $map = $this->request->get();
@@ -37,7 +39,7 @@ class ConfigController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveConfig")]
+    #[RequestMapping("saveConfig", ["POST", "PUT"])]
     public function saveConfig(): Json
     {
         $map = $this->request->post();
@@ -53,7 +55,7 @@ class ConfigController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteConfig")]
+    #[DeleteMapping("deleteConfig")]
     public function deleteConfig(): Json
     {
         $delete = new Delete(SystemConfig::class, (array)$this->request->post("list"));

@@ -9,23 +9,25 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemUserPermission;
 use app\model\SystemUserPermissionRelation;
 use app\model\SystemUserRole;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/user/role")]
+#[Controller("/admin/api/user/role")]
 #[Middleware(AuthenticationMiddleware::class)]
 class RoleController extends AbstractAdminController
 {
-    #[Route("GET", "getRoleList")]
+    #[GetMapping("getRoleList")]
     public function getRoleList(): Json
     {
         $map = $this->request->get();
@@ -39,7 +41,7 @@ class RoleController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveRole")]
+    #[RequestMapping("saveRole", ["POST", "PUT"])]
     public function saveRole(): Json
     {
         $map = $this->request->post();
@@ -57,7 +59,7 @@ class RoleController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteRole")]
+    #[DeleteMapping("deleteRole")]
     public function deleteRole(): Json
     {
         $delete = new Delete(SystemUserRole::class, (array)$this->request->post("list"));
@@ -65,7 +67,7 @@ class RoleController extends AbstractAdminController
         return $this->json(message: "删除成功");
     }
 
-    #[Route("GET", "getPermissionsByRoleId")]
+    #[GetMapping("getPermissionsByRoleId")]
     public function getPermissionsByRoleId(): Json
     {
         $map = $this->request->get();

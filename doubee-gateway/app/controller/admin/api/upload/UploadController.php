@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace app\controller\admin\api\upload;
 
 use app\controller\AbstractAdminController;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\Inject;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\PostMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\service\admin\UploadService;
-use think\annotation\Inject;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/upload")]
+#[Controller("/admin/api/upload")]
 #[Middleware(AuthenticationMiddleware::class)]
 class UploadController extends AbstractAdminController
 {
     #[Inject]
     protected UploadService $uploadService;
 
-    #[Route("POST", "upload")]
+    #[PostMapping("upload")]
     public function upload(): Json
     {
         $file = $this->request->file('file');

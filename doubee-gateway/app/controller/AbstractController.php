@@ -5,10 +5,10 @@ declare (strict_types=1);
 namespace app\controller;
 
 use app\constant\StatusCode;
+use app\kernel\route\annotation\Inject;
 use think\Request;
 use think\response\Json;
 use think\Validate;
-use think\annotation\Inject;
 
 abstract class AbstractController
 {
@@ -44,7 +44,7 @@ abstract class AbstractController
             if (strpos($validate, '.')) {
                 [$validate, $scene] = explode('.', $validate);
             }
-            $class = str_contains($validate, '\\') ? $validate : $this->app->parseClass('validate', $validate);
+            $class = str_contains($validate, '\\') ? $validate : app()->parseClass('validate', $validate);
             $v = new $class();
             if (!empty($scene)) {
                 $v->scene($scene);

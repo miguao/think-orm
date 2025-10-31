@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace app\controller\merchant\api;
 
 use app\controller\AbstractMerchantController;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\Inject;
+use app\kernel\route\annotation\PostMapping;
 use app\service\merchant\UserService;
-use think\annotation\Inject;
-use think\annotation\route\Group;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/merchant/api/auth")]
+#[Controller("/merchant/api/auth")]
 class AuthController extends AbstractMerchantController
 {
     #[Inject]
     protected UserService $userService;
 
-    #[Route("POST", "passwordLogin")]
+    #[PostMapping("passwordLogin")]
     public function passwordLogin(): Json
     {
         $map = $this->request->post();
@@ -33,7 +33,7 @@ class AuthController extends AbstractMerchantController
         return $this->json(message: "登录成功", data: ['token' => $token]);
     }
 
-    #[Route("POST", "verificationCodeLogin")]
+    #[PostMapping("verificationCodeLogin")]
     public function verificationCodeLogin(): Json
     {
         $map = $this->request->post();
@@ -49,7 +49,7 @@ class AuthController extends AbstractMerchantController
         return $this->json(message: "登录成功", data: ['token' => $token]);
     }
 
-    #[Route("POST", "sendLoginVerificationCode")]
+    #[PostMapping("sendLoginVerificationCode")]
     public function sendLoginVerificationCode(): Json
     {
         $map = $this->request->post();
@@ -59,7 +59,7 @@ class AuthController extends AbstractMerchantController
         return $this->json(message: "验证码发送成功，有效期为 3 分钟，请尽快使用。");
     }
 
-    #[Route("POST", "emailRegister")]
+    #[PostMapping("emailRegister")]
     public function emailRegister(): Json
     {
         $map = $this->request->post();
@@ -83,7 +83,7 @@ class AuthController extends AbstractMerchantController
         return $this->json(message: "注册成功", data: ['token' => $token]);
     }
 
-    #[Route("POST", "phoneRegister")]
+    #[PostMapping("phoneRegister")]
     public function phoneRegister(): Json
     {
         $map = $this->request->post();
@@ -107,7 +107,7 @@ class AuthController extends AbstractMerchantController
         return $this->json(message: "注册成功", data: ['token' => $token]);
     }
 
-    #[Route("POST", "sendRegisterCode")]
+    #[PostMapping("sendRegisterCode")]
     public function sendRegisterCode(): Json
     {
         $map = $this->request->post();
@@ -117,7 +117,7 @@ class AuthController extends AbstractMerchantController
         return $this->json(message: "验证码发送成功，有效期为 3 分钟，请尽快使用。");
     }
 
-    #[Route("POST", "resetPassword")]
+    #[PostMapping("resetPassword")]
     public function resetPassword(): Json
     {
         $map = $this->request->post();
@@ -140,7 +140,7 @@ class AuthController extends AbstractMerchantController
         return $this->json(message: "密码重置成功，请使用新密码重新登录。");
     }
 
-    #[Route("POST", "sendResetPasswordCode")]
+    #[PostMapping("sendResetPasswordCode")]
     public function sendResetPasswordCode(): Json
     {
         $map = $this->request->post();

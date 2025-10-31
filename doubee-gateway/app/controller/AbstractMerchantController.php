@@ -6,7 +6,7 @@ namespace app\controller;
 
 use app\kernel\context\Context;
 use app\kernel\database\contract\DatabaseInterface;
-use think\annotation\Inject;
+use app\kernel\route\annotation\Inject;
 use think\Request as ServerRequest;
 
 abstract class AbstractMerchantController extends AbstractController

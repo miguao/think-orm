@@ -4,18 +4,18 @@ namespace app\controller\admin\api\merchant;
 
 use app\controller\AbstractAdminController;
 use app\entity\database\Get;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantPermission;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/merchant/permission")]
+#[Controller("/admin/api/merchant/permission")]
 #[Middleware(AuthenticationMiddleware::class)]
 class PermissionController extends AbstractAdminController
 {
-    #[Route("GET", "getPermissionList")]
+    #[GetMapping("getPermissionList")]
     public function getPermissionList(): Json
     {
         $map = $this->request->get();

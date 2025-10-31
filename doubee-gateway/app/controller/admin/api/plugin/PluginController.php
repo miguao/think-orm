@@ -7,17 +7,17 @@ namespace app\controller\admin\api\plugin;
 use app\controller\AbstractAdminController;
 use app\kernel\plugin\entity\Query;
 use app\kernel\plugin\PluginFactory;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
 use app\middleware\admin\AuthenticationMiddleware;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/plugin")]
+#[Controller("/admin/api/plugin")]
 #[Middleware(AuthenticationMiddleware::class)]
 class PluginController extends AbstractAdminController
 {
-    #[Route("GET", "getInstalledPlugins")]
+    #[GetMapping("getInstalledPlugins")]
     public function getInstalledPlugins(): Json
     {
         $query = new Query();
@@ -26,6 +26,7 @@ class PluginController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
+    #[GetMapping("previewIcon")]
     public function previewIcon()
     {
 

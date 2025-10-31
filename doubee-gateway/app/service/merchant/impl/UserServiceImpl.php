@@ -6,6 +6,7 @@ namespace app\service\merchant\impl;
 
 use app\constant\Cache as CacheConstant;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Inject;
 use app\model\Merchant;
 use app\model\MerchantApplication;
 use app\service\admin\MailerService;
@@ -15,7 +16,6 @@ use app\utils\DateUtils;
 use app\utils\StringUtils;
 use app\utils\ValidatorUtils;
 use Firebase\JWT\JWT;
-use think\annotation\Inject;
 use think\facade\Cache;
 use think\facade\Request;
 

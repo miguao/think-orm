@@ -5,20 +5,19 @@ declare (strict_types=1);
 namespace app\controller\admin\api;
 
 use app\controller\AbstractController;
-use app\model\SystemLoginLog;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\Inject;
+use app\kernel\route\annotation\PostMapping;
 use app\service\admin\UserService;
-use think\annotation\Inject;
-use think\annotation\route\Group;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/auth")]
+#[Controller("/admin/api/auth")]
 class AuthController extends AbstractController
 {
     #[Inject]
     protected UserService $userService;
 
-    #[Route("POST", "login")]
+    #[PostMapping("login")]
     public function login(): Json
     {
         $map = $this->request->post();

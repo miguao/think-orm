@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace app\service\admin\impl;
 
 use app\exception\JsonException;
+use app\kernel\route\annotation\Inject;
 use app\service\admin\ConfigService;
 use app\service\admin\MailerService;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
-use think\annotation\Inject;
 
 class MailerServiceImpl implements MailerService
 {

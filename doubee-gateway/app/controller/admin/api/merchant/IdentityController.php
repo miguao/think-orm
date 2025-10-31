@@ -6,19 +6,19 @@ namespace app\controller\admin\api\merchant;
 
 use app\controller\AbstractAdminController;
 use app\entity\database\Get;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantIdentity;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/merchant/identity")]
+#[Controller("/admin/api/merchant/identity")]
 #[Middleware(AuthenticationMiddleware::class)]
 class IdentityController extends AbstractAdminController
 {
-    #[Route("GET", "getIdentityList")]
+    #[GetMapping("getIdentityList")]
     public function getIdentityList(): Json
     {
         $map = $this->request->get();

@@ -9,20 +9,22 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemDictionaryData;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/dictionary/data")]
+#[Controller("/admin/api/dictionary/data")]
 #[Middleware(AuthenticationMiddleware::class)]
 class DataController extends AbstractAdminController
 {
-    #[Route("GET", "getDataList")]
+    #[GetMapping("getDataList")]
     public function getDataList(): Json
     {
         $map = $this->request->get();
@@ -34,7 +36,7 @@ class DataController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveData")]
+    #[RequestMapping("saveData", ["POST", "PUT"])]
     public function saveData(): Json
     {
         $map = $this->request->post();
@@ -56,7 +58,7 @@ class DataController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteData")]
+    #[DeleteMapping("deleteData")]
     public function deleteData(): Json
     {
         $delete = new Delete(SystemDictionaryData::class, (array)$this->request->post("list"));

@@ -9,20 +9,22 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\PaymentBank;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/payment/bank")]
+#[Controller("/admin/api/payment/bank")]
 #[Middleware(AuthenticationMiddleware::class)]
 class BankController extends AbstractAdminController
 {
-    #[Route("GET", "getBankList")]
+    #[GetMapping("getBankList")]
     public function getBankList(): Json
     {
         $map = $this->request->get();
@@ -34,7 +36,7 @@ class BankController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveBank")]
+    #[RequestMapping("saveBank", ["POST", "PUT"])]
     public function saveBank(): Json
     {
         $map = $this->request->post();
@@ -50,7 +52,7 @@ class BankController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteBank")]
+    #[DeleteMapping("deleteBank")]
     public function deleteBank(): Json
     {
         $delete = new Delete(PaymentBank::class, (array)$this->request->post("list"));

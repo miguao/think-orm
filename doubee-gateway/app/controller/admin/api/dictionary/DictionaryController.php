@@ -9,26 +9,28 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Inject;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemDictionary;
 use app\utils\DateUtils;
 use app\service\admin\DictionaryService;
 use Exception;
-use think\annotation\Inject;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/dictionary")]
+#[Controller("/admin/api/dictionary")]
 #[Middleware(AuthenticationMiddleware::class)]
 class DictionaryController extends AbstractAdminController
 {
     #[Inject]
     protected DictionaryService $dictService;
 
-    #[Route("GET", "getDictionaryByCode")]
+    #[GetMapping("getDictionaryByCode")]
     public function getDictionaryByCode(): Json
     {
         $map = $this->request->get();
@@ -38,7 +40,7 @@ class DictionaryController extends AbstractAdminController
         return $this->json(data: (array)$data);
     }
 
-    #[Route("GET", "getAllDictionaryList")]
+    #[GetMapping("getAllDictionaryList")]
     public function getAllDictionaryList(): Json
     {
         $map = $this->request->get();
@@ -49,7 +51,7 @@ class DictionaryController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("GET", "getDictionaryList")]
+    #[GetMapping("getDictionaryList")]
     public function getDictionaryList(): Json
     {
         $map = $this->request->get();
@@ -63,7 +65,7 @@ class DictionaryController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveDictionary")]
+    #[RequestMapping("saveDictionary", ["POST", "PUT"])]
     public function saveDictionary(): Json
     {
         $map = $this->request->post();
@@ -79,7 +81,7 @@ class DictionaryController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteDictionary")]
+    #[DeleteMapping("deleteDictionary")]
     public function deleteDictionary(): Json
     {
         $delete = new Delete(SystemDictionary::class, (array)$this->request->post("list"));

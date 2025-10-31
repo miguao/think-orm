@@ -6,18 +6,18 @@ namespace app\controller\admin\api\merchant;
 
 use app\controller\AbstractAdminController;
 use app\entity\database\Get;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantWithdraw;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/merchant/withdraw")]
+#[Controller("/admin/api/merchant/withdraw")]
 #[Middleware(AuthenticationMiddleware::class)]
 class WithdrawController extends AbstractAdminController
 {
-    #[Route("GET", "getWithdrawList")]
+    #[GetMapping("getWithdrawList")]
     public function getWithdrawList(): Json
     {
         $map = $this->request->all();

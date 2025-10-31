@@ -9,23 +9,26 @@ use app\entity\database\Get;
 use app\entity\database\Save;
 use app\entity\database\Delete;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\PostMapping;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\SystemUser;
 use app\model\SystemUserRoleRelation;
 use app\utils\DateUtils;
 use app\utils\StringUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/user")]
+#[Controller("/admin/api/user")]
 #[Middleware(AuthenticationMiddleware::class)]
 class UserController extends AbstractAdminController
 {
-    #[Route("GET", "getUserList")]
+    #[GetMapping("getUserList")]
     public function getUserList(): Json
     {
         $map = $this->request->get();
@@ -40,7 +43,7 @@ class UserController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveUser")]
+    #[RequestMapping("saveUser", ["POST", "PUT"])]
     public function saveUser(): Json
     {
         $map = $this->request->post();
@@ -68,7 +71,7 @@ class UserController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deleteUser")]
+    #[DeleteMapping("deleteUser")]
     public function deleteUser(): Json
     {
         $delete = new Delete(SystemUser::class, (array)$this->request->post("list"));
@@ -76,7 +79,7 @@ class UserController extends AbstractAdminController
         return $this->json(message: "删除成功");
     }
 
-    #[Route("POST", "importUser")]
+    #[PostMapping("importUser")]
     public function importUser(): Json
     {
         return $this->json(message: "导入成功");

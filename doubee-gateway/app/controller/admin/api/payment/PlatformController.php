@@ -9,20 +9,22 @@ use app\entity\database\Delete;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\DeleteMapping;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\PaymentPlatform;
 use app\utils\DateUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/payment/platform")]
+#[Controller("/admin/api/payment/platform")]
 #[Middleware(AuthenticationMiddleware::class)]
 class PlatformController extends AbstractAdminController
 {
-    #[Route("GET", "getPlatformList")]
+    #[GetMapping("getPlatformList")]
     public function getPlatformList(): Json
     {
         $map = $this->request->all();
@@ -34,7 +36,7 @@ class PlatformController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "savePlatform")]
+    #[RequestMapping("savePlatform", ["POST", "PUT"])]
     public function savePlatform(): Json
     {
         $map = $this->request->post();
@@ -50,7 +52,7 @@ class PlatformController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("DELETE", "deletePlatform")]
+    #[DeleteMapping("deletePlatform")]
     public function deletePlatform(): Json
     {
         $delete = new Delete(PaymentPlatform::class, (array)$this->request->post("list"));

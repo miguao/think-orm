@@ -6,6 +6,7 @@ namespace app\service\admin\impl;
 
 use app\constant\SystemUserPermissionType;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Inject;
 use app\model\SystemUser;
 use app\service\admin\LogService;
 use app\service\admin\UserService;
@@ -13,7 +14,6 @@ use app\utils\AesUtils;
 use app\utils\DateUtils;
 use app\utils\StringUtils;
 use Firebase\JWT\JWT;
-use think\annotation\Inject;
 use think\db\Query;
 use think\Request;
 

@@ -8,22 +8,24 @@ use app\controller\AbstractAdminController;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\PostMapping;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantApplication;
 use app\utils\DateUtils;
 use app\utils\StringUtils;
 use Exception;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/merchant/app")]
+#[Controller("/admin/api/merchant/app")]
 #[Middleware(AuthenticationMiddleware::class)]
 class AppController extends AbstractAdminController
 {
-    #[Route("GET", "getAppList")]
+    #[GetMapping("getAppList")]
     public function getAppList(): Json
     {
         $map = $this->request->all();
@@ -47,7 +49,7 @@ class AppController extends AbstractAdminController
         return $this->json(data: $data, ext: $raw);
     }
 
-    #[Route("*", "saveApp")]
+    #[RequestMapping("saveApp", ["POST", "PUT"])]
     public function saveApp(): Json
     {
         $map = $this->request->post();
@@ -68,7 +70,7 @@ class AppController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[Route("POST", "resetKey")]
+    #[PostMapping("resetKey")]
     public function resetKey(): Json
     {
         $map = $this->request->post();

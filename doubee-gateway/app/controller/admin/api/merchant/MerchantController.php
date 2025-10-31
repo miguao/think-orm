@@ -8,27 +8,28 @@ use app\controller\AbstractAdminController;
 use app\entity\database\Get;
 use app\entity\database\Save;
 use app\exception\JsonException;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Inject;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\Merchant;
 use app\service\merchant\UserService;
 use app\utils\DateUtils;
 use app\utils\StringUtils;
 use Exception;
-use think\annotation\Inject;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\db\Query;
 use think\response\Json;
 
-#[Group("/admin/api/merchant")]
+#[Controller("/admin/api/merchant")]
 #[Middleware(AuthenticationMiddleware::class)]
 class MerchantController extends AbstractAdminController
 {
     #[Inject]
     protected UserService $userService;
 
-    #[Route("GET", "getMerchantList")]
+    #[GetMapping("getMerchantList")]
     public function getMerchantList(): Json
     {
         $map = $this->request->all();
@@ -43,7 +44,7 @@ class MerchantController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[Route("*", "saveMerchant")]
+    #[RequestMapping("saveMerchant", ["POST", "PUT"])]
     public function saveMerchant(): Json
     {
         $map = $this->request->post();

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace app\controller\admin\api\dashboard;
 
 use app\controller\AbstractAdminController;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Middleware;
 use app\middleware\admin\AuthenticationMiddleware;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/admin/api/dashboard/console")]
+#[Controller("/admin/api/dashboard/console")]
 #[Middleware(AuthenticationMiddleware::class)]
 class ConsoleController extends AbstractAdminController
 {
-    #[Route("GET", "getOverviewData")]
+    #[GetMapping("getOverviewData")]
     public function getOverviewData(): Json
     {
         return $this->json();
