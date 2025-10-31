@@ -12,7 +12,7 @@ class Payment
     {
     }
 
-    public function trade()
+    public function create()
     {
         return $this->tradeService->preCreate();
     }
