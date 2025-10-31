@@ -36,9 +36,7 @@ class PluginFactory
         $plugins = [];
 
         $finder = new Finder();
-        $finder->in($pluginBasePath)
-            ->depth('< 2')
-            ->directories();
+        $finder->in($pluginBasePath)->depth('< 2')->directories();
 
         foreach ($finder as $dir) {
             $folderName = $dir->getFilename();
