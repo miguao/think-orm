@@ -2,4 +2,8 @@
 
 declare (strict_types=1);
 
-return [];
+use app\kernel\service\RouteAnnotationService;
+
+return [
+    RouteAnnotationService::class,
+];
