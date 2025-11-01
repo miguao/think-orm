@@ -120,11 +120,11 @@ class ModelCommand extends Command
             $dbType = (string)($col['DATA_TYPE'] ?? $col['data_type'] ?? 'string');
             $phpType = $this->dbTypeToPhpType($dbType);
             $colName = (string)($col['COLUMN_NAME'] ?? $col['column_name']);
-            $comment = trim((string)($col['COLUMN_COMMENT'] ?? $col['column_comment'] ?? ''));
+//            $comment = trim((string)($col['COLUMN_COMMENT'] ?? $col['column_comment'] ?? ''));
             $line = ' * @property ' . $phpType . ' $' . $colName;
-            if ($comment !== '') {
-                $line .= ' ' . $comment;
-            }
+//            if ($comment !== '') {
+//                $line .= ' ' . $comment;
+//            }
             $props[] = $line;
         }
 
