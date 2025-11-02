@@ -35,8 +35,8 @@ class RouteAnnotationProvider
 
         // 生产环境使用缓存闭包
         if (!$isDebug) {
-            $cached = Cache::get(unserialize(self::CACHE_KEY));
-            $cachedHash = Cache::get(unserialize(self::HASH_KEY));
+            $cached = unserialize(Cache::get(self::CACHE_KEY));
+            $cachedHash = unserialize(Cache::get(self::HASH_KEY));
             if (is_array($cached) && $cachedHash === $dirHash) {
                 self::registerCachedClosures($cached);
                 return;
