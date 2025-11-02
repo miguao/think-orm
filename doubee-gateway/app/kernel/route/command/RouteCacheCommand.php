@@ -20,7 +20,6 @@ class RouteCacheCommand extends Command
 
     protected function execute(Input $input, Output $output): int
     {
-        // 清除旧缓存
         Cache::delete(RouteAnnotationProvider::CACHE_KEY);
         Cache::delete(RouteAnnotationProvider::HASH_KEY);
 
