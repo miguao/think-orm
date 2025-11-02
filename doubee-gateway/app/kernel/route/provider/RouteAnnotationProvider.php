@@ -14,6 +14,7 @@ use app\kernel\route\annotation\{
     Middleware,
     Inject
 };
+use function Opis\Closure\{serialize, unserialize};
 use ReflectionClass;
 use ReflectionMethod;
 use think\facade\Route;
@@ -34,8 +35,8 @@ class RouteAnnotationProvider
 
         // 生产环境使用缓存闭包
         if (!$isDebug) {
-            $cached = Cache::get(self::CACHE_KEY);
-            $cachedHash = Cache::get(self::HASH_KEY);
+            $cached = Cache::get(unserialize(self::CACHE_KEY));
+            $cachedHash = Cache::get(unserialize(self::HASH_KEY));
             if (is_array($cached) && $cachedHash === $dirHash) {
                 self::registerCachedClosures($cached);
                 return;
@@ -114,8 +115,8 @@ class RouteAnnotationProvider
         }
 
         if (!$isDebug) {
-            Cache::set(self::CACHE_KEY, $closures, 86400 * 30);
-            Cache::set(self::HASH_KEY, $dirHash, 86400 * 30);
+            Cache::set(self::CACHE_KEY, serialize($closures), 86400 * 30);
+            Cache::set(self::HASH_KEY, serialize($dirHash), 86400 * 30);
         }
     }
 
