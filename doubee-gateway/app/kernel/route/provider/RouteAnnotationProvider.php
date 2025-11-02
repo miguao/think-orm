@@ -14,7 +14,6 @@ use app\kernel\route\annotation\{
     Middleware,
     Inject
 };
-use function Opis\Closure\{serialize, unserialize};
 use ReflectionClass;
 use ReflectionMethod;
 use think\facade\Route;
@@ -33,17 +32,18 @@ class RouteAnnotationProvider
 
         $dirHash = self::dirHash($controllerPath);
 
-        // 生产环境使用缓存闭包
+        // 尝试从缓存读取
         if (!$isDebug) {
-            $cached = unserialize(Cache::get(self::CACHE_KEY));
-            $cachedHash = unserialize(Cache::get(self::HASH_KEY));
-            if (is_array($cached) && $cachedHash === $dirHash) {
-                self::registerCachedClosures($cached);
+            $cached = Cache::get(self::CACHE_KEY);
+            $cachedHash = Cache::get(self::HASH_KEY);
+
+            if ($cached && $cachedHash === $dirHash) {
+                self::registerFromCache($cached);
                 return;
             }
         }
 
-        $closures = [];
+        $routes = [];
 
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($controllerPath));
 
@@ -92,38 +92,44 @@ class RouteAnnotationProvider
                     $path = '/' . trim($instance->path, '/');
                     $fullPath = $prefix . $path;
 
+                    // 注册闭包（不缓存 ReflectionMethod）
                     foreach ($methods as $httpMethod) {
-                        // 生成闭包
-                        $closure = function (...$params) use ($class, $method) {
+                        Route::rule($fullPath, function (...$params) use ($class, $method) {
                             $controller = new $class();
                             Inject::handle($controller);
                             return $controller->{$method->getName()}(...$params);
-                        };
-
-                        Route::rule($fullPath, $closure, $httpMethod)->middleware($middlewares);
-
-                        // 缓存闭包
-                        $closures[] = [
-                            'path' => $fullPath,
-                            'method' => $httpMethod,
-                            'closure' => $closure,
-                            'middleware' => $middlewares,
-                        ];
+                        }, $httpMethod)->middleware($middlewares);
                     }
+
+                    // 缓存可序列化路由信息
+                    $routes[] = [
+                        'methods' => $methods,
+                        'path' => $fullPath,
+                        'class' => $class,
+                        'method' => $method->getName(),
+                        'middleware' => $middlewares,
+                    ];
                 }
             }
         }
 
+        // 缓存路由数据（生产环境）
         if (!$isDebug) {
-            Cache::set(self::CACHE_KEY, serialize($closures), 86400 * 30);
-            Cache::set(self::HASH_KEY, serialize($dirHash), 86400 * 30);
+            Cache::set(self::CACHE_KEY, $routes, 86400 * 30);
+            Cache::set(self::HASH_KEY, $dirHash, 86400 * 30);
         }
     }
 
-    private static function registerCachedClosures(array $closures): void
+    private static function registerFromCache(array $routes): void
     {
-        foreach ($closures as $r) {
-            Route::rule($r['path'], $r['closure'], $r['method'])->middleware($r['middleware']);
+        foreach ($routes as $r) {
+            foreach ($r['methods'] as $m) {
+                Route::rule($r['path'], function (...$params) use ($r) {
+                    $controller = new $r['class']();
+                    Inject::handle($controller);
+                    return $controller->{$r['method']}(...$params);
+                }, $m)->middleware($r['middleware']);
+            }
         }
     }
 
