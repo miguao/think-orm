@@ -10,11 +10,9 @@ use Attribute;
 class GetMapping
 {
     public string $path;
-    public string $method;
 
     public function __construct(string $path)
     {
-        $this->method = strtoupper("GET");
         $this->path = $path;
     }
 }
