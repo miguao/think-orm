@@ -17,10 +17,7 @@ class RequestMapping
     {
         $this->path = $path;
 
-        if (is_string($method)) {
-            $this->methods = $method === '*' ? ['*'] : [strtoupper($method)];
-        } else {
-            $this->methods = array_map('strtoupper', $method);
-        }
+        $methods = (array)$method;
+        $this->methods = ($method === '*') ? ['*'] : array_map('strtoupper', $methods);
     }
 }
