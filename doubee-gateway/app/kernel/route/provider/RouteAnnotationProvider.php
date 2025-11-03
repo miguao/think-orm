@@ -56,10 +56,9 @@ class RouteAnnotationProvider
             if (!class_exists($class)) continue;
 
             $ref = new ReflectionClass($class);
-            $ctrlAttribs = $ref->getAttributes(Controller::class);
-            if (empty($ctrlAttribs)) continue;
+            $ctrlAttribs = $ref->getAttributes(Controller::class)[0] ?? null;
 
-            $prefix = '/' . trim($ctrlAttribs[0]->newInstance()->prefix ?? '', '/');
+            $prefix = $ctrlAttribs ? '/' . trim($ctrlAttribs->newInstance()->prefix, '/') : '';
             $classMiddleware = array_map(fn($a) => $a->newInstance()->class, $ref->getAttributes(Middleware::class));
 
             foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
