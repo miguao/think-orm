@@ -121,6 +121,8 @@ class RouteAnnotationProvider
 
     private static function registerFromCache(array $routes): void
     {
+        print_r($routes);
+
         foreach ($routes as $r) {
             foreach ($r['methods'] as $m) {
                 Route::rule($r['path'], function (...$params) use ($r) {
