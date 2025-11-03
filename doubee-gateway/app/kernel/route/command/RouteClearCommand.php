@@ -20,8 +20,8 @@ class RouteClearCommand extends Command
 
     protected function execute(Input $input, Output $output): int
     {
-        Cache::delete(RouteAnnotationProvider::CACHE_KEY);
-        Cache::delete(RouteAnnotationProvider::HASH_KEY);
+        Cache::store('redis')->delete(RouteAnnotationProvider::CACHE_KEY);
+        Cache::store('redis')->delete(RouteAnnotationProvider::HASH_KEY);
 
         $output->writeln('<info>Route cache cleared successfully!</info>');
         return 0;

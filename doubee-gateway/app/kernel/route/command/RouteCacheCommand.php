@@ -20,8 +20,8 @@ class RouteCacheCommand extends Command
 
     protected function execute(Input $input, Output $output): int
     {
-        Cache::delete(RouteAnnotationProvider::CACHE_KEY);
-        Cache::delete(RouteAnnotationProvider::HASH_KEY);
+        Cache::store('redis')->delete(RouteAnnotationProvider::CACHE_KEY);
+        Cache::store('redis')->delete(RouteAnnotationProvider::HASH_KEY);
 
         RouteAnnotationProvider::register();
 

@@ -34,8 +34,8 @@ class RouteAnnotationProvider
 
         // 尝试从缓存读取
         if (!$isDebug) {
-            $cached = Cache::get(self::CACHE_KEY);
-            $cachedHash = Cache::get(self::HASH_KEY);
+            $cached = Cache::store('redis')->get(self::CACHE_KEY);
+            $cachedHash = Cache::store('redis')->get(self::HASH_KEY);
 
             if ($cached && $cachedHash === $dirHash) {
                 self::registerFromCache($cached);
@@ -114,8 +114,8 @@ class RouteAnnotationProvider
 
         // 缓存路由数据（生产环境）
         if (!$isDebug) {
-            Cache::set(self::CACHE_KEY, $routes, 86400 * 30);
-            Cache::set(self::HASH_KEY, $dirHash, 86400 * 30);
+            Cache::store('redis')->set(self::CACHE_KEY, $routes, 86400 * 30);
+            Cache::store('redis')->set(self::HASH_KEY, $dirHash, 86400 * 30);
         }
     }
 
