@@ -17,4 +17,8 @@ class Payment extends AbstractPayment
     {
         return $this->tradeService->preCreate();
     }
+
+    public function async()
+    {
+    }
 }
