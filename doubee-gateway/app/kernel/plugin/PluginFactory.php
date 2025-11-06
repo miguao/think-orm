@@ -4,25 +4,34 @@ declare (strict_types=1);
 
 namespace app\kernel\plugin;
 
+use app\kernel\component\Singleton;
+use app\kernel\plugin\entity\Plugin as PluginEntity;
 use app\kernel\plugin\entity\Query;
 use Symfony\Component\Finder\Finder;
 use think\facade\Event;
 
 class PluginFactory
 {
-    /**
-     * 插件工厂
-     * @var PluginFactory|null
-     */
-    protected static ?PluginFactory $instance = null;
+    use Singleton;
 
     /**
-     * 获取实例
-     * @return PluginFactory
+     * 获取插件
+     * @param string $identifier
+     * @return PluginEntity|null
      */
-    public static function getInstance(): PluginFactory
+    public function getPlugin(string $identifier): ?PluginEntity
     {
-        return self::$instance ??= new self();
+        $pluginBasePath = base_path("plugin/{$identifier}");
+        list($info, $handler) = [
+            $pluginBasePath . "Config/Info.php",
+            $pluginBasePath . "Config/Handler.php"
+        ];
+
+        if (!file_exists($info)) {
+            return null;
+        }
+
+        return new PluginEntity($identifier, (array)require($info), file_exists($handler) ? (array)require($handler) : []);
     }
 
     /**
@@ -33,48 +42,23 @@ class PluginFactory
     public function getInstalledPlugins(Query $query): array
     {
         $pluginBasePath = base_path('plugin');
-        $plugins = [];
+        $finder = is_dir($pluginBasePath) ? Finder::create()->in($pluginBasePath)->depth("== 0")->directories() : [];
 
-        $finder = new Finder();
-        $finder->in($pluginBasePath)->depth('< 2')->directories();
-
-        foreach ($finder as $dir) {
-            $folderName = $dir->getFilename();
-            $pluginPath = $dir->getRealPath();
-
-            $infoPath = $pluginPath . DIRECTORY_SEPARATOR . 'Config' . DIRECTORY_SEPARATOR . 'Info.php';
-            if (!is_file($infoPath)) {
+        $data = [];
+        foreach ($finder as $item) {
+            $plugin = $this->getPlugin($item->getFilename());
+            if (!$plugin) {
                 continue;
             }
 
-            $config = [];
-            if (is_file($infoPath)) {
-                $maybe = include $infoPath;
-                if (is_array($maybe)) {
-                    $config = $maybe;
-                }
-            }
-
-            $plugins[] = [
-                'icon' => "/admin/api/plugin/previewIcon?identifier={$folderName}",
-                'name' => $config['name'],
-                'identifier' => $folderName,
-                'type' => $config['type'],
-                'author' => $config['author'],
-                'description' => $config['description'],
-                'version' => $config['version'],
-            ];
+            $data[] = $plugin;
         }
 
-        if ($query->paginate) {
-            $offset = ($query->paginate[0] - 1) * $query->paginate[1];
-            $plugins = array_slice($plugins, $offset, $query->paginate[1]);
-            $total = count($plugins);
+        $offset = ($query->paginate[0] - 1) * $query->paginate[1];
+        $data = array_slice($data, $offset, $query->paginate[1]);
+        $total = count($data);
 
-            return ['list' => $plugins, 'total' => $total];
-        }
-
-        return $plugins;
+        return ['list' => $data, 'total' => $total];
     }
 
     /**
