@@ -4,18 +4,85 @@ declare (strict_types=1);
 
 namespace app\kernel\plugin\abstract;
 
+use app\kernel\plugin\entity\Plugin;
 use app\kernel\plugin\handler\Payment;
+use app\model\PaymentOrder;
 
 abstract class AbstractPayment implements Payment
 {
+    /**
+     * 插件信息
+     * @var Plugin
+     */
+    protected Plugin $plugin;
+
+    /**
+     * 订单信息
+     * @var PaymentOrder
+     */
+    protected PaymentOrder $order;
+
     /**
      * 配置信息
      * @var array
      */
     protected array $config;
 
-    public function __construct(array $config)
+    /**
+     * 客户端IP
+     * @var string
+     */
+    protected string $clientIp;
+
+    /**
+     * 支付金额
+     * @var float
+     */
+    protected float $amount;
+
+    /**
+     * 异步通知地址
+     * @var string
+     */
+    protected string $notificationUrl;
+
+    /**
+     * 同步跳转地址
+     * @var string|null
+     */
+    protected ?string $redirectUrl;
+
+    /**
+     * 构造函数
+     * @param Plugin $plugin
+     * @param PaymentOrder $order
+     * @param array $config
+     * @param string $clientIp
+     * @param float $amount
+     * @param string $notificationUrl
+     * @param string|null $redirectUrl
+     */
+    public function __construct(
+        Plugin       $plugin,
+        PaymentOrder $order,
+        array        $config,
+        string       $clientIp,
+        float        $amount,
+        string       $notificationUrl,
+        ?string      $redirectUrl = null
+    )
     {
+        $this->plugin = $plugin;
+        $this->order = $order;
         $this->config = $config;
+        $this->clientIp = $clientIp;
+        $this->amount = $amount;
+        $this->notificationUrl = $notificationUrl;
+        $this->redirectUrl = $redirectUrl;
+    }
+
+    public function successful(): void
+    {
+
     }
 }

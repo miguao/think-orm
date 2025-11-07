@@ -6,6 +6,7 @@ namespace app\kernel\plugin;
 
 use app\kernel\component\Singleton;
 use app\kernel\plugin\handler\Payment;
+use app\model\PaymentOrder;
 
 class PaymentFactory
 {
@@ -14,10 +15,23 @@ class PaymentFactory
     /**
      * 获取支付处理器
      * @param string $identifier
+     * @param PaymentOrder $paymentOrder
      * @param array $config
+     * @param string $clientIp
+     * @param float $amount
+     * @param string $notificationUrl
+     * @param string|null $redirectUrl
      * @return Payment|null
      */
-    public function getHandler(string $identifier, array $config): ?Payment
+    public function getHandler(
+        string       $identifier,
+        PaymentOrder $paymentOrder,
+        array        $config,
+        string       $clientIp,
+        float        $amount,
+        string       $notificationUrl,
+        ?string      $redirectUrl = null
+    ): ?Payment
     {
         $plugin = PluginFactory::getInstance()->getPlugin($identifier);
         if (!$plugin) {
@@ -33,6 +47,6 @@ class PaymentFactory
             return null;
         }
 
-        return new $handler($config);
+        return new $handler($plugin, $paymentOrder, $config, $clientIp, $amount, $notificationUrl, $redirectUrl);
     }
 }

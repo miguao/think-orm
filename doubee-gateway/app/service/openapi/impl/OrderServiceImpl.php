@@ -84,7 +84,16 @@ class OrderServiceImpl implements OrderService
             $paymentOrder->status = 0;
             $paymentOrder->save();
 
-            $plugin = PaymentFactory::getInstance()->getHandler($channel->plugin_identifier, (array)$channel->config);
+            $plugin = PaymentFactory::getInstance()->getHandler(
+                $channel->plugin_identifier,
+                $paymentOrder,
+                (array)$channel->config,
+                "127.0.0.1",
+                $amount,
+                $map['notification_url'],
+                null
+            );
+
             return $plugin->create();
         });
 
