@@ -9,6 +9,10 @@ use think\model\relation\HasOne;
 
 class PaymentChannel extends Model
 {
+    protected $type = [
+        'config' => 'array'
+    ];
+
     /**
      * 银行信息
      * @return HasOne
