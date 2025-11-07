@@ -84,7 +84,7 @@ class OrderServiceImpl implements OrderService
             $paymentOrder->status = 0;
             $paymentOrder->save();
 
-            $plugin = PaymentFactory::getInstance()->getHandler(
+            $handler = PaymentFactory::getInstance()->getHandler(
                 $channel->plugin_identifier,
                 $paymentOrder,
                 (array)$channel->config,
@@ -94,7 +94,7 @@ class OrderServiceImpl implements OrderService
                 null
             );
 
-            return $plugin->create();
+            return $handler->create();
         });
 
 
