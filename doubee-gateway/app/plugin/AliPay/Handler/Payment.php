@@ -10,6 +10,8 @@ class Payment extends AbstractPayment
 {
     public function create()
     {
+        print_r($this->config);
+        exit;
     }
 
     public function async()

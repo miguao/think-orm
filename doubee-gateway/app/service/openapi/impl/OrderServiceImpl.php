@@ -84,13 +84,7 @@ class OrderServiceImpl implements OrderService
             $paymentOrder->status = 0;
             $paymentOrder->save();
 
-            $plugin = PaymentFactory::getInstance()->getHandler('alipay');
-            $plugin->order = $paymentOrder;
-            $plugin->business = [
-                'app_id' => '2021004156668150',
-                'apply_private_key' => 'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCBEba23Aqk4dYuEwR0mSAFMo3oyQKQUPjzE1eWq6kqJ3F/jc/KCXPl2pXKXnt2zfwRT3q9pzVSrMaAkkFGmE34hYqf/yOwK4d3rqVfHUR3T//v8ExouhLX5P7VYfAXx7Un2ndb92o2CGtvtBiC8jsQxmgRL5l6t+QHwnRq18Gsy0xZFbdeszYq+klmWc33wsd7V3CZDLEWgjbLRwF4Se0XxaGyst/rYBPqi4WBcr1axM8e2OTtQTchnTeqT8A55cWsYI+wmMJKNamSb8lzd3mvM2VL+JYT3gfQOUwGlhcvZJ4gjKp5s/qb8HWRv/eRTp/HTqPzcxFBiV0Unfp2sPyPAgMBAAECggEAMmy9OYuWDPy+NJnxb6wzOlSZ5IxDmCZKXIz99ztxh6qJSRAaUhCHWxGe28U17yBijlDC3z1oM7iUhL6fCfmO3L0vf3qqcrVO448zxIkmqoZys0bqUy//FKG+fZcZufCn8b4ES8XJlPqNHsL5oI8KTG93UN+L0sntKKrr2KIaZGsp4xCnmjB1ErzgvqyKdC2KayZ53izPPi2bSGvX3E2dhVJB4bfTf45rQn+YTQTxI5OoZXi4MvhVXZpZ6qhFybMJdkHPuReVRCIRPs34vg9wKWDa0Vwc2Xwsjn/iz4t7ElWh1lZ3RwDxcWm2MQofAAPfSJ9iWl5Z6Ef7oG2cUi3b4QKBgQDILuCy37a8iPT2BJ06L4K774k/kahdhB1osSzbt2kXUMy5CyWTgy+o81tSwjW2mV5seRF187P8vuwiSDOakdsnUGLSVAatMdrBj39BWHM9AgCjIo5soJgOdXFM4Iy5raIMQFI2reOuDv2kw7At9gpTnjffBTaUnIp9HNCPfep5zQKBgQClDrS7HnsQDrRNtQffzZwBOIeNaG4SHLlB3RSV5PpVNTy/BXCw1mSKoacxD6dEqR2jEPN9amihY9q4yaHDAxlYPMNotK8N5itrgJFZ31gU6iN6lz+L5iAKIBDkZgDwvudISaYZb4GBwjqHRNcJNxf9zsvfB2zgZxD+MvsVTqkDywKBgEm4ccmN95bw/P1I77oI2yVo7mt5sb5WtBnk/bcgkVQjznDq+PidHEUk8eHFYdCQJKTf5R1CFWujyARMAK0Qv9t3kB0TEq5fqMcVmHCxKSczgJaTWE4KylSwzXvZShnrJr1KRryaRznHjYNLCauza1Ql9T9thQ8voxS2MtxVK6+VAoGAF1Ts10aHvs1VT2a3pjs6QjHrd2G7rXPB/D10G3wyprjPzXDHbTfhHnebWqQL0PjW56YNxTy1bZrf4B8gbqCRhJeSR8rCtARFPvz9juazXMF8Imge43e0L7o4qRCCMYXKy70dbZsFg4IhI93nR7Yx/f6tculpyo7HKCestmZYHeECgYEAikzLQAYJ2ICNQvm42jcQpyKn9SCHkQl02X3b1wTETCeAm47rsS0mJfFlMymc98hfMYGmJzxkwBudXDJ9XgAT0V3BaH0We1lSWk2Hj2XLsVc8ttw4WCWSHQKPAj6fh8OAo5arZfTSkrhQPXjrAJywhvgio89qWk6ZzqC7cuuIwNU=',
-                'alipay_public_key' => 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4QtauTRo29kR+L26l18VQfPbyEdnZ1GZGMoQbeoneaWiGH+0Fhzq86RZxKJ9f8q221oIJ1hpZV+6SndqRGLFOGuA12njaPo7eQSiME55fV2MDLtzRyD8/ZSi8WSb/uiOIanagOLcLC+/NEO6wqLoSbiaVkPGh4DUPLB7R6biE8olBiUNlgYzm+mPOtiabtqE3bz7BBcyli6d0FUmLTD1Jk09oQQNW3QvDPWlS+Fd56zqCj2Hlx/8vE/E/P9/Z2+iG7cZ5pmd7Sm/lmZ5z9XdWuj549DgtTIhQ7gHihgrRbxMmocLTHOSlWbhPD+eyrT6G2iONjnFhUewLhwG7lWMZwIDAQAB'
-            ];
+            $plugin = PaymentFactory::getInstance()->getHandler($channel->plugin_identifier, (array)$channel->config);
             return $plugin->create();
         });
 

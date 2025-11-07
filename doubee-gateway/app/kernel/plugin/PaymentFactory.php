@@ -14,9 +14,10 @@ class PaymentFactory
     /**
      * 获取支付处理器
      * @param string $identifier
+     * @param array $config
      * @return Payment|null
      */
-    public function getHandler(string $identifier): ?Payment
+    public function getHandler(string $identifier, array $config): ?Payment
     {
         $plugin = PluginFactory::getInstance()->getPlugin($identifier);
         if (!$plugin) {
@@ -32,6 +33,6 @@ class PaymentFactory
             return null;
         }
 
-        return new $handler();
+        return new $handler($config);
     }
 }
