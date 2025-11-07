@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace app\service\openapi\impl;
 
 use app\exception\JsonException;
+use app\kernel\plugin\PaymentFactory;
 use app\model\Merchant;
 use app\model\MerchantApplication;
+use app\model\PaymentBank;
 use app\model\PaymentChannel;
 use app\model\PaymentOrder;
 use app\plugin\AliPay\Handler\Payment;
@@ -27,6 +29,7 @@ class OrderServiceImpl implements OrderService
             throw new JsonException("当前商户状态异常，如有异常请联系客服。");
         }
 
+        // 查询商户应用
         $application = MerchantApplication::query()
             ->where("merchant_id", $merchant->id)
             ->where("application_no", $map['application_no'])
@@ -35,12 +38,16 @@ class OrderServiceImpl implements OrderService
             throw new JsonException("应用不存在");
         }
 
-        $channel = PaymentChannel::query()->find($map['channel_id']);
-        if (!$channel) {
-            throw new JsonException("通道不存在");
+        // 根据银行代码查找对应银行信息
+        $bank = PaymentBank::query()->where("code", $map['bank_code'])->find();
+        if (!$bank) {
+            throw new JsonException("银行代码不存在");
         }
-        if ($channel->status != 1) {
-            throw new JsonException("当前通道暂时关闭，如有异常请联系客服。");
+
+        // 根据银行ID查找可用支付通道
+        $channel = PaymentChannel::query()->where("bank_id", $bank->id)->find();
+        if (!$channel) {
+            throw new JsonException("无可用通道，请尝试其他支付方式。");
         }
 
         $amount = (float)$map['amount'];
@@ -77,7 +84,7 @@ class OrderServiceImpl implements OrderService
             $paymentOrder->status = 0;
             $paymentOrder->save();
 
-            $plugin = new Payment();
+            $plugin = PaymentFactory::getInstance()->getHandler('alipay');
             $plugin->order = $paymentOrder;
             $plugin->business = [
                 'app_id' => '2021004156668150',

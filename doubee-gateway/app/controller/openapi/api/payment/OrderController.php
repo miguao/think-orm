@@ -25,20 +25,22 @@ class OrderController extends AbstractController
         $this->validator((array)$map, [
             'merchant_no' => 'require',
             'application_no' => 'require',
-            'channel_id' => 'require',
+            'bank_code' => 'require',
             'out_trade_no' => 'require',
             'subject' => 'require',
             'amount' => 'require',
             'notification_url' => 'require',
+            'sign_type' => 'require',
             'sign' => 'require',
         ], [
             'merchant_no.require' => '商户号不能为空',
             'application_no.require' => '应用号不能为空',
-            'channel_id.require' => '通道ID不能为空',
+            'bank_code.require' => '银行代码不能为空',
             'out_trade_no.require' => '商户订单号不能为空',
             'subject.require' => '商品名称不能为空',
             'amount.require' => '订单金额不能为空',
-            'notification_url.require' => '回调地址不能为空',
+            'notification_url.require' => '通知地址不能为空',
+            'sign_type.require' => '签名方式不能为空',
             'sign.require' => '签名值不能为空',
         ]);
 
