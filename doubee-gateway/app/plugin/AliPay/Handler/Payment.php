@@ -15,9 +15,7 @@ class Payment extends AbstractPayment
         $instance = Builder::factory([
             'privateKey' => Rsa::fromPkcs1($this->config['apply_private_key']),
             'publicKey' => Rsa::fromSpki($this->config['alipay_public_key']),
-            'params' => [
-                'app_id' => $this->config['app_id'],
-            ],
+            'params' => ['app_id' => $this->config['app_id']],
         ]);
 
         $request = $instance->chain('alipay.trade.precreate')->post([
