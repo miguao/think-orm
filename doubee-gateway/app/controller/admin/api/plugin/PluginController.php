@@ -16,7 +16,7 @@ use JetBrains\PhpStorm\NoReturn;
 use think\response\Json;
 
 #[Controller("/admin/api/plugin")]
-#[Middleware(AuthenticationMiddleware::class)]
+//#[Middleware(AuthenticationMiddleware::class)]
 class PluginController extends AbstractAdminController
 {
     #[GetMapping("getInstalledPlugins")]
