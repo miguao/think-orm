@@ -42,6 +42,6 @@ class AppExceptionHandle extends Handle
                 return json(['code' => StatusCode::FAILED->value, 'message' => $e->getMessage()]);
         }
 
-        return parent::render($request, $e);
+        return json(['code' => StatusCode::FAILED->value, 'message' => $e->getMessage()]);
     }
 }
