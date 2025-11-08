@@ -22,16 +22,22 @@ class PluginFactory
     public function getPlugin(string $identifier): ?PluginEntity
     {
         $pluginBasePath = base_path("plugin/{$identifier}");
-        list($info, $handler) = [
+        list($info, $form, $handler) = [
             $pluginBasePath . "Config/Info.php",
-            $pluginBasePath . "Config/Handler.php"
+            $pluginBasePath . "Config/Form.php",
+            $pluginBasePath . "Config/Handler.php",
         ];
 
         if (!file_exists($info)) {
             return null;
         }
 
-        return new PluginEntity($identifier, (array)require($info), file_exists($handler) ? (array)require($handler) : []);
+        return new PluginEntity(
+            $identifier,
+            (array)require($info),
+            file_exists($form) ? (array)require($form) : [],
+            file_exists($handler) ? (array)require($handler) : []
+        );
     }
 
     /**
