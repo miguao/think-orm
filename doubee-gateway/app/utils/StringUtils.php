@@ -100,6 +100,7 @@ class StringUtils
     public static function generateSignature(array $data, string $secret): string
     {
         unset($data['sign']);
+        unset($data['sign_type']);
         ksort($data);
         foreach ($data as $key => $val) {
             if ($val === '' || is_array($val)) {
