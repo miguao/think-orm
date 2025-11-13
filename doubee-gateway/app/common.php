@@ -164,59 +164,62 @@ function get_linux_hardware_info(): array
         }
     }
 
-    // 方法2: 获取CPU ID
+    // 方法2: 获取CPU ID（优化：支持更多格式，即使部分信息缺失也能生成标识）
     $cpuInfo = @file_get_contents('/proc/cpuinfo');
-    if ($cpuInfo) {
+    if ($cpuInfo && strlen($cpuInfo) > 10) {
         // 尝试获取 CPU serial number (ARM架构)
         $cpuSerialNumber = extract_wmic_value($cpuInfo, '/^Serial\s*:\s*([0-9a-f]+)$/im');
         if ($cpuSerialNumber) {
             $hardwareInfo[] = 'cpu:' . strtoupper($cpuSerialNumber);
-        }
-
-        // 获取 CPU 型号和特性组合（支持多种格式）
-        $cpuModelName = extract_wmic_value($cpuInfo, '/^model name\s*:\s*(.+)$/im');
-        if (!$cpuModelName) {
-            // 备用：尝试获取 Hardware 字段（某些ARM架构）
-            $cpuModelName = extract_wmic_value($cpuInfo, '/^Hardware\s*:\s*(.+)$/im');
-        }
-        if (!$cpuModelName) {
-            // 备用：尝试获取 Processor 字段
-            $cpuModelName = extract_wmic_value($cpuInfo, '/^Processor\s*:\s*(.+)$/im');
-        }
-
-        $processorNumber = extract_wmic_value($cpuInfo, '/^processor\s*:\s*(\d+)$/im');
-        if (!$processorNumber) {
-            // 备用：尝试获取 BogoMIPS 或其他唯一标识
-            $bogoMips = extract_wmic_value($cpuInfo, '/^BogoMIPS\s*:\s*([0-9.]+)$/im');
-            if ($bogoMips) {
-                $processorNumber = md5($bogoMips);
-            }
-        }
-
-        if ($cpuModelName && $processorNumber) {
-            $hardwareInfo[] = 'cpu:' . md5($cpuModelName . $processorNumber);
-        } elseif ($cpuModelName) {
-            // 即使没有processor number，也使用CPU型号
-            $hardwareInfo[] = 'cpu:' . md5($cpuModelName);
-        } elseif ($processorNumber) {
-            // 或者使用processor number
-            $hardwareInfo[] = 'cpu:' . md5('processor' . $processorNumber);
         } else {
-            // 最后备用：使用CPU信息的前几行组合
-            $cpuLines = explode("\n", $cpuInfo);
-            $cpuKeyInfo = [];
-            foreach (array_slice($cpuLines, 0, 10) as $line) {
-                if (preg_match('/^[a-zA-Z\s]+:\s*(.+)$/', $line, $matches)) {
-                    $cpuKeyInfo[] = trim($matches[1]);
+            // 获取 CPU 型号和特性组合（支持多种格式）
+            $cpuModelName = extract_wmic_value($cpuInfo, '/^model name\s*:\s*(.+)$/im');
+            if (!$cpuModelName) {
+                $cpuModelName = extract_wmic_value($cpuInfo, '/^Hardware\s*:\s*(.+)$/im');
+            }
+            if (!$cpuModelName) {
+                $cpuModelName = extract_wmic_value($cpuInfo, '/^Processor\s*:\s*(.+)$/im');
+            }
+            if (!$cpuModelName) {
+                $cpuModelName = extract_wmic_value($cpuInfo, '/^cpu\s*:\s*(.+)$/im');
+            }
+
+            $processorNumber = extract_wmic_value($cpuInfo, '/^processor\s*:\s*(\d+)$/im');
+            if (!$processorNumber) {
+                $bogoMips = extract_wmic_value($cpuInfo, '/^BogoMIPS\s*:\s*([0-9.]+)$/im');
+                if ($bogoMips) {
+                    $processorNumber = md5($bogoMips);
                 }
             }
-            if (!empty($cpuKeyInfo)) {
+
+            // 使用CPU信息的前20行关键信息组合（更可靠）
+            $cpuLines = explode("\n", $cpuInfo);
+            $cpuKeyInfo = [];
+            foreach (array_slice($cpuLines, 0, 20) as $line) {
+                $line = trim($line);
+                if (preg_match('/^([a-zA-Z\s]+):\s*(.+)$/', $line, $matches)) {
+                    $key = strtolower(trim($matches[1]));
+                    $value = trim($matches[2]);
+                    // 只收集关键字段
+                    if (in_array($key, ['processor', 'model name', 'hardware', 'cpu', 'bogomips', 'cpu implementer', 'cpu architecture', 'cpu variant', 'cpu part'])) {
+                        $cpuKeyInfo[] = $key . ':' . $value;
+                    }
+                }
+            }
+
+            if ($cpuModelName && $processorNumber) {
+                $hardwareInfo[] = 'cpu:' . md5($cpuModelName . $processorNumber);
+            } elseif ($cpuModelName) {
+                $hardwareInfo[] = 'cpu:' . md5($cpuModelName);
+            } elseif (!empty($cpuKeyInfo)) {
                 $hardwareInfo[] = 'cpu:' . md5(implode('|', $cpuKeyInfo));
+            } elseif ($processorNumber) {
+                $hardwareInfo[] = 'cpu:' . md5('processor' . $processorNumber);
             }
         }
     }
 
-    // 方法3: 获取主板序列号（DMI）- 多种方法
+    // 方法3: 获取主板序列号（DMI）- 多种方法（在虚拟化环境中可能不可用）
     $output = @shell_exec('cat /sys/class/dmi/id/board_serial 2>/dev/null');
     $motherboardSerialNumber = $output ? trim($output) : null;
     if ($motherboardSerialNumber && is_valid_serial_number($motherboardSerialNumber)) {
@@ -225,7 +228,7 @@ function get_linux_hardware_info(): array
         // 备用方法1: 尝试获取主板产品名称
         $output = @shell_exec('cat /sys/class/dmi/id/board_name 2>/dev/null');
         $boardName = $output ? trim($output) : null;
-        if (!empty($boardName) && strtoupper($boardName) !== 'TO BE FILLED BY O.E.M.') {
+        if ($boardName && !empty($boardName) && strtoupper($boardName) !== 'TO BE FILLED BY O.E.M.') {
             $hardwareInfo[] = 'mb:' . md5($boardName);
         } else {
             // 备用方法2: 尝试获取主板厂商
@@ -256,43 +259,66 @@ function get_linux_hardware_info(): array
         }
     }
 
-    // 方法5: 获取机器ID（systemd）
+    // 方法5: 获取机器ID（systemd）- 在容器/虚拟化环境中可能不可用
     $machineIdentifier = @file_get_contents('/etc/machine-id');
     if ($machineIdentifier) {
         $machineIdentifier = trim($machineIdentifier);
         if (strlen($machineIdentifier) >= 16) {
             $hardwareInfo[] = 'machine:' . substr($machineIdentifier, 0, 32);
         }
-    } else {
-        // 备用方法1: 尝试获取 product_uuid
-        $output = @shell_exec('cat /sys/class/dmi/id/product_uuid 2>/dev/null');
-        $productUuid = $output ? trim($output) : null;
-        if (!empty($productUuid)) {
-            $hardwareInfo[] = 'uuid:' . str_replace('-', '', strtoupper($productUuid));
-        } else {
-            // 备用方法2: 使用 hostname + 系统信息组合
-            $hostname = @gethostname();
-            $uname = @php_uname('n');
-            if ($hostname || $uname) {
-                $hardwareInfo[] = 'host:' . md5(($hostname ?: '') . ($uname ?: ''));
-            }
-        }
     }
 
-    // 方法6: 获取系统UUID（额外备用）
+    // 方法6: 获取系统UUID（DMI）- 在虚拟化环境中可能不可用
     if (empty(array_filter($hardwareInfo, fn($item) => str_starts_with($item, 'uuid:')))) {
         $output = @shell_exec('cat /sys/class/dmi/id/product_uuid 2>/dev/null');
         $productUuid = $output ? trim($output) : null;
-        if (!empty($productUuid) && $productUuid !== '00000000-0000-0000-0000-000000000000') {
+        if ($productUuid && !empty($productUuid) && $productUuid !== '00000000-0000-0000-0000-000000000000') {
             $hardwareInfo[] = 'uuid:' . str_replace('-', '', strtoupper($productUuid));
         }
     }
 
-    // 方法7: 获取BIOS信息（备用）
+    // 方法7: 获取BIOS信息（DMI）- 在虚拟化环境中可能不可用
     $output = @shell_exec('cat /sys/class/dmi/id/bios_version 2>/dev/null');
     $biosVersion = $output ? trim($output) : null;
-    if (!empty($biosVersion)) {
+    if ($biosVersion && !empty($biosVersion)) {
         $hardwareInfo[] = 'bios:' . md5($biosVersion);
+    }
+
+    // 方法8: 使用系统信息组合（在受限环境中的可靠备用方法）
+    if (count($hardwareInfo) < 3) {
+        $systemInfo = [];
+
+        // 获取 hostname
+        $hostname = @gethostname();
+        if ($hostname) {
+            $systemInfo[] = 'hostname:' . $hostname;
+        }
+
+        // 获取 boot_id（Linux内核启动ID，每次启动都不同，但可以作为系统标识）
+        $bootId = @file_get_contents('/proc/sys/kernel/random/boot_id');
+        if ($bootId) {
+            $systemInfo[] = 'boot:' . trim($bootId);
+        }
+
+        // 获取系统版本信息
+        $osRelease = @file_get_contents('/etc/os-release');
+        if ($osRelease) {
+            $osId = extract_wmic_value($osRelease, '/^ID=["\']?([^"\'\n]+)["\']?/im');
+            $osVersionId = extract_wmic_value($osRelease, '/^VERSION_ID=["\']?([^"\'\n]+)["\']?/im');
+            if ($osId) {
+                $systemInfo[] = 'os:' . $osId . ($osVersionId ? ':' . $osVersionId : '');
+            }
+        }
+
+        // 获取内核版本
+        $kernelVersion = @php_uname('r');
+        if ($kernelVersion) {
+            $systemInfo[] = 'kernel:' . $kernelVersion;
+        }
+
+        if (!empty($systemInfo)) {
+            $hardwareInfo[] = 'system:' . md5(implode('|', $systemInfo));
+        }
     }
 
     return $hardwareInfo;
