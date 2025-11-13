@@ -284,41 +284,41 @@ function get_linux_hardware_info(): array
         $hardwareInfo[] = 'bios:' . md5($biosVersion);
     }
 
-    // 方法8: 使用系统信息组合（在受限环境中的可靠备用方法）
-    if (count($hardwareInfo) < 3) {
-        $systemInfo = [];
+    // 方法8: 使用系统信息组合（作为额外补充，提高硬件ID的唯一性和可靠性）
+    // 即使已有足够的硬件信息，也添加系统信息作为补充
+    $systemInfo = [];
 
-        // 获取 hostname
-        $hostname = @gethostname();
-        if ($hostname) {
-            $systemInfo[] = 'hostname:' . $hostname;
-        }
+    // 获取 hostname
+    $hostname = @gethostname();
+    if ($hostname) {
+        $systemInfo[] = 'hostname:' . $hostname;
+    }
 
-        // 获取 boot_id（Linux内核启动ID，每次启动都不同，但可以作为系统标识）
-        $bootId = @file_get_contents('/proc/sys/kernel/random/boot_id');
-        if ($bootId) {
-            $systemInfo[] = 'boot:' . trim($bootId);
-        }
+    // 获取 boot_id（Linux内核启动ID，每次启动都不同，但可以作为系统标识）
+    $bootId = @file_get_contents('/proc/sys/kernel/random/boot_id');
+    if ($bootId) {
+        $systemInfo[] = 'boot:' . trim($bootId);
+    }
 
-        // 获取系统版本信息
-        $osRelease = @file_get_contents('/etc/os-release');
-        if ($osRelease) {
-            $osId = extract_wmic_value($osRelease, '/^ID=["\']?([^"\'\n]+)["\']?/im');
-            $osVersionId = extract_wmic_value($osRelease, '/^VERSION_ID=["\']?([^"\'\n]+)["\']?/im');
-            if ($osId) {
-                $systemInfo[] = 'os:' . $osId . ($osVersionId ? ':' . $osVersionId : '');
-            }
+    // 获取系统版本信息
+    $osRelease = @file_get_contents('/etc/os-release');
+    if ($osRelease) {
+        $osId = extract_wmic_value($osRelease, '/^ID=["\']?([^"\'\n]+)["\']?/im');
+        $osVersionId = extract_wmic_value($osRelease, '/^VERSION_ID=["\']?([^"\'\n]+)["\']?/im');
+        if ($osId) {
+            $systemInfo[] = 'os:' . $osId . ($osVersionId ? ':' . $osVersionId : '');
         }
+    }
 
-        // 获取内核版本
-        $kernelVersion = @php_uname('r');
-        if ($kernelVersion) {
-            $systemInfo[] = 'kernel:' . $kernelVersion;
-        }
+    // 获取内核版本
+    $kernelVersion = @php_uname('r');
+    if ($kernelVersion) {
+        $systemInfo[] = 'kernel:' . $kernelVersion;
+    }
 
-        if (!empty($systemInfo)) {
-            $hardwareInfo[] = 'system:' . md5(implode('|', $systemInfo));
-        }
+    // 如果系统信息不为空，添加为硬件标识
+    if (!empty($systemInfo)) {
+        $hardwareInfo[] = 'system:' . md5(implode('|', $systemInfo));
     }
 
     return $hardwareInfo;
