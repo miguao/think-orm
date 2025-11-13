@@ -173,19 +173,68 @@ function get_linux_hardware_info(): array
             $hardwareInfo[] = 'cpu:' . strtoupper($cpuSerialNumber);
         }
 
-        // 获取 CPU 型号和特性组合
+        // 获取 CPU 型号和特性组合（支持多种格式）
         $cpuModelName = extract_wmic_value($cpuInfo, '/^model name\s*:\s*(.+)$/im');
+        if (!$cpuModelName) {
+            // 备用：尝试获取 Hardware 字段（某些ARM架构）
+            $cpuModelName = extract_wmic_value($cpuInfo, '/^Hardware\s*:\s*(.+)$/im');
+        }
+        if (!$cpuModelName) {
+            // 备用：尝试获取 Processor 字段
+            $cpuModelName = extract_wmic_value($cpuInfo, '/^Processor\s*:\s*(.+)$/im');
+        }
+
         $processorNumber = extract_wmic_value($cpuInfo, '/^processor\s*:\s*(\d+)$/im');
+        if (!$processorNumber) {
+            // 备用：尝试获取 BogoMIPS 或其他唯一标识
+            $bogoMips = extract_wmic_value($cpuInfo, '/^BogoMIPS\s*:\s*([0-9.]+)$/im');
+            if ($bogoMips) {
+                $processorNumber = md5($bogoMips);
+            }
+        }
+
         if ($cpuModelName && $processorNumber) {
             $hardwareInfo[] = 'cpu:' . md5($cpuModelName . $processorNumber);
+        } elseif ($cpuModelName) {
+            // 即使没有processor number，也使用CPU型号
+            $hardwareInfo[] = 'cpu:' . md5($cpuModelName);
+        } elseif ($processorNumber) {
+            // 或者使用processor number
+            $hardwareInfo[] = 'cpu:' . md5('processor' . $processorNumber);
+        } else {
+            // 最后备用：使用CPU信息的前几行组合
+            $cpuLines = explode("\n", $cpuInfo);
+            $cpuKeyInfo = [];
+            foreach (array_slice($cpuLines, 0, 10) as $line) {
+                if (preg_match('/^[a-zA-Z\s]+:\s*(.+)$/', $line, $matches)) {
+                    $cpuKeyInfo[] = trim($matches[1]);
+                }
+            }
+            if (!empty($cpuKeyInfo)) {
+                $hardwareInfo[] = 'cpu:' . md5(implode('|', $cpuKeyInfo));
+            }
         }
     }
 
-    // 方法3: 获取主板序列号（DMI）
+    // 方法3: 获取主板序列号（DMI）- 多种方法
     $output = @shell_exec('cat /sys/class/dmi/id/board_serial 2>/dev/null');
     $motherboardSerialNumber = $output ? trim($output) : null;
     if ($motherboardSerialNumber && is_valid_serial_number($motherboardSerialNumber)) {
         $hardwareInfo[] = 'mb:' . $motherboardSerialNumber;
+    } else {
+        // 备用方法1: 尝试获取主板产品名称
+        $output = @shell_exec('cat /sys/class/dmi/id/board_name 2>/dev/null');
+        $boardName = $output ? trim($output) : null;
+        if (!empty($boardName) && strtoupper($boardName) !== 'TO BE FILLED BY O.E.M.') {
+            $hardwareInfo[] = 'mb:' . md5($boardName);
+        } else {
+            // 备用方法2: 尝试获取主板厂商
+            $output = @shell_exec('cat /sys/class/dmi/id/board_vendor 2>/dev/null');
+            $boardVendor = $output ? trim($output) : null;
+            if ($boardVendor && !empty($boardVendor)) {
+                $hardwareInfo[] = 'mb:' . md5($boardVendor);
+            }
+        }
     }
 
     // 方法4: 获取硬盘序列号
@@ -214,6 +263,36 @@ function get_linux_hardware_info(): array
         if (strlen($machineIdentifier) >= 16) {
             $hardwareInfo[] = 'machine:' . substr($machineIdentifier, 0, 32);
         }
+    } else {
+        // 备用方法1: 尝试获取 product_uuid
+        $output = @shell_exec('cat /sys/class/dmi/id/product_uuid 2>/dev/null');
+        $productUuid = $output ? trim($output) : null;
+        if (!empty($productUuid)) {
+            $hardwareInfo[] = 'uuid:' . str_replace('-', '', strtoupper($productUuid));
+        } else {
+            // 备用方法2: 使用 hostname + 系统信息组合
+            $hostname = @gethostname();
+            $uname = @php_uname('n');
+            if ($hostname || $uname) {
+                $hardwareInfo[] = 'host:' . md5(($hostname ?: '') . ($uname ?: ''));
+            }
+        }
+    }
+
+    // 方法6: 获取系统UUID（额外备用）
+    if (empty(array_filter($hardwareInfo, fn($item) => str_starts_with($item, 'uuid:')))) {
+        $output = @shell_exec('cat /sys/class/dmi/id/product_uuid 2>/dev/null');
+        $productUuid = $output ? trim($output) : null;
+        if (!empty($productUuid) && $productUuid !== '00000000-0000-0000-0000-000000000000') {
+            $hardwareInfo[] = 'uuid:' . str_replace('-', '', strtoupper($productUuid));
+        }
+    }
+
+    // 方法7: 获取BIOS信息（备用）
+    $output = @shell_exec('cat /sys/class/dmi/id/bios_version 2>/dev/null');
+    $biosVersion = $output ? trim($output) : null;
+    if (!empty($biosVersion)) {
+        $hardwareInfo[] = 'bios:' . md5($biosVersion);
     }
 
     return $hardwareInfo;
