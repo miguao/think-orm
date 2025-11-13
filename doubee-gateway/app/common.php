@@ -91,8 +91,10 @@ function get_windows_hardware_info(): array
                 $macAddress = str_replace(['-', ':'], '', trim($parts[0]));
                 $transport = strtolower(trim($parts[3] ?? ''));
 
-                if (is_valid_mac_address($macAddress)
-                    && !str_contains($transport, 'media disconnected')) {
+                if (
+                    is_valid_mac_address($macAddress)
+                    && !str_contains($transport, 'media disconnected')
+                ) {
                     $hardwareInfo[] = 'mac:' . strtoupper($macAddress);
                     break;
                 }
@@ -140,12 +142,27 @@ function get_linux_hardware_info(): array
     $hardwareInfo = [];
 
     // 方法1: 获取物理网卡MAC地址（排除虚拟网卡）
-    $output = @shell_exec("ip link show 2>/dev/null | grep -E '^[0-9]+:' | grep -v 'lo:' | head -1");
-    if ($output) {
-        $output2 = @shell_exec("ip link show 2>/dev/null | grep -A 1 -E '^[0-9]+:' | grep -E 'link/ether' | head -1");
-        $macAddress = extract_mac_address($output2, '/([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i');
-        if ($macAddress) {
-            $hardwareInfo[] = 'mac:' . $macAddress;
+    // 优化：只执行一次 ip link show 命令，在PHP中解析
+    $ipLinkOutput = @shell_exec('ip link show 2>/dev/null');
+    if ($ipLinkOutput) {
+        $lines = explode("\n", $ipLinkOutput);
+        foreach ($lines as $i => $line) {
+            // 查找接口行（格式：1: eth0: ...）
+            if (preg_match('/^\d+:\s+([^:]+):/', $line, $matches)) {
+                $interface = trim($matches[1]);
+                // 跳过lo接口
+                if ($interface === 'lo') {
+                    continue;
+                }
+                // 检查下一行是否有MAC地址
+                if (isset($lines[$i + 1]) && preg_match('/link\/ether\s+([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i', $lines[$i + 1], $macMatches)) {
+                    $macAddress = extract_mac_address($lines[$i + 1], '/([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i');
+                    if ($macAddress) {
+                        $hardwareInfo[] = 'mac:' . $macAddress;
+                        break; // 找到第一个有效MAC后退出
+                    }
+                }
+            }
         }
     }
 
@@ -192,29 +209,31 @@ function get_linux_hardware_info(): array
                 }
             }
 
-            // 使用CPU信息的前20行关键信息组合（更可靠）
-            $cpuLines = explode("\n", $cpuInfo);
-            $cpuKeyInfo = [];
-            foreach (array_slice($cpuLines, 0, 20) as $line) {
-                $line = trim($line);
-                if (preg_match('/^([a-zA-Z\s]+):\s*(.+)$/', $line, $matches)) {
-                    $key = strtolower(trim($matches[1]));
-                    $value = trim($matches[2]);
-                    // 只收集关键字段
-                    if (in_array($key, ['processor', 'model name', 'hardware', 'cpu', 'bogomips', 'cpu implementer', 'cpu architecture', 'cpu variant', 'cpu part'])) {
-                        $cpuKeyInfo[] = $key . ':' . $value;
-                    }
-                }
-            }
-
+            // 如果已有CPU型号或处理器号，直接使用；否则收集关键信息组合
             if ($cpuModelName && $processorNumber) {
                 $hardwareInfo[] = 'cpu:' . md5($cpuModelName . $processorNumber);
             } elseif ($cpuModelName) {
                 $hardwareInfo[] = 'cpu:' . md5($cpuModelName);
-            } elseif (!empty($cpuKeyInfo)) {
-                $hardwareInfo[] = 'cpu:' . md5(implode('|', $cpuKeyInfo));
             } elseif ($processorNumber) {
                 $hardwareInfo[] = 'cpu:' . md5('processor' . $processorNumber);
+            } else {
+                // 最后备用：使用CPU信息的前20行关键信息组合
+                $cpuLines = explode("\n", $cpuInfo);
+                $cpuKeyInfo = [];
+                foreach (array_slice($cpuLines, 0, 20) as $line) {
+                    $line = trim($line);
+                    if (preg_match('/^([a-zA-Z\s]+):\s*(.+)$/', $line, $matches)) {
+                        $key = strtolower(trim($matches[1]));
+                        $value = trim($matches[2]);
+                        // 只收集关键字段
+                        if (in_array($key, ['processor', 'model name', 'hardware', 'cpu', 'bogomips', 'cpu implementer', 'cpu architecture', 'cpu variant', 'cpu part'])) {
+                            $cpuKeyInfo[] = $key . ':' . $value;
+                        }
+                    }
+                }
+                if (!empty($cpuKeyInfo)) {
+                    $hardwareInfo[] = 'cpu:' . md5(implode('|', $cpuKeyInfo));
+                }
             }
         }
     }
@@ -228,13 +247,13 @@ function get_linux_hardware_info(): array
         // 备用方法1: 尝试获取主板产品名称
         $output = @shell_exec('cat /sys/class/dmi/id/board_name 2>/dev/null');
         $boardName = $output ? trim($output) : null;
-        if ($boardName && !empty($boardName) && strtoupper($boardName) !== 'TO BE FILLED BY O.E.M.') {
+        if (!empty($boardName) && strtoupper($boardName) !== 'TO BE FILLED BY O.E.M.') {
             $hardwareInfo[] = 'mb:' . md5($boardName);
         } else {
             // 备用方法2: 尝试获取主板厂商
             $output = @shell_exec('cat /sys/class/dmi/id/board_vendor 2>/dev/null');
             $boardVendor = $output ? trim($output) : null;
-            if ($boardVendor && !empty($boardVendor)) {
+            if (!empty($boardVendor)) {
                 $hardwareInfo[] = 'mb:' . md5($boardVendor);
             }
         }
@@ -269,10 +288,18 @@ function get_linux_hardware_info(): array
     }
 
     // 方法6: 获取系统UUID（DMI）- 在虚拟化环境中可能不可用
-    if (empty(array_filter($hardwareInfo, fn($item) => str_starts_with($item, 'uuid:')))) {
+    // 检查是否已有UUID（避免重复）
+    $hasUuid = false;
+    foreach ($hardwareInfo as $item) {
+        if (str_starts_with($item, 'uuid:')) {
+            $hasUuid = true;
+            break;
+        }
+    }
+    if (!$hasUuid) {
         $output = @shell_exec('cat /sys/class/dmi/id/product_uuid 2>/dev/null');
         $productUuid = $output ? trim($output) : null;
-        if ($productUuid && !empty($productUuid) && $productUuid !== '00000000-0000-0000-0000-000000000000') {
+        if (!empty($productUuid) && $productUuid !== '00000000-0000-0000-0000-000000000000') {
             $hardwareInfo[] = 'uuid:' . str_replace('-', '', strtoupper($productUuid));
         }
     }
@@ -280,7 +307,7 @@ function get_linux_hardware_info(): array
     // 方法7: 获取BIOS信息（DMI）- 在虚拟化环境中可能不可用
     $output = @shell_exec('cat /sys/class/dmi/id/bios_version 2>/dev/null');
     $biosVersion = $output ? trim($output) : null;
-    if ($biosVersion && !empty($biosVersion)) {
+    if (!empty($biosVersion)) {
         $hardwareInfo[] = 'bios:' . md5($biosVersion);
     }
 
@@ -418,4 +445,25 @@ function get_hardware_id(?string $hardwareIdSpecified = null): string
     // 取前16个字符作为硬件ID并规范化
     $hardwareId = strtoupper(substr($hardwareHash, 0, 16));
     return str_pad($hardwareId, 16, '0', STR_PAD_RIGHT);
+}
+
+/**
+ * 计算文件的哈希值（使用硬件ID作为盐值）
+ * @param string $filePath 文件路径
+ * @param string $hardwareId 硬件ID
+ * @return string|null 文件的哈希值，失败返回null
+ */
+function calculate_file_hash(string $filePath, string $hardwareId): ?string
+{
+    if (!file_exists($filePath)) {
+        return null;
+    }
+
+    $content = file_get_contents($filePath);
+    if ($content === false) {
+        return null;
+    }
+
+    // 使用硬件ID作为盐值，增加安全性
+    return hash_hmac('sha256', $content, $hardwareId);
 }
