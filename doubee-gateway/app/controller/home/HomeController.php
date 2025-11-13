@@ -24,22 +24,24 @@ class HomeController extends AbstractController
     #[GetMapping("trade")]
     public function trade()
     {
-        $paymentOrder = new PaymentOrder();
-        $paymentOrder->trade_no = StringUtils::generateTradeNo();
-        $paymentOrder->subject = "在线充值，订单号：" . StringUtils::generateTradeNo();
+        print_r(get_hardware_id());
 
-        $config = PaymentChannel::query()->where("plugin_identifier", "AliPay")->find()->config;
-
-        $class = PaymentFactory::getInstance()->getHandler(
-            identifier: "Alipay",
-            paymentOrder: $paymentOrder,
-            config: $config,
-            clientIp: "127.0.0.1",
-            amount: 0.01,
-            notificationUrl: "https://testing.nanoa.cn/",
-            redirectUrl: null
-        );
-        print_r($class->create());
-        exit;
+//        $paymentOrder = new PaymentOrder();
+//        $paymentOrder->trade_no = StringUtils::generateTradeNo();
+//        $paymentOrder->subject = "在线充值，订单号：" . StringUtils::generateTradeNo();
+//
+//        $config = PaymentChannel::query()->where("plugin_identifier", "AliPay")->find()->config;
+//
+//        $class = PaymentFactory::getInstance()->getHandler(
+//            identifier: "Alipay",
+//            paymentOrder: $paymentOrder,
+//            config: $config,
+//            clientIp: "127.0.0.1",
+//            amount: 0.01,
+//            notificationUrl: "https://testing.nanoa.cn/",
+//            redirectUrl: null
+//        );
+//        print_r($class->create());
+//        exit;
     }
 }
