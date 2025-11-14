@@ -60,7 +60,7 @@ class OrderServiceImpl implements OrderService
             throw new JsonException("签名错误");
         }
 
-        $order = Db::transaction(function () use ($map, $merchant, $application, $channel, $amount) {
+        return Db::transaction(function () use ($map, $merchant, $application, $channel, $amount) {
             $merchantId = (int)$merchant->id;
             $applicationId = (int)$application->id;
             $channelId = (int)$channel->id;
@@ -94,10 +94,8 @@ class OrderServiceImpl implements OrderService
                 null
             );
 
-            return $handler->create();
+            $pay = $handler->create();
+            return ['url' => $pay->getPayUrl()];
         });
-
-
-        return ['url' => $order];
     }
 }
