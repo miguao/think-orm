@@ -7,6 +7,7 @@ namespace app\exception\handle;
 use app\constant\StatusCode;
 use app\exception\JsonException;
 use app\exception\UnauthorizedException;
+use app\kernel\plugin\exception\PluginException;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\exception\Handle;
@@ -37,6 +38,7 @@ class AppExceptionHandle extends Handle
         switch (true) {
             case $e instanceof JsonException:
             case $e instanceof UnauthorizedException:
+            case $e instanceof PluginException:
                 return json(['code' => $e->getCode(), 'message' => $e->getMessage()]);
             case $e instanceof ValidateException:
                 return json(['code' => StatusCode::FAILED->value, 'message' => $e->getMessage()]);
