@@ -11,7 +11,7 @@ class Get
      * @var string
      */
     public string $model;
-    
+
     /**
      * 分页信息
      * @var array|null
@@ -35,7 +35,6 @@ class Get
      * @var array
      */
     public array $columns = ['*'];
-
 
     /**
      * @var array
