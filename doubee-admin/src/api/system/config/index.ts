@@ -8,14 +8,17 @@ import { Config, SearchParam } from './model';
  * @returns Promise<Config[]>
  */
 export async function getConfigList(params?: SearchParam) {
-    const response = await request.get<ApiResult<Config[]>>('/config/getConfigList', {
-        params
-    });
-    if (response.data.code === 200) {
-        return response.data.data;
+  const response = await request.get<ApiResult<Config[]>>(
+    '/config/getConfigList',
+    {
+      params
     }
+  );
+  if (response.data.code === 200) {
+    return response.data.data;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -24,15 +27,15 @@ export async function getConfigList(params?: SearchParam) {
  * @returns Promise<string>
  */
 export async function addConfig(data: Config) {
-    const response = await request.post<ApiResult<unknown>>(
-        '/config/saveConfig',
-        data
-    );
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.post<ApiResult<unknown>>(
+    '/config/saveConfig',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -41,12 +44,15 @@ export async function addConfig(data: Config) {
  * @returns Promise<string>
  */
 export async function updateConfig(data: Config) {
-    const response = await request.put<ApiResult<unknown>>('/config/saveConfig', data);
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.put<ApiResult<unknown>>(
+    '/config/saveConfig',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -55,10 +61,13 @@ export async function updateConfig(data: Config) {
  * @returns Promise<string>
  */
 export async function deleteConfig(list: number[]) {
-    const response = await request.delete<ApiResult<unknown>>('/config/deleteConfig', { data: { list } });
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.delete<ApiResult<unknown>>(
+    '/config/deleteConfig',
+    { data: { list } }
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }

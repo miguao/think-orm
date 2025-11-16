@@ -8,9 +8,12 @@ import { DictionaryData } from '../dictionary-data/model';
  * @returns Promise<Dictionary[]>
  */
 export async function getDictionaryByCode(code: string) {
-  const response = await request.get<ApiResult<DictionaryData[]>>('/dictionary/getDictionaryByCode', {
-    params: { code }
-  });
+  const response = await request.get<ApiResult<DictionaryData[]>>(
+    '/dictionary/getDictionaryByCode',
+    {
+      params: { code }
+    }
+  );
   if (response.data.code === 200 && response.data.data) {
     return response.data.data;
   }
@@ -24,9 +27,12 @@ export async function getDictionaryByCode(code: string) {
  * @returns Promise<Dictionary[]>
  */
 export async function getAllDictionaryList(params?: SearchParam) {
-  const response = await request.get<ApiResult<Dictionary[]>>('/dictionary/getAllDictionaryList', {
-    params
-  });
+  const response = await request.get<ApiResult<Dictionary[]>>(
+    '/dictionary/getAllDictionaryList',
+    {
+      params
+    }
+  );
   if (response.data.code === 200) {
     return response.data.data;
   }
@@ -57,7 +63,10 @@ export async function addDictionary(data: Dictionary) {
  * @returns Promise<string>
  */
 export async function updateDictionary(data: Dictionary) {
-  const response = await request.put<ApiResult<unknown>>('/dictionary/saveDictionary', data);
+  const response = await request.put<ApiResult<unknown>>(
+    '/dictionary/saveDictionary',
+    data
+  );
   if (response.data.code === 200) {
     return response.data.message;
   }
@@ -72,7 +81,8 @@ export async function updateDictionary(data: Dictionary) {
  */
 export async function deleteDictionary(id?: number) {
   const response = await request.delete<ApiResult<unknown>>(
-    '/dictionary/deleteDictionary', { data: { list: [id] } }
+    '/dictionary/deleteDictionary',
+    { data: { list: [id] } }
   );
   if (response.data.code === 200) {
     return response.data.message;

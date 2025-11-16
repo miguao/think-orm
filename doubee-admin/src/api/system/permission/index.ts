@@ -8,12 +8,15 @@ import type { Permission, SearchParam } from './model';
  * @returns Promise<Permission[]>
  */
 export async function getPermissionList(params: SearchParam) {
-    const response = await request.get<ApiResult<Permission[]>>('/user/permission/getPermissionList', { params });
-    if (response.data.code === 200 && response.data.data) {
-        return response.data.data;
-    }
+  const response = await request.get<ApiResult<Permission[]>>(
+    '/user/permission/getPermissionList',
+    { params }
+  );
+  if (response.data.code === 200 && response.data.data) {
+    return response.data.data;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -22,12 +25,15 @@ export async function getPermissionList(params: SearchParam) {
  * @returns Promise<string>
  */
 export async function addPermission(data: Permission) {
-    const response = await request.post<ApiResult<Permission[]>>('/user/permission/savePermission', data);
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.post<ApiResult<Permission[]>>(
+    '/user/permission/savePermission',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -36,24 +42,30 @@ export async function addPermission(data: Permission) {
  * @returns Promise<string>
  */
 export async function updatePermission(data: Permission) {
-    const response = await request.put<ApiResult<Permission[]>>('/user/permission/savePermission', data);
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.put<ApiResult<Permission[]>>(
+    '/user/permission/savePermission',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
  * 删除权限
  * @param id 权限ID
- * @returns Promise<string> 
+ * @returns Promise<string>
  */
 export async function deletePermission(id?: number) {
-    const response = await request.delete<ApiResult<unknown>>('/user/permission/deletePermission', { data: { list: id } });
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.delete<ApiResult<unknown>>(
+    '/user/permission/deletePermission',
+    { data: { list: id } }
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }

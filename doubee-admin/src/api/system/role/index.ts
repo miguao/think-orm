@@ -9,7 +9,10 @@ import type { Permission } from '../permission/model';
  * @returns Promise<Role[]>
  */
 export async function getRoleList(params: SearchParam) {
-  const response = await request.get<ApiResult<Role[]>>('/user/role/getRoleList', { params });
+  const response = await request.get<ApiResult<Role[]>>(
+    '/user/role/getRoleList',
+    { params }
+  );
   if (response.data.code === 200 && response.data.data) {
     return response.data.data;
   }
@@ -23,7 +26,10 @@ export async function getRoleList(params: SearchParam) {
  * @returns Promise<string>
  */
 export async function addRole(data: Role) {
-  const response = await request.post<ApiResult<unknown>>('/user/role/saveRole', data);
+  const response = await request.post<ApiResult<unknown>>(
+    '/user/role/saveRole',
+    data
+  );
   if (response.data.code === 200) {
     return response.data.message;
   }
@@ -37,7 +43,10 @@ export async function addRole(data: Role) {
  * @returns Promise<string>
  */
 export async function updateRole(data: Role) {
-  const response = await request.put<ApiResult<unknown>>('/user/role/saveRole', data);
+  const response = await request.put<ApiResult<unknown>>(
+    '/user/role/saveRole',
+    data
+  );
   if (response.data.code === 200) {
     return response.data.message;
   }
@@ -47,11 +56,14 @@ export async function updateRole(data: Role) {
 
 /**
  * 删除角色
- * @param list 删除列表 
+ * @param list 删除列表
  * @returns Promise<string>
  */
 export async function deleteRole(list: number[]) {
-  const response = await request.delete<ApiResult<unknown>>('/user/role/deleteRole', { data: { list } });
+  const response = await request.delete<ApiResult<unknown>>(
+    '/user/role/deleteRole',
+    { data: { list } }
+  );
   if (response.data.code === 200) {
     return response.data.message;
   }
@@ -79,7 +91,8 @@ export async function listRoles(params?: SearchParam) {
  */
 export async function getPermissionsByRoleId(roleId?: number) {
   const res = await request.get<ApiResult<Permission[]>>(
-    '/user/role/getPermissionsByRoleId', { params: { role_id: roleId } }
+    '/user/role/getPermissionsByRoleId',
+    { params: { role_id: roleId } }
   );
   if (res.data.code === 200) {
     return res.data.data;

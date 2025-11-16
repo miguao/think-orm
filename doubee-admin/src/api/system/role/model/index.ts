@@ -7,7 +7,7 @@ export interface Role {
   name?: string;
   creation_time?: string;
   status?: number;
-  permissions?: Permission[] | TreeKey[]
+  permissions?: Permission[] | TreeKey[];
 }
 
 export interface SearchParam extends PageParam {

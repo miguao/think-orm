@@ -8,15 +8,15 @@ import { ApiResult } from '@/api';
  * @returns Promise<Institution[]>
  */
 export async function getInstitutionList(params: SearchParam) {
-    const response = await request.get<ApiResult<Institution[]>>(
-        '/institution/getInstitutionList',
-        { params }
-    );
-    if (response.data.code === 200 && response.data.data) {
-        return response.data.data;
-    }
+  const response = await request.get<ApiResult<Institution[]>>(
+    '/institution/getInstitutionList',
+    { params }
+  );
+  if (response.data.code === 200 && response.data.data) {
+    return response.data.data;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -25,15 +25,15 @@ export async function getInstitutionList(params: SearchParam) {
  * @returns Promise<string>
  */
 export async function addInstitution(data: Institution) {
-    const response = await request.post<ApiResult<unknown>>(
-        '/institution/saveInstitution',
-        data
-    );
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.post<ApiResult<unknown>>(
+    '/institution/saveInstitution',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -42,15 +42,15 @@ export async function addInstitution(data: Institution) {
  * @returns Promise<string>
  */
 export async function updateInstitution(data: Institution) {
-    const response = await request.put<ApiResult<unknown>>(
-        '/institution/saveInstitution',
-        data
-    );
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.put<ApiResult<unknown>>(
+    '/institution/saveInstitution',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -59,15 +59,13 @@ export async function updateInstitution(data: Institution) {
  * @returns Promise<string>
  */
 export async function deleteInstitution(id?: number) {
-    const response = await request.delete<ApiResult<unknown>>(
-        'institution/deleteInstitution',
-        { data: { list: [id] } }
-    );
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.delete<ApiResult<unknown>>(
+    'institution/deleteInstitution',
+    { data: { list: [id] } }
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
-
-

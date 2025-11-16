@@ -1,1 +1,1 @@
-export interface File { }
+export interface File {}

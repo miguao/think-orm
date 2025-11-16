@@ -9,5 +9,4 @@ export interface Dictionary {
   creation_time?: string;
 }
 
-export interface SearchParam extends PageParam {
-}
+export interface SearchParam extends PageParam {}

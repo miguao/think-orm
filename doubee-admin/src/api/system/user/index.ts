@@ -8,7 +8,10 @@ import type { SearchParam, User } from './model';
  * @returns Promise<User[]>
  */
 export async function getUserList(params: SearchParam) {
-  const response = await request.get<ApiResult<PageResult<User>>>('/user/getUserList', { params });
+  const response = await request.get<ApiResult<PageResult<User>>>(
+    '/user/getUserList',
+    { params }
+  );
   if (response.data.code === 200) {
     return response.data.data;
   }
@@ -22,7 +25,10 @@ export async function getUserList(params: SearchParam) {
  * @returns Promise<string>
  */
 export async function addUser(data: User) {
-  const response = await request.post<ApiResult<unknown>>('/user/saveUser', data);
+  const response = await request.post<ApiResult<unknown>>(
+    '/user/saveUser',
+    data
+  );
   if (response.data.code === 200) {
     return response.data.message;
   }
@@ -36,7 +42,10 @@ export async function addUser(data: User) {
  * @returns Promise<string>
  */
 export async function updateUser(data: User) {
-  const response = await request.put<ApiResult<unknown>>('/user/saveUser', data);
+  const response = await request.put<ApiResult<unknown>>(
+    '/user/saveUser',
+    data
+  );
   if (response.data.code === 200) {
     return response.data.message;
   }
@@ -49,7 +58,10 @@ export async function updateUser(data: User) {
  * @returns Promise<string>
  */
 export async function deleteUser(list: number[]) {
-  const response = await request.delete<ApiResult<unknown>>('/user/deleteUser', { data: { list } });
+  const response = await request.delete<ApiResult<unknown>>(
+    '/user/deleteUser',
+    { data: { list } }
+  );
   if (response.data.code === 200) {
     return response.data.message;
   }
