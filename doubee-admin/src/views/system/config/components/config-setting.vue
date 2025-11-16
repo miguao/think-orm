@@ -46,8 +46,6 @@
                 v-model="form[item.key]"
                 :placeholder="'请输入' + item.title"
               />
-
-              
             </el-form-item>
           </el-col>
         </el-row>
