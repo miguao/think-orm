@@ -59,11 +59,11 @@ export const useUserStore = defineStore('user', {
 
       const { menus, homePath } = formatMenus(
         USER_MENUS ??
-        toTree({
-          data: result.menus?.filter?.((d) => d.type !== 1),
-          idField: 'id',
-          parentIdField: 'parent_id'
-        })
+          toTree({
+            data: result.menus?.filter?.((d) => d.type !== 1),
+            idField: 'id',
+            parentIdField: 'parent_id'
+          })
       );
 
       this.setMenus(menus);

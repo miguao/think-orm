@@ -102,19 +102,19 @@ const DEFAULT_STATE: ThemeState = {
   /** 内容区是否最大化 */
   maximized: false,
   /** 是否需要页签栏 */
-  tabBar: true,
+  tabBar: false,
   /** 布局类型 */
-  layout: 'default',
+  layout: 'top',
   /** 侧栏布局类型 */
   sidebarLayout: 'default',
   /** 顶栏风格 */
-  headerStyle: 'light',
+  headerStyle: 'dark',
   /** 侧栏风格 */
   sidebarStyle: 'dark',
   /** 双侧栏二级风格 */
   mixSidebarStyle: 'light',
   /** 页签风格 */
-  tabStyle: 'simple',
+  tabStyle: 'button',
   /** 是否固定顶栏 */
   fixedHeader: true,
   /** 是否固定侧栏 */
@@ -164,7 +164,7 @@ const DEFAULT_STATE: ThemeState = {
   /** 页签是否显示图标 */
   tabIcon: true,
   /** 刷新是否保留已打开页签 */
-  tabsCache: false,
+  tabsCache: true,
   /** 切换路由是否缓存 */
   pageKeepAlive: true,
   /** 皮肤背景配置 */
