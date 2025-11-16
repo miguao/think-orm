@@ -3,11 +3,11 @@
     <el-form label-width="72px" @keyup.enter="search" @submit.prevent="">
       <el-row :gutter="8">
         <el-col :lg="6" :md="12" :sm="12" :xs="24">
-          <el-form-item label="商户编号">
+          <el-form-item label="商户号">
             <el-input
               clearable
               v-model.trim="form['search-merchant_no']"
-              placeholder="请输入商户编号"
+              placeholder="请输入商户号"
             />
           </el-form-item>
         </el-col>

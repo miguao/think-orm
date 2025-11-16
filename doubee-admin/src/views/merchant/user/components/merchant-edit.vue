@@ -35,8 +35,8 @@
         </el-col>
 
         <el-col :sm="12" :xs="24">
-          <el-form-item label="角色" prop="role_id">
-            <role-select v-model="form.role_id" />
+          <el-form-item label="用户组" prop="group_id">
+            <group-select v-model="form.group_id" />
           </el-form-item>
 
           <el-form-item v-if="!isUpdate" label="登录密码" prop="password">
@@ -72,7 +72,7 @@
   import type { FormInstance, FormRules } from 'element-plus';
   import { EleMessage } from 'ele-admin-plus';
   import { useFormData } from '@/utils/use-form-data';
-  import roleSelect from '../../role/components/role-select.vue';
+  import groupSelect from '../../group/components/group-select.vue';
   import type { Merchant } from '@/api/merchant/user/model';
   import { addMerchant, updateMerchant } from '@/api/merchant/user';
 
@@ -99,7 +99,7 @@
   /** 表单数据 */
   const [form, resetFields, assignFields] = useFormData<Merchant>({
     id: void 0,
-    role_id: undefined,
+    group_id: undefined,
     merchant_no: undefined,
     email: '',
     phone: '',
@@ -112,7 +112,7 @@
     role_id: [
       {
         required: true,
-        message: '请选择角色',
+        message: '请选择用户组',
         type: 'number',
         trigger: 'blur'
       }
