@@ -1,5 +1,5 @@
 <template>
-  <ele-page>
+  <ele-page class="merchant-user-page">
     <merchant-search @search="reload" />
     <ele-card :body-style="{ paddingTop: '8px' }">
       <ele-pro-table
@@ -11,28 +11,41 @@
         v-model:selections="selections"
         :highlight-current-row="true"
         cache-key="merchantUserTable"
+        :bordered="false"
+        :stripe="true"
+        table-class="merchant-user-table"
       >
         <template #toolbar>
-          <el-button
-            type="primary"
-            class="ele-btn-icon"
-            :icon="PlusOutlined"
-            @click="openEdit()"
-          >
-            添加
-          </el-button>
-          <el-button
-            type="danger"
-            class="ele-btn-icon"
-            :icon="DeleteOutlined"
-            @click="remove()"
-          >
-            删除
-          </el-button>
+          <div class="toolbar-actions">
+            <el-button
+              type="primary"
+              class="ele-btn-icon"
+              :icon="PlusOutlined"
+              @click="openEdit()"
+            >
+              添加
+            </el-button>
+            <el-button
+              type="danger"
+              class="ele-btn-icon"
+              :icon="DeleteOutlined"
+              @click="remove()"
+            >
+              删除
+            </el-button>
+          </div>
+        </template>
+        <template #merchant_no="{ row }">
+          <div class="user-cell">
+            <p class="user-name">{{ row.merchant_no }}</p>
+            <p class="user-meta">{{ row.email || '暂无邮箱' }}</p>
+          </div>
         </template>
 
         <template #role="{ row }">
-          <el-tag type="info">{{ row.role?.name }}</el-tag>
+          <el-tag type="info" effect="dark">{{
+            row.merchantGroup?.name
+          }}</el-tag>
         </template>
 
         <template #status="{ row }">
@@ -44,33 +57,35 @@
         </template>
 
         <template #action="{ row }">
-          <el-link type="primary" underline="never" @click="openEdit(row)">
-            修改
-          </el-link>
-          <el-divider direction="vertical" />
-          <ele-dropdown
-            :items="[
-              { title: '重置密码', command: 'password' },
-              {
-                title: '删除用户',
-                command: 'delete',
-                danger: true,
-                divided: true
-              }
-            ]"
-            style="display: inline"
-            @command="(key) => dropClick(key, row)"
-          >
-            <el-link type="primary" underline="never">
-              <span>更多</span>
-              <el-icon
-                :size="12"
-                style="vertical-align: -1px; margin-left: 2px"
-              >
-                <ArrowDown />
-              </el-icon>
-            </el-link>
-          </ele-dropdown>
+          <div class="action-links">
+            <el-link type="primary" underline="never" @click="openEdit(row)"
+              >修改</el-link
+            >
+            <el-divider direction="vertical" />
+            <ele-dropdown
+              :items="[
+                { title: '重置密码', command: 'password' },
+                {
+                  title: '删除用户',
+                  command: 'delete',
+                  danger: true,
+                  divided: true
+                }
+              ]"
+              style="display: inline"
+              @command="(key) => dropClick(key, row)"
+            >
+              <el-link type="primary" underline="never">
+                <span>更多</span>
+                <el-icon
+                  :size="12"
+                  style="vertical-align: -1px; margin-left: 2px"
+                >
+                  <ArrowDown />
+                </el-icon>
+              </el-link>
+            </ele-dropdown>
+          </div>
         </template>
       </ele-pro-table>
     </ele-card>
@@ -112,8 +127,9 @@
     },
     {
       prop: 'merchant_no',
-      label: '商户编号',
-      width: 160
+      label: '商户 / 邮箱',
+      width: 210,
+      slot: 'merchant_no'
     },
     {
       prop: 'phone',
@@ -153,27 +169,14 @@
       align: 'center'
     },
     {
-      prop: 'last_login_ip',
-      label: '上次登录IP',
-      width: 160,
-      align: 'center'
-    },
-    {
       prop: 'login_time',
       label: '登录时间',
       width: 180,
       align: 'center'
     },
     {
-      prop: 'last_login_time',
-      label: '上次登录时间',
-      width: 180,
-      align: 'center'
-    },
-    {
       prop: 'creation_time',
-      label: '创建时间',
-      sortable: 'custom',
+      label: '注册时间',
       width: 180,
       align: 'center'
     },
@@ -306,3 +309,43 @@
     }
   };
 </script>
+
+<style scoped>
+  .merchant-user-page :deep(.ele-page-body) {
+    padding-top: 12px;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .user-cell {
+    text-align: left;
+  }
+
+  .user-name {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .user-meta {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+
+  :deep(.merchant-user-table .el-table__row) {
+    transition: transform 0.15s;
+  }
+
+  :deep(.merchant-user-table .el-table__row:hover) {
+    transform: translateX(3px);
+  }
+
+  .action-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
