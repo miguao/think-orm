@@ -1,7 +1,7 @@
 <template>
   <ele-page>
     <!-- 搜索表单 -->
-    <role-search @search="reload" />
+    <group-search @search="reload" />
     <ele-card :body-style="{ paddingTop: '8px' }">
       <!-- 表格 -->
       <ele-pro-table
@@ -12,7 +12,7 @@
         :show-overflow-tooltip="true"
         v-model:selections="selections"
         :highlight-current-row="true"
-        cache-key="merchantRoleTable"
+        cache-key="merchantGroupTable"
       >
         <template #toolbar>
           <el-button
@@ -59,7 +59,7 @@
     </ele-card>
 
     <!-- 编辑弹窗 -->
-    <role-edit v-model="showEdit" :data="current" @done="reload" />
+    <group-edit v-model="showEdit" :data="current" @done="reload" />
   </ele-page>
 </template>
 
@@ -73,12 +73,12 @@
     Columns
   } from 'ele-admin-plus/es/ele-pro-table/types';
   import { PlusOutlined, DeleteOutlined } from '@/components/icons';
-  import RoleSearch from './components/role-search.vue';
-  import RoleEdit from './components/role-edit.vue';
-  import type { Role, SearchParam } from '@/api/system/role/model';
-  import { deleteRole, getRoleList, updateRole } from '@/api/merchant/role';
+  import GroupSearch from './components/group-search.vue';
+  import GroupEdit from './components/group-edit.vue';
+  import type { Group, SearchParam } from '@/api/merchant/group/model';
+  import { deleteGroup, getGroupList, updateGroup } from '@/api/merchant/group';
 
-  defineOptions({ name: 'SystemRole' });
+  defineOptions({ name: 'MerchantGroup' });
 
   /** 表格实例 */
   const tableRef = ref<InstanceType<typeof EleProTable> | null>(null);
@@ -93,7 +93,7 @@
     },
     {
       prop: 'name',
-      label: '角色名称',
+      label: '用户组名称',
       minWidth: 120
     },
     {
@@ -120,10 +120,10 @@
   ]);
 
   /** 表格选中数据 */
-  const selections = ref<Role[]>([]);
+  const selections = ref<Group[]>([]);
 
   /** 当前编辑数据 */
-  const current = ref<Role | null>(null);
+  const current = ref<Group | null>(null);
 
   /** 是否显示编辑弹窗 */
   const showEdit = ref(false);
@@ -133,7 +133,7 @@
 
   /** 表格数据源 */
   const datasource: DatasourceFunction = ({ pages, where, orders }) => {
-    return getRoleList({ ...where, ...orders, ...pages });
+    return getGroupList({ ...where, ...orders, ...pages });
   };
 
   /** 搜索 */
@@ -143,24 +143,24 @@
   };
 
   /** 打开编辑弹窗 */
-  const openEdit = (row?: Role) => {
+  const openEdit = (row?: Group) => {
     current.value = row ?? null;
     showEdit.value = true;
   };
 
   /** 打开权限分配弹窗 */
-  const openAuth = (row?: Role) => {
+  const openAuth = (row?: Group) => {
     current.value = row ?? null;
     showAuth.value = true;
   };
 
   /**
-   * 更新角色状态
-   * @param id 角色ID
-   * @param status 角色状态
+   * 更新用户组状态
+   * @param id 用户组ID
+   * @param status 用户组状态
    */
   const updateStatus = (id: number, status: number) => {
-    updateRole({ id, status })
+    updateGroup({ id, status })
       .then((message) => {
         EleMessage.success({ message: message, plain: true });
       })
@@ -170,7 +170,7 @@
   };
 
   /** 删除单个 */
-  const remove = (row?: Role) => {
+  const remove = (row?: Group) => {
     const rows = row == null ? selections.value : [row];
     if (!rows.length) {
       EleMessage.error({ message: '请至少选择一条数据', plain: true });
@@ -191,7 +191,7 @@
         .map((d) => d.id)
         .filter((id): id is number => id !== undefined);
 
-      deleteRole(ids)
+      deleteGroup(ids)
         .then((message) => {
           loading.close();
           EleMessage.success({ message: message, plain: true });
