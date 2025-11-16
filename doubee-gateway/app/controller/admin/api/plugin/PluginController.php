@@ -5,6 +5,7 @@ declare (strict_types=1);
 namespace app\controller\admin\api\plugin;
 
 use app\controller\AbstractAdminController;
+use app\exception\JsonException;
 use app\kernel\plugin\entity\Query;
 use app\kernel\plugin\PluginFactory;
 use app\kernel\route\annotation\Controller;
@@ -26,12 +27,6 @@ class PluginController extends AbstractAdminController
         $query->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
         $data = PluginFactory::getInstance()->getInstalledPlugins($query);
         return $this->json(data: $data);
-    }
-
-    #[GetMapping("previewIcon")]
-    public function previewIcon()
-    {
-
     }
 
     #[NoReturn]
