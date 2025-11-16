@@ -1,13 +1,13 @@
-import { PageParam } from "@/api";
+import { PageParam } from '@/api';
 
 export interface Channel {
-    id?: number;
-    name?: string;
-    type?: string;
-    status?: number;
+  id?: number;
+  name?: string;
+  type?: string;
+  status?: number;
 }
 
 export interface SearchParam extends PageParam {
-    'search-name'?: string;
-    'search-status'?: number;
+  'search-name'?: string;
+  'search-status'?: number;
 }
