@@ -1,6 +1,6 @@
-import { ApiResult, PageResult } from "@/api";
-import request from "@/utils/request";
-import type { Merchant, SearchParam } from "./model";
+import { ApiResult, PageResult } from '@/api';
+import request from '@/utils/request';
+import type { Merchant, SearchParam } from './model';
 
 /**
  * 获取商户列表
@@ -8,12 +8,15 @@ import type { Merchant, SearchParam } from "./model";
  * @returns Promise<Merchant[]>
  */
 export async function getMerchantList(params: SearchParam) {
-    const response = await request.get<ApiResult<PageResult<Merchant>>>('/merchant/getMerchantList', { params });
-    if (response.data.code === 200) {
-        return response.data.data;
-    }
+  const response = await request.get<ApiResult<PageResult<Merchant>>>(
+    '/merchant/getMerchantList',
+    { params }
+  );
+  if (response.data.code === 200) {
+    return response.data.data;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -22,12 +25,15 @@ export async function getMerchantList(params: SearchParam) {
  * @returns Promise<string>
  */
 export async function addMerchant(data: Merchant) {
-    const response = await request.post<ApiResult<unknown>>('/merchant/saveMerchant', data);
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.post<ApiResult<unknown>>(
+    '/merchant/saveMerchant',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -36,24 +42,30 @@ export async function addMerchant(data: Merchant) {
  * @returns Promise<string>
  */
 export async function updateMerchant(data: Merchant) {
-    const response = await request.put<ApiResult<unknown>>('/merchant/saveMerchant', data);
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.put<ApiResult<unknown>>(
+    '/merchant/saveMerchant',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
  * 删除商户
- * @param list 删除列表 
+ * @param list 删除列表
  * @returns Promise<string>
  */
 export async function deleteMerchant(list: number[]) {
-    const response = await request.delete<ApiResult<unknown>>('/merchant/deleteMerchant', { data: { list } });
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.delete<ApiResult<unknown>>(
+    '/merchant/deleteMerchant',
+    { data: { list } }
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
