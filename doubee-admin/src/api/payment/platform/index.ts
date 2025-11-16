@@ -1,6 +1,6 @@
-import request from "@/utils/request";
-import type { Platform, SearchParam } from "./model";
-import { ApiResult, PageResult } from "@/api";
+import request from '@/utils/request';
+import type { Platform, SearchParam } from './model';
+import { ApiResult, PageResult } from '@/api';
 
 /**
  * 获取平台列表
@@ -8,12 +8,15 @@ import { ApiResult, PageResult } from "@/api";
  * @returns Promise<Platform[]>
  */
 export async function getPlatformList(params: SearchParam) {
-    const response = await request.get<ApiResult<PageResult<Platform>>>('/payment/platform/getPlatformList', { params });
-    if (response.data.code === 200) {
-        return response.data.data;
-    }
+  const response = await request.get<ApiResult<PageResult<Platform>>>(
+    '/payment/platform/getPlatformList',
+    { params }
+  );
+  if (response.data.code === 200) {
+    return response.data.data;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -22,12 +25,15 @@ export async function getPlatformList(params: SearchParam) {
  * @returns Promise<string>
  */
 export async function addPlatform(data: Platform) {
-    const response = await request.post<ApiResult<unknown>>('/payment/platform/savePlatform', data);
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.post<ApiResult<unknown>>(
+    '/payment/platform/savePlatform',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -36,12 +42,15 @@ export async function addPlatform(data: Platform) {
  * @returns Promise<string>
  */
 export async function updatePlatform(data: Platform) {
-    const response = await request.put<ApiResult<unknown>>('/payment/platform/savePlatform', data);
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.put<ApiResult<unknown>>(
+    '/payment/platform/savePlatform',
+    data
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -50,10 +59,13 @@ export async function updatePlatform(data: Platform) {
  * @returns Promise<string>
  */
 export async function deletePlatform(list: number[]) {
-    const response = await request.delete<ApiResult<unknown>>('/payment/platform/deletePlatform', { data: { list } });
-    if (response.data.code === 200) {
-        return response.data.message;
-    }
+  const response = await request.delete<ApiResult<unknown>>(
+    '/payment/platform/deletePlatform',
+    { data: { list } }
+  );
+  if (response.data.code === 200) {
+    return response.data.message;
+  }
 
-    return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(response.data.message));
 }
