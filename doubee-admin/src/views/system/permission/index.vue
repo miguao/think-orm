@@ -119,7 +119,12 @@
         </template>
 
         <template #status="{ row }">
-          <el-switch v-model="row.status" :active-value="1" :inactive-value="0" @change="(value: number) => updateStatus(row.id, value)" />
+          <el-switch
+            v-model="row.status"
+            :active-value="1"
+            :inactive-value="0"
+            @change="(value: number) => updateStatus(row.id, value)"
+          />
         </template>
       </ele-pro-table>
     </ele-card>
@@ -150,7 +155,11 @@
   } from '@/components/icons';
   import PermissionSearch from './components/permission-search.vue';
   import PermissionEdit from './components/permission-edit.vue';
-  import { deletePermission, getPermissionList, updatePermission } from '@/api/system/permission';
+  import {
+    deletePermission,
+    getPermissionList,
+    updatePermission
+  } from '@/api/system/permission';
   import type { Permission, SearchParam } from '@/api/system/permission/model';
 
   defineOptions({ name: 'SystemPermission' });
@@ -260,11 +269,13 @@
    * @param status 权限状态
    */
   const updateStatus = (id: number, status: number) => {
-    updatePermission({ id, status }).then((message) => {
-      EleMessage.success({ message: message, plain: true });
-    }).catch((exception) => {
-      EleMessage.error({ message: exception.message, plain: true });
-    });
+    updatePermission({ id, status })
+      .then((message) => {
+        EleMessage.success({ message: message, plain: true });
+      })
+      .catch((exception) => {
+        EleMessage.error({ message: exception.message, plain: true });
+      });
   };
 
   /** 删除单个 */
@@ -273,7 +284,7 @@
       EleMessage.error({ message: '请先删除子节点', plain: true });
       return;
     }
-    
+
     ElMessageBox.confirm('确定要删除“' + row.name + '”吗?', '系统提示', {
       type: 'warning',
       draggable: true
@@ -295,7 +306,7 @@
         });
     });
   };
-  
+
   /** 展开全部 */
   const expandAll = () => {
     tableRef.value?.toggleRowExpansionAll?.(true);
