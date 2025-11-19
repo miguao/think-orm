@@ -16,6 +16,7 @@ use app\kernel\route\annotation\Middleware;
 use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantGroup;
+use app\model\MerchantPermission;
 use app\utils\DateUtils;
 use Exception;
 use think\response\Json;
@@ -58,5 +59,50 @@ class GroupController extends AbstractAdminController
         $delete = new Delete(MerchantGroup::class, (array)$this->request->post("list"));
         $this->database->delete($delete);
         return $this->json(message: "删除成功");
+    }
+
+    #[GetMapping("getPermissionsByGroupId")]
+    public function getPermissionsByGroupId(): Json
+    {
+        $map = $this->request->get();
+        $this->validator((array)$map, ['group_id' => 'require'], ['group_id.require' => '用户组ID不能为空']);
+
+        $get = new Get(MerchantPermission::class);
+        $get->setWhere((array)$map);
+        $get->setOrderBy('sort', 'desc');
+        $data = $this->database->get($get);
+
+        $groupId = (int)$map['group_id'];
+        $roleData = MerchantGroup::query()->with(['permissions'])->find($groupId);
+        if (!$roleData) {
+            throw new JsonException("用户组不存在");
+        }
+
+        $roleData = $roleData->toArray();
+        if (!empty($roleData['permissions'])) {
+            foreach ($roleData['permissions'] as $value) {
+                foreach ($data as $key => $permission) {
+                    if ($value['id'] == $permission['id']) {
+                        $data[$key]['checked'] = true;
+                    } else {
+                        if (!isset($permission['checked'])) {
+                            $data[$key]['checked'] = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        $data = array_map(function ($item) {
+            return [
+                'id' => $item['id'],
+                'parent_id' => $item['parent_id'],
+                'icon' => $item['icon'],
+                'name' => $item['name'],
+                'checked' => $item['checked'] ?? false,
+            ];
+        }, $data);
+
+        return $this->json(data: $data);
     }
 }
