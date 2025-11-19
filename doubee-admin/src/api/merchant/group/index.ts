@@ -1,6 +1,7 @@
 import request from '@/utils/request';
 import type { ApiResult } from '@/api';
 import type { Group, SearchParam } from './model';
+import { Permission } from '../permission/model';
 
 /**
  * 获取用户组列表
@@ -68,4 +69,21 @@ export async function deleteGroup(list: number[]) {
   }
 
   return Promise.reject(new Error(response.data.message));
+}
+
+/**
+ * 获取用户组拥有权限
+ * @param groupId 用户组ID
+ * @returns Promise<string>
+ */
+export async function getPermissionsByGroupId(groupId?: number) {
+  const res = await request.get<ApiResult<Permission[]>>(
+    '/merchant/group/getPermissionsByGroupId',
+    { params: { group_id: groupId } }
+  );
+  if (res.data.code === 200) {
+    return res.data.data;
+  }
+
+  return Promise.reject(new Error(res.data.message));
 }
