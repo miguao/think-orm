@@ -57,6 +57,10 @@ class PluginFactory
                 continue;
             }
 
+            if ($query->type && $query->type != $plugin->info['type']) {
+                continue;
+            }
+
             $data[] = $plugin;
         }
 
