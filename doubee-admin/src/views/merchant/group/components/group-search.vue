@@ -1,17 +1,13 @@
 <template>
   <ele-card :body-style="{ paddingBottom: '2px' }">
-    <el-form
-      label-width="72px"
-      @keyup.enter.prevent="search"
-      @submit.prevent=""
-    >
+    <el-form @keyup.enter.prevent="search" @submit.prevent="">
       <el-row :gutter="8">
         <el-col :lg="6" :md="8" :sm="12" :xs="24">
-          <el-form-item label="角色名称">
+          <el-form-item label="用户组名称">
             <el-input
               clearable
               v-model.trim="form['search-name']"
-              placeholder="请输入角色名称"
+              placeholder="请输入用户组名称"
             />
           </el-form-item>
         </el-col>

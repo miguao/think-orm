@@ -47,7 +47,7 @@
   };
 
   /** 获取用户组数据 */
-  getDictionaryByCode('merchant_role,id,name')
+  getDictionaryByCode('merchant_group,id,name')
     .then((data) => {
       groupData.value = data.map((item: any) => ({
         id: item.id,

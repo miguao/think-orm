@@ -60,6 +60,9 @@
 
     <!-- 编辑弹窗 -->
     <group-edit v-model="showEdit" :data="current" @done="reload" />
+
+    <!-- 权限分配弹窗 -->
+    <group-auth v-model="showAuth" :data="current" />
   </ele-page>
 </template>
 
@@ -77,6 +80,7 @@
   import GroupEdit from './components/group-edit.vue';
   import type { Group, SearchParam } from '@/api/merchant/group/model';
   import { deleteGroup, getGroupList, updateGroup } from '@/api/merchant/group';
+  import GroupAuth from './components/group-auth.vue';
 
   defineOptions({ name: 'MerchantGroup' });
 
