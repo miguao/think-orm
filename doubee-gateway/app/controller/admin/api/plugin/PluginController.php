@@ -24,6 +24,7 @@ class PluginController extends AbstractAdminController
     public function getInstalledPlugins(): Json
     {
         $query = new Query();
+        $query->setType($this->request->get("equal-type"));
         $query->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
         $data = PluginFactory::getInstance()->getInstalledPlugins($query);
         return $this->json(data: $data);
