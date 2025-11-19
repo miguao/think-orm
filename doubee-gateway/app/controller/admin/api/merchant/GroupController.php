@@ -17,6 +17,7 @@ use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
 use app\model\MerchantGroup;
 use app\model\MerchantPermission;
+use app\model\MerchantPermissionRelation;
 use app\utils\DateUtils;
 use Exception;
 use think\response\Json;
@@ -43,6 +44,8 @@ class GroupController extends AbstractAdminController
         $map = $this->request->post();
         $save = new Save(MerchantGroup::class);
         $save->setMap($map);
+        $save->setMiddle("permissions", MerchantPermissionRelation::class, "permission_id", "group_id");
+
         $save->addForceMap("creation_time", DateUtils::current());
         try {
             $this->database->save($save);
