@@ -5,22 +5,23 @@ declare(strict_types=1);
 namespace app\controller\merchant\api\personal;
 
 use app\controller\AbstractMerchantController;
+use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
+use app\kernel\route\annotation\Inject;
+use app\kernel\route\annotation\Middleware;
+use app\kernel\route\annotation\PostMapping;
 use app\middleware\merchant\AuthenticationMiddleware;
 use app\service\admin\UserService;
-use think\annotation\Inject;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Route;
 use think\response\Json;
 
-#[Group("/merchant/api/personal/account")]
+#[Controller("/merchant/api/personal/account")]
 #[Middleware(AuthenticationMiddleware::class)]
 class AccountController extends AbstractMerchantController
 {
     #[Inject]
     protected UserService $userService;
 
-    #[Route("GET", "getMeInfo")]
+    #[GetMapping("getMeInfo")]
     public function getMeInfo(): Json
     {
         $user = $this->getUserInfo();
@@ -30,7 +31,7 @@ class AccountController extends AbstractMerchantController
         return $this->json(data: $user);
     }
 
-    #[Route("POST", "logout")]
+    #[PostMapping("logout")]
     public function logout(): Json
     {
         $this->userService->logout($this->getUserId());
