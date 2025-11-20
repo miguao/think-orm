@@ -87,6 +87,13 @@ interface UserService
     public function createWithApplication(Merchant $merchant): bool;
 
     /**
+     * 获取权限
+     * @param int $userId
+     * @return array
+     */
+    public function findByUserPermissions(int $userId): array;
+
+    /**
      * 退出登录
      * @param int $userId
      * @return void

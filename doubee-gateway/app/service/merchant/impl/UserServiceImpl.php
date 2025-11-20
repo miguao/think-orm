@@ -16,6 +16,7 @@ use app\utils\DateUtils;
 use app\utils\StringUtils;
 use app\utils\ValidatorUtils;
 use Firebase\JWT\JWT;
+use think\db\Query;
 use think\facade\Cache;
 use think\facade\Request;
 
@@ -240,7 +241,7 @@ class UserServiceImpl implements UserService
             $this->mailerService->sendEmail($username, "找回密码验证码", "您正在进行找回密码操作，验证码为：{$code}，有效期为 3 分钟。请勿泄露给他人。如非本人操作，请忽略本邮件。");
             Cache::store("redis")->set($cacheKey, $code, 180);
         }
-        
+
         if (ValidatorUtils::isValidPhoneNumber($username)) {
             throw new JsonException("短信验证码功能暂未开放，敬请期待。");
         }
@@ -258,6 +259,49 @@ class UserServiceImpl implements UserService
         $application->status = 1;
 
         return $application->save();
+    }
+
+    public function findByUserPermissions(int $userId): array
+    {
+        $user = Merchant::query()->with(['merchantGroup' => function (Query $query) {
+            $query->with(['permissions' => function (Query $query) {
+                $query->where("status", 1)->order("sort", "desc");
+            }]);
+        }])->find($userId);
+
+        if (!$user) {
+            throw new JsonException("用户不存在");
+        }
+
+        $menus = [];
+        $permissions = [];
+
+        $group = $user->merchantGroup;
+        if ($group && $group->permissions) {
+            foreach ($group->permissions as $permission) {
+                if ($permission->type == 2) {
+                    $permissions[] = [
+                        'id' => $permission->id,
+                        'path' => $permission->path,
+                    ];
+                }
+
+                if ($permission->type == 1 || $permission->type == 0) {
+                    $menus[] = [
+                        'id' => $permission->id,
+                        'parent_id' => $permission->parent_id,
+                        'icon' => $permission->icon,
+                        'name' => $permission->name,
+                        'path' => $permission->path,
+                        'component' => $permission->component,
+                        'hide' => $permission->hide,
+                        'metadata' => $permission->metadata,
+                    ];
+                }
+            }
+        }
+
+        return ['permissions' => $permissions, 'menus' => $menus];
     }
 
     public function logout(int $userId): void

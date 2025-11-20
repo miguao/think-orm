@@ -11,7 +11,7 @@ use app\kernel\route\annotation\Inject;
 use app\kernel\route\annotation\Middleware;
 use app\kernel\route\annotation\PostMapping;
 use app\middleware\merchant\AuthenticationMiddleware;
-use app\service\admin\UserService;
+use app\service\merchant\UserService;
 use think\response\Json;
 
 #[Controller("/merchant/api/personal/account")]
