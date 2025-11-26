@@ -20,10 +20,10 @@ class Query
 
     /**
      * 设置插件类型
-     * @param string $type
+     * @param string|null $type
      * @return void
      */
-    public function setType(string $type): void
+    public function setType(?string $type): void
     {
         $this->type = $type;
     }
