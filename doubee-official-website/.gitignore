@@ -1,0 +1,47 @@
+# 依赖
+node_modules
+.pnp
+.pnp.js
+
+# 构建产物
+dist
+.dumi/tmp
+.dumi/tmp-production
+
+# 缓存
+.cache
+.mfsu
+.umi
+.umi-production
+*.tsbuildinfo
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 系统文件
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.idea
+.vscode
+*.sublime-*
+*.code-workspace
+
+# 临时文件
+*.tmp
+*.temp
+.temp
+.tmp
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+

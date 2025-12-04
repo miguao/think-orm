@@ -1,0 +1,42 @@
+{
+  "name": "d",
+  "version": "0.0.1",
+  "description": "d",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "dumi dev",
+    "build": "dumi build",
+    "preview": "dumi preview",
+    "prepare": "husky install && dumi setup"
+  },
+  "authors": [],
+  "license": "MIT",
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "lint-staged": {
+    "*.{md,json}": [
+      "prettier --write --no-error-on-unmatched-pattern"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.8.1",
+    "@commitlint/config-conventional": "^17.8.1",
+    "dumi": "^2.4.21",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.3.0",
+    "prettier": "^2.8.8"
+  },
+  "dependencies": {
+    "antd": "^5.29.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "dumi-theme-lobehub": "^2.0.9"
+  },
+  "overrides": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

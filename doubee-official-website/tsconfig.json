@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "baseUrl": "./",
+    "paths": {
+      "@@/*": [".dumi/tmp/*"]
+    },
+    // 性能优化配置
+    "incremental": true,
+    "assumeChangesOnlyAffectDirectDependencies": true
+  },
+  "include": [".dumirc.ts"],
+  "exclude": ["node_modules", "dist", ".dumi/tmp"]
+}
