@@ -1,0 +1,135 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #f5f7fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 超级重要：让后台布局铺满页面 */
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ------------------------------
+ * Scrollbar Style
+ * ------------------------------ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ------------------------------
+ * Ant Design 全局优化
+ * ------------------------------ */
+
+/* 修改 Antd 卡片默认内边距（后台常用） */
+.ant-card {
+  border-radius: 8px;
+}
+
+/* Table 表格优化：紧凑但清晰 */
+.ant-table {
+  background: #fff;
+}
+
+.ant-table-thead > tr > th {
+  background: #fafafa !important;
+  font-weight: 500;
+}
+
+.ant-table-tbody > tr > td {
+  padding: 12px 16px !important;
+}
+
+.ant-table-row:hover > td {
+  background: #f6f8fc !important;
+}
+
+/* Form 表单：更适配后台使用 */
+.ant-form-item-label > label {
+  font-size: 14px;
+  color: #333;
+}
+
+/* Modal 尺寸优化 */
+.ant-modal-content {
+  border-radius: 8px;
+}
+
+/* Button：优化禁用态 */
+.ant-btn[disabled] {
+  opacity: 0.7;
+}
+
+/* Pagination 小优化 */
+.ant-pagination {
+  margin-top: 20px;
+}
+
+/* ------------------------------
+ * Layout Utility Classes
+ * ------------------------------ */
+
+/* 布局区域内边距 */
+.page-container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* 顶部区域统一风格 */
+.page-header {
+  padding: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Flex 辅助类（可配合 UnoCSS） */
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 通用文字 */
+.text-muted {
+  color: #999;
+}
+
+.text-title {
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* ------------------------------
+ * Fix: Antd + UnoCSS 冲突处理
+ * ------------------------------ */
+
+/* UnoCSS 的 preflight 可能会设置按钮背景为透明，这里统一修复 */
+button,
+.ant-btn {
+  background-clip: padding-box;
+}
+
+/* 避免 UnoCSS 覆盖 Antd 的 line-height */
+.ant-btn {
+  line-height: 1 !important;
+}
