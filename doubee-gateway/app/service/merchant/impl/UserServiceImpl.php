@@ -288,10 +288,10 @@ class UserServiceImpl implements UserService
 
                 if ($permission->type == 1 || $permission->type == 0) {
                     $menus[] = [
-                        'id' => $permission->id,
-                        'parent_id' => $permission->parent_id,
+                        'menuId' => $permission->id,
+                        'parentId' => $permission->parent_id,
                         'icon' => $permission->icon,
-                        'name' => $permission->name,
+                        'title' => $permission->name,
                         'path' => $permission->path,
                         'component' => $permission->component,
                         'hide' => $permission->hide,
