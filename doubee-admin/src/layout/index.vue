@@ -93,11 +93,6 @@
           <ExpandOutlined v-else style="stroke-width: 4" />
         </el-icon>
       </layout-tool>
-      <!-- 应用商店 -->
-      <layout-tool :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }">
-        <i18n-icon :icon-style="{ transform: 'scale(1.15)' }" />
-      </layout-tool>
-
       <!-- 语言切换 -->
       <layout-tool :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }">
         <i18n-icon :icon-style="{ transform: 'scale(1.15)' }" />
