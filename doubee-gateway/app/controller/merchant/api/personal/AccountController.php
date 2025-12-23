@@ -26,7 +26,7 @@ class AccountController extends AbstractMerchantController
     {
         $user = $this->getUserInfo();
         $permissions = $this->userService->findByUserPermissions($this->getUserId());
-        $user['menus'] = $permissions['menus'];
+        $user['authorities'] = $permissions['menus'];
 
         return $this->json(data: $user);
     }
