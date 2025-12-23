@@ -42,10 +42,10 @@
           </div>
         </template>
 
-        <template #role="{ row }">
-          <el-tag type="info" effect="dark">{{
-            row.merchantGroup?.name
-          }}</el-tag>
+        <template #merchantGroup="{ row }">
+          <el-tag type="info">
+            {{ row.merchantGroup?.name }}
+          </el-tag>
         </template>
 
         <template #status="{ row }">
@@ -127,63 +127,43 @@
     },
     {
       prop: 'merchant_no',
-      label: '商户 / 邮箱',
+      label: '商户号 / 邮箱',
       width: 210,
       slot: 'merchant_no'
     },
     {
       prop: 'phone',
       label: '手机号码',
-      width: 120,
       align: 'center'
     },
     {
-      prop: 'email',
-      label: '邮箱号码',
-      width: 180,
-      align: 'center'
-    },
-    {
-      prop: 'role',
-      label: '角色',
-      width: 150,
-      slot: 'role',
-      align: 'center'
+      prop: 'merchantGroup',
+      label: '用户组',
+      slot: 'merchantGroup'
     },
     {
       prop: 'balance',
-      label: '账户余额',
-      width: 120,
-      align: 'center'
+      label: '账户余额'
     },
     {
       prop: 'freeze_balance',
-      label: '冻结金额',
-      width: 120,
-      align: 'center'
+      label: '冻结金额'
     },
     {
       prop: 'login_ip',
-      label: '登录IP',
-      width: 160,
-      align: 'center'
+      label: '登录IP'
     },
     {
       prop: 'login_time',
-      label: '登录时间',
-      width: 180,
-      align: 'center'
+      label: '登录时间'
     },
     {
       prop: 'creation_time',
-      label: '注册时间',
-      width: 180,
-      align: 'center'
+      label: '注册时间'
     },
     {
       prop: 'status',
       label: '状态',
-      width: 100,
       align: 'center',
       slot: 'status'
     },
