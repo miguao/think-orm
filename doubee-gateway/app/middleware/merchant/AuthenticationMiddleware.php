@@ -39,7 +39,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
             throw new UnauthorizedException($exception->getMessage());
         }
 
-        $user = Merchant::query()->find($userId);
+        $user = Merchant::query()->with(['merchantGroup'])->find($userId);
         if (!$user) {
             throw new UnauthorizedException("用户不存在");
         }
