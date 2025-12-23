@@ -10,4 +10,9 @@ return [
     Plugin::AUTHOR => '官方',
     Plugin::VERSION => '1.0.0',
     Plugin::TYPE => 'payment',
+    Plugin::OPTIONS => [
+        'face' => '订单码支付',
+        'pc' => '电脑网站支付',
+        'wap' => '手机网站支付',
+    ],
 ];

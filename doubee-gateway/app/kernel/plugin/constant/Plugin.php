@@ -11,4 +11,7 @@ interface Plugin
     const AUTHOR = 'author';
     const VERSION = 'version';
     const TYPE = 'type';
+
+    const FROM = 'from';
+    const OPTIONS = 'options';
 }
