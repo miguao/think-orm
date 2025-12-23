@@ -17,6 +17,8 @@ use app\service\admin\UserService as SystemUserService;
 use app\service\admin\MailerService as SystemMailerService;
 use app\service\admin\impl\MailerServiceImpl as SystemMailerServiceImpl;
 use app\service\admin\ConfigService as SystemConfigService;
+use app\service\admin\GeeTestService as SystemGeeTestService;
+use app\service\admin\impl\GeeTestServiceImpl as SystemGeeTestServiceImpl;
 use app\service\merchant\impl\UserServiceImpl as MerchantUserServiceImpl;
 use app\service\merchant\UserService as MerchantUserService;
 use app\service\openapi\impl\OrderServiceImpl as OpenApiOrderServiceImpl;
@@ -35,6 +37,7 @@ return [
     SystemLogService::class => SystemLogServiceImpl::class,
     SystemMailerService::class => SystemMailerServiceImpl::class,
     SystemUploadService::class => SystemUploadServiceImpl::class,
+    SystemGeeTestService::class => SystemGeeTestServiceImpl::class,
 
     // 商户业务绑定关系
     MerchantUserService::class => MerchantUserServiceImpl::class,
