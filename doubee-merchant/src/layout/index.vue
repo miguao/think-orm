@@ -74,14 +74,14 @@
         </el-icon>
       </layout-tool>
       <!-- 刷新 -->
-      <layout-tool
+      <!-- <layout-tool
         :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }"
         @click="reloadPageTab()"
       >
         <el-icon style="transform: scale(1.09)">
           <ReloadOutlined />
         </el-icon>
-      </layout-tool>
+      </layout-tool> -->
     </template>
     <!-- 顶栏右侧按钮 -->
     <template #right>
@@ -120,11 +120,11 @@
         />
       </layout-tool>
       <!-- 主题设置 -->
-      <layout-tool @click="openSetting">
+      <!-- <layout-tool @click="openSetting">
         <el-icon>
           <MoreOutlined />
         </el-icon>
-      </layout-tool>
+      </layout-tool> -->
     </template>
     <!-- 页签栏右侧下拉菜单 -->
     <template v-if="tabBar && !tabInHeader" #tabExtra="{ active }">
