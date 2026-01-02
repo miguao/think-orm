@@ -28,7 +28,7 @@ class ChannelController extends AbstractAdminController
         $get->setWhere((array)$map);
         $get->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
         $data = $this->database->get($get, function (Query $query) {
-            return $query->with(['bank']);
+            return $query->with(['type']);
         });
 
         return $this->json(data: $data);

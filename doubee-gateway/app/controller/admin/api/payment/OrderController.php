@@ -26,7 +26,7 @@ class OrderController extends AbstractAdminController
         $get->setWhere((array)$map);
         $get->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
         $data = $this->database->get($get, function (Query $builder) {
-            return $builder->with(['merchant', 'application', 'channel', 'bank']);
+            return $builder->with(['merchant', 'application', 'channel', 'type']);
         });
 
         return $this->json(data: $data);

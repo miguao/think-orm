@@ -20,12 +20,12 @@ use app\utils\DateUtils;
 use Exception;
 use think\response\Json;
 
-#[Controller("/admin/api/payment/bank")]
+#[Controller("/admin/api/payment/type")]
 #[Middleware(AuthenticationMiddleware::class)]
-class BankController extends AbstractAdminController
+class TypeController extends AbstractAdminController
 {
-    #[GetMapping("getBankList")]
-    public function getBankList(): Json
+    #[GetMapping("getTypeList")]
+    public function getTypeList(): Json
     {
         $map = $this->request->get();
         $get = new Get(PaymentType::class);
@@ -36,8 +36,8 @@ class BankController extends AbstractAdminController
         return $this->json(data: $data);
     }
 
-    #[RequestMapping("saveBank", ["POST", "PUT"])]
-    public function saveBank(): Json
+    #[RequestMapping("saveType", ["POST", "PUT"])]
+    public function saveType(): Json
     {
         $map = $this->request->post();
         $save = new Save(PaymentType::class);
@@ -52,8 +52,8 @@ class BankController extends AbstractAdminController
         return $this->json(message: "保存成功");
     }
 
-    #[DeleteMapping("deleteBank")]
-    public function deleteBank(): Json
+    #[DeleteMapping("deleteType")]
+    public function deleteType(): Json
     {
         $delete = new Delete(PaymentType::class, (array)$this->request->post("list"));
         $this->database->delete($delete);
