@@ -14,7 +14,7 @@ use think\Model;
  * @property string $creation_time
  * @property int $status
  */
-class PaymentBank extends Model
+class PaymentType extends Model
 {
 
 }

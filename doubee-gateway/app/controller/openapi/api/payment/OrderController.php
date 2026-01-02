@@ -30,7 +30,6 @@ class OrderController extends AbstractController
             'subject' => 'require',
             'amount' => 'require',
             'notification_url' => 'require',
-            'sign_type' => 'require',
             'sign' => 'require',
         ], [
             'merchant_no.require' => '商户号不能为空',
@@ -40,7 +39,6 @@ class OrderController extends AbstractController
             'subject.require' => '商品名称不能为空',
             'amount.require' => '订单金额不能为空',
             'notification_url.require' => '通知地址不能为空',
-            'sign_type.require' => '签名方式不能为空',
             'sign.require' => '签名值不能为空',
         ]);
 

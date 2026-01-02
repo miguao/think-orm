@@ -15,7 +15,7 @@ use app\kernel\route\annotation\GetMapping;
 use app\kernel\route\annotation\Middleware;
 use app\kernel\route\annotation\RequestMapping;
 use app\middleware\admin\AuthenticationMiddleware;
-use app\model\PaymentBank;
+use app\model\PaymentType;
 use app\utils\DateUtils;
 use Exception;
 use think\response\Json;
@@ -28,7 +28,7 @@ class BankController extends AbstractAdminController
     public function getBankList(): Json
     {
         $map = $this->request->get();
-        $get = new Get(PaymentBank::class);
+        $get = new Get(PaymentType::class);
         $get->setWhere((array)$map);
         $get->setPaginate((int)$this->request->get("page"), (int)$this->request->get("limit"));
         $data = $this->database->get($get);
@@ -40,7 +40,7 @@ class BankController extends AbstractAdminController
     public function saveBank(): Json
     {
         $map = $this->request->post();
-        $save = new Save(PaymentBank::class);
+        $save = new Save(PaymentType::class);
         $save->setMap($map);
         $save->addForceMap("creation_time", DateUtils::current());
         try {
@@ -55,7 +55,7 @@ class BankController extends AbstractAdminController
     #[DeleteMapping("deleteBank")]
     public function deleteBank(): Json
     {
-        $delete = new Delete(PaymentBank::class, (array)$this->request->post("list"));
+        $delete = new Delete(PaymentType::class, (array)$this->request->post("list"));
         $this->database->delete($delete);
         return $this->json(message: "删除成功");
     }

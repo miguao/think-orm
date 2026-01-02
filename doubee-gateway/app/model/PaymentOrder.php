@@ -37,11 +37,11 @@ class PaymentOrder extends Model
     }
 
     /**
-     * 银行信息
+     * 类型信息
      * @return HasOne
      */
-    public function bank(): HasOne
+    public function type(): HasOne
     {
-        return $this->hasOne(PaymentBank::class, "id", "bank_id");
+        return $this->hasOne(PaymentType::class, "id", "type_id");
     }
 }

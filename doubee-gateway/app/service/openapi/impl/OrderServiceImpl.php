@@ -8,10 +8,9 @@ use app\exception\JsonException;
 use app\kernel\plugin\PaymentFactory;
 use app\model\Merchant;
 use app\model\MerchantApplication;
-use app\model\PaymentBank;
+use app\model\PaymentType;
 use app\model\PaymentChannel;
 use app\model\PaymentOrder;
-use app\plugin\AliPay\Handler\Payment;
 use app\service\openapi\OrderService;
 use app\utils\DateUtils;
 use app\utils\StringUtils;
@@ -39,7 +38,7 @@ class OrderServiceImpl implements OrderService
         }
 
         // 根据银行代码查找对应银行信息
-        $bank = PaymentBank::query()->where("code", $map['bank_code'])->find();
+        $bank = PaymentType::query()->where("code", $map['bank_code'])->find();
         if (!$bank) {
             throw new JsonException("银行代码不存在");
         }
