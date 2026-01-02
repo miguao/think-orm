@@ -5,6 +5,7 @@ declare (strict_types=1);
 namespace app\controller\admin\api;
 
 use app\controller\AbstractController;
+use app\kernel\plugin\PluginFactory;
 use app\kernel\route\annotation\Controller;
 use app\kernel\route\annotation\Inject;
 use app\kernel\route\annotation\PostMapping;
@@ -29,8 +30,8 @@ class AuthController extends AbstractController
             'email.email' => '邮箱号码格式不正确',
             'password.required' => '密码不能为空',
         ]);
-        $token = $this->userService->login($map['email'], $map['password']);
 
+        $token = $this->userService->login($map['email'], $map['password']);
         return $this->json(data: ['token' => $token]);
     }
 }
