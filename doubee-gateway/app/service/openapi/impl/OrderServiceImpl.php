@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\service\openapi\impl;
 
 use app\exception\JsonException;
-use app\kernel\plugin\PaymentFactory;
+use app\kernel\plugin\PluginFactory;
 use app\model\Merchant;
 use app\model\MerchantApplication;
 use app\model\PaymentType;
@@ -83,7 +83,7 @@ class OrderServiceImpl implements OrderService
             $paymentOrder->status = 0;
             $paymentOrder->save();
 
-            $handler = PaymentFactory::getInstance()->getHandler(
+            $handler = PluginFactory::getInstance()->getPaymentHandler(
                 $channel->plugin_identifier,
                 $paymentOrder,
                 (array)$channel->config,

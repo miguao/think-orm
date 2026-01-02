@@ -7,6 +7,8 @@ namespace app\kernel\plugin;
 use app\kernel\component\Singleton;
 use app\kernel\plugin\entity\Plugin as PluginEntity;
 use app\kernel\plugin\entity\Query;
+use app\kernel\plugin\handler\Payment;
+use app\model\PaymentOrder;
 use Symfony\Component\Finder\Finder;
 use think\facade\Event;
 
@@ -15,28 +17,88 @@ class PluginFactory
     use Singleton;
 
     /**
+     * 插件缓存
+     * @var array<string, PluginEntity>
+     */
+    protected array $pluginCache = [];
+
+    /**
      * 获取插件
      * @param string $identifier
      * @return PluginEntity|null
      */
     public function getPlugin(string $identifier): ?PluginEntity
     {
-        $pluginBasePath = base_path("plugin/{$identifier}");
-        list($info, $form, $handler) = [
-            $pluginBasePath . "Config/Info.php",
-            $pluginBasePath . "Config/Form.php",
-            $pluginBasePath . "Config/Handler.php",
-        ];
+        if (isset($this->pluginCache[$identifier])) {
+            return $this->pluginCache[$identifier];
+        }
 
-        if (!file_exists($info)) {
+        $basePath = base_path("plugin/{$identifier}/");
+        $infoFile = $basePath . 'Config/Info.php';
+
+        if (!is_file($infoFile)) {
             return null;
         }
 
-        return new PluginEntity(
+        $plugin = new PluginEntity(
             $identifier,
-            (array)require($info),
-            file_exists($form) ? (array)require($form) : [],
-            file_exists($handler) ? (array)require($handler) : []
+            require $infoFile,
+            $this->loadConfig($basePath . 'Config/Form.php'),
+            $this->loadConfig($basePath . 'Config/Handler.php')
+        );
+
+        return $this->pluginCache[$identifier] = $plugin;
+    }
+
+    /**
+     * 加载配置文件
+     * @param string $file
+     * @return array
+     */
+    private function loadConfig(string $file): array
+    {
+        return is_file($file) ? (array)require $file : [];
+    }
+
+    /**
+     * 获取支付处理器
+     * @param string $identifier
+     * @param PaymentOrder $paymentOrder
+     * @param array $config
+     * @param string $clientIp
+     * @param float $amount
+     * @param string $notificationUrl
+     * @param string|null $redirectUrl
+     * @return Payment|null
+     */
+    public function getPaymentHandler(
+        string       $identifier,
+        PaymentOrder $paymentOrder,
+        array        $config,
+        string       $clientIp,
+        float        $amount,
+        string       $notificationUrl,
+        ?string      $redirectUrl = null
+    ): ?Payment
+    {
+        $plugin = $this->getPlugin($identifier);
+        if (!$plugin) {
+            return null;
+        }
+
+        $handlerClass = $plugin->handler[Payment::class] ?? null;
+        if (!$handlerClass || !class_exists($handlerClass)) {
+            return null;
+        }
+
+        return new $handlerClass(
+            $plugin,
+            $paymentOrder,
+            $config,
+            $clientIp,
+            $amount,
+            $notificationUrl,
+            $redirectUrl
         );
     }
 
@@ -47,28 +109,38 @@ class PluginFactory
      */
     public function getInstalledPlugins(Query $query): array
     {
-        $pluginBasePath = base_path('plugin');
-        $finder = is_dir($pluginBasePath) ? Finder::create()->in($pluginBasePath)->depth("== 0")->directories() : [];
+        $plugins = [];
 
-        $data = [];
-        foreach ($finder as $item) {
-            $plugin = $this->getPlugin($item->getFilename());
+        $pluginBasePath = base_path('plugin');
+        if (!is_dir($pluginBasePath)) {
+            return ['list' => [], 'total' => 0];
+        }
+
+        $finder = Finder::create()
+            ->directories()
+            ->depth('== 0')
+            ->in($pluginBasePath);
+
+        foreach ($finder as $dir) {
+            $plugin = $this->getPlugin($dir->getFilename());
             if (!$plugin) {
                 continue;
             }
 
-            if ($query->type && $query->type != $plugin->info['type']) {
+            if ($query->type && $plugin->info['type'] !== $query->type) {
                 continue;
             }
 
-            $data[] = $plugin;
+            $plugins[] = $plugin;
         }
 
-        $offset = ($query->paginate[0] - 1) * $query->paginate[1];
-        $data = array_slice($data, $offset, $query->paginate[1]);
-        $total = count($data);
+        $offset = max(0, ($query->paginate[0] - 1) * $query->paginate[1]);
+        $total = count(array_slice($plugins, $offset, $query->paginate[1]));
 
-        return ['list' => $data, 'total' => $total];
+        return [
+            'list' => array_slice($plugins, $offset, $query->paginate[1]),
+            'total' => $total,
+        ];
     }
 
     /**
@@ -79,6 +151,6 @@ class PluginFactory
      */
     public function trigger(string $hook, array $params = []): mixed
     {
-        return Event::trigger('PluginEvent', ['hook' => $hook, 'params' => $params]);
+        return Event::trigger('PluginEvent', compact('hook', 'params'));
     }
 }

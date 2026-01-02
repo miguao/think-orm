@@ -6,10 +6,6 @@ namespace app\kernel\component;
 
 trait Singleton
 {
-    /**
-     * 实例对象
-     * @var Singleton|null
-     */
     protected static ?self $instance = null;
 
     /**

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\controller\home;
 
 use app\controller\AbstractController;
-use app\kernel\plugin\PaymentFactory;
 use app\kernel\plugin\PluginFactory;
 use app\kernel\route\annotation\GetMapping;
 use app\kernel\route\annotation\Inject;
@@ -23,9 +22,11 @@ class HomeController extends AbstractController
     #[GetMapping("/")]
     public function index()
     {
-        $get = $this->request->get();
-        print_r($this->geeTestService->getBehavioralVerificationCode($get['lot_number'], $get['captcha_output'], $get['pass_token'], $get['gen_time']));
-//        return $this->json(message: "hello,word");
+//        print_r(StringUtils::generateUniqueAppNumber());
+//        exit;
+//        $get = $this->request->get();
+//        print_r($this->geeTestService->getBehavioralVerificationCode($get['lot_number'], $get['captcha_output'], $get['pass_token'], $get['gen_time']));
+        return $this->json(message: "hello,word");
     }
 
     #[GetMapping("trade")]
@@ -37,7 +38,7 @@ class HomeController extends AbstractController
 
         $config = PaymentChannel::query()->where("plugin_identifier", "AliPay")->find()->config;
 
-        $class = PaymentFactory::getInstance()->getHandler(
+        $class = PluginFactory::getInstance()->getPaymentHandler(
             identifier: "Alipay",
             paymentOrder: $paymentOrder,
             config: $config,
