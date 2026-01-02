@@ -1,3 +1,4 @@
+<!-- 文件上传 -->
 <template>
   <EleUploadList
     v-model="images"
@@ -51,7 +52,9 @@
     BeforePreview,
     UploadLocale
   } from 'ele-admin-plus/es/ele-upload-list/types';
-  import { uploadFile } from '@/api/system/file';
+  import { useComponentLang } from '@/utils/use-component-lang';
+  import type { CommonUploadLocale } from './config';
+  import { uploadApi } from './config';
 
   defineOptions({ name: 'CommonUpload' });
 
@@ -97,6 +100,8 @@
       beforePreview?: BeforePreview;
       /** 国际化 */
       locale?: Partial<UploadLocale>;
+      /** 自定义文案 */
+      componentLang?: CommonUploadLocale;
     }>(),
     {
       fileLimit: 100,
@@ -113,6 +118,27 @@
     (e: 'preview', item: UploadItem): void;
   }>();
 
+  const { lang } = useComponentLang<CommonUploadLocale>(
+    {
+      zh_CN: {
+        imageError: '只能选择图片',
+        excelError: '只能选择 excel 文件',
+        limitError: '大小不能超过 {limit}MB'
+      },
+      zh_TW: {
+        imageError: '只能選擇圖片',
+        excelError: '只能選擇 Excel 檔案',
+        limitError: '大小不能超過 {limit}MB'
+      },
+      en: {
+        imageError: 'Can only select images',
+        excelError: 'Can only select excel files',
+        limitError: 'File size cannot exceed {limit}MB'
+      }
+    },
+    props
+  );
+
   /** 已上传数据 */
   const images = defineModel<UploadItem[]>({
     type: Array,
@@ -126,7 +152,7 @@
     }
     if (props.accept === 'image/*') {
       if (!file.type.startsWith('image')) {
-        EleMessage.error({ message: '只能选择图片', plain: true });
+        EleMessage.error({ message: lang.value.imageError, plain: true });
         return;
       }
     } else if (props.accept === '.xls,.xlsx') {
@@ -136,13 +162,16 @@
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ].includes(file.type)
       ) {
-        EleMessage.error({ message: '只能选择 excel 文件', plain: true });
+        EleMessage.error({ message: lang.value.excelError, plain: true });
         return;
       }
     }
     if (props.fileLimit && file.size / 1024 / 1024 > props.fileLimit) {
       EleMessage.error({
-        message: `大小不能超过 ${props.fileLimit}MB`,
+        message: lang.value.limitError.replace(
+          /\{\s*limit\s*\}/g,
+          String(props.fileLimit)
+        ),
         plain: true
       });
       return;
@@ -164,7 +193,7 @@
     }
     item.status = 'uploading';
     item.progress = 0;
-    uploadFile(data.file, {
+    uploadApi(data.file, {
       onUploadProgress: (e: AxiosProgressEvent) => {
         if (e.total != null && item.status !== 'done') {
           item.progress = (e.loaded / e.total) * 100;

@@ -14,13 +14,19 @@
     :persistent="persistent"
     :placement="placement"
     :transition="transition"
-    :popperWidth="popperWidth"
     :popperOptions="popperOptions"
-    :popperClass="selectPopperClass"
     selectClass="is-icon-select"
     :selectStyle="selectStyle"
     :inputStyle="inputStyle"
     :selectTagsStyle="selectTagsStyle"
+    :popperClass="selectPopperClass"
+    :popperWidth="popperWidth"
+    :popperHeight="popperHeight"
+    :popperType="popperType"
+    :popperProps="popperProps"
+    :popperSlots="popperSlots"
+    :popperTitle="lang.title"
+    :responsive="isResponsive"
     :selectedLabel="modelValue"
     :visible="selectVisible"
     @update:visible="updateVisible"
@@ -29,75 +35,82 @@
     @focus="handleSelectFocus"
     @blur="handleSelectBlur"
   >
+    <template
+      v-for="name in Object.keys($slots).filter((k) => !ownSlots.includes(k))"
+      #[name]="slotProps"
+    >
+      <slot :name="name" v-bind="slotProps || {}"></slot>
+    </template>
     <template v-if="modelValue && $slots.icon" #prefix>
       <slot name="icon" :icon="modelValue" :prefix="true"></slot>
     </template>
-    <div class="ele-icon-select" :style="iconPopperStyle">
+    <div
+      v-if="tabBar || showFilterInput"
+      class="ele-icon-select-header"
+      :style="headerStyle"
+    >
+      <slot name="tabLeftExtra"></slot>
+      <div v-if="tabBar" class="ele-icon-select-tabs" :style="tabsStyle">
+        <div
+          v-for="(t, i) in tabs"
+          :key="`${i}-${t}`"
+          class="ele-icon-select-tab"
+          :class="{ 'is-active': i === tabActive }"
+          @click="handleTabClick(i)"
+        >
+          {{ t }}
+        </div>
+      </div>
       <div
-        v-if="tabBar || filterable === 'popper'"
-        class="ele-icon-select-header"
-        :style="headerStyle"
+        v-if="showFilterInput"
+        class="ele-icon-select-search"
+        :style="searchStyle"
       >
-        <slot name="tabLeftExtra"></slot>
-        <div v-if="tabBar" class="ele-icon-select-tabs" :style="tabsStyle">
-          <div
-            v-for="(t, i) in tabs"
-            :key="i + '-' + t"
-            :class="['ele-icon-select-tab', { 'is-active': i === tabActive }]"
-            @click="handleTabClick(i)"
-          >
-            {{ t }}
-          </div>
-        </div>
-        <div
-          v-if="filterable === 'popper'"
-          class="ele-icon-select-search"
-          :style="searchStyle"
-        >
-          <ElInput
-            size="small"
-            :clearable="true"
-            :modelValue="keywords"
-            :validateEvent="false"
-            :prefixIcon="SearchOutlined"
-            :placeholder="filterPlaceholder"
-            @update:modelValue="handleSelectFilter"
-          />
-        </div>
-        <slot name="tabRightExtra"></slot>
+        <ElInput
+          size="small"
+          :clearable="true"
+          :modelValue="keywords"
+          :validateEvent="false"
+          :prefixIcon="SearchOutlined"
+          :placeholder="filterPlaceholder ?? lang.searchPlaceholder"
+          @update:modelValue="handleSelectFilter"
+        />
       </div>
-      <div class="ele-icon-select-main">
+      <slot name="tabRightExtra"></slot>
+    </div>
+    <div class="ele-icon-select-main">
+      <div
+        v-if="menus && menus.length"
+        class="ele-icon-select-menus"
+        :style="menusStyle"
+      >
         <div
-          v-if="menus && menus.length"
-          class="ele-icon-select-menus"
-          :style="menusStyle"
+          v-for="(m, i) in menus"
+          :key="`${i}-${m}`"
+          class="ele-icon-select-menu"
+          :class="{ 'is-active': i === menuActive }"
+          @click="handleMenuClick(i)"
         >
-          <div
-            v-for="(m, i) in menus"
-            :key="i + '-' + m"
-            :class="['ele-icon-select-menu', { 'is-active': i === menuActive }]"
-            @click="handleMenuClick(i)"
-          >
-            {{ m }}
-          </div>
+          {{ m }}
         </div>
-        <IconGrid
-          :data="icons"
-          :icon="modelValue"
-          :emptyProps="emptyProps"
-          :tooltip="tooltip"
-          :tooltipProps="tooltipProps"
-          :popperVisible="selectVisible"
-          :gridStyle="gridStyle"
-          :itemStyle="itemStyle"
-          :style="bodyStyle"
-          @select="handleIconSelect"
-        >
-          <template v-if="$slots.icon" #icon="slotProps">
-            <slot name="icon" v-bind="slotProps || {}"></slot>
-          </template>
-        </IconGrid>
       </div>
+      <IconGrid
+        :data="icons"
+        :icon="modelValue"
+        :emptyProps="emptyProps"
+        :tooltip="tooltip"
+        :tooltipProps="tooltipProps"
+        :popperVisible="selectVisible"
+        :gridStyle="gridStyle"
+        :itemStyle="itemStyle"
+        :popperType="popperType"
+        :style="bodyStyle"
+        @select="handleIconSelect"
+      >
+        <template v-if="$slots.icon" #icon="slotProps">
+          <slot name="icon" v-bind="slotProps || {}"></slot>
+        </template>
+      </IconGrid>
     </div>
   </EleBasicSelect>
 </template>
@@ -105,8 +118,8 @@
 <script lang="ts" setup>
   import { ref, computed, watch } from 'vue';
   import { ElInput } from 'element-plus';
-  import type { StyleValue } from '../ele-app/types';
   import type { EleBasicSelectInstance } from '../ele-app/plus';
+  import { useLocale } from '../ele-config-provider/receiver';
   import { useResponsive } from '../ele-pro-layout/util';
   import EleBasicSelect from '../ele-basic-select/index.vue';
   import { valueIsChanged, useFormValidate } from '../ele-basic-select/util';
@@ -114,6 +127,7 @@
   import IconGrid from './components/icon-grid.vue';
   import type { IconItem } from './types';
   import { iconSelectProps, iconSelectEmits } from './props';
+  const ownSlots = ['default', 'icon', 'tabLeftExtra', 'tabRightExtra'];
 
   defineOptions({ name: 'EleIconSelect' });
 
@@ -121,6 +135,7 @@
 
   const emit = defineEmits(iconSelectEmits);
 
+  const { lang } = useLocale('iconSelect', props);
   const { validateChange } = useFormValidate();
   const isResponsive = useResponsive(props);
 
@@ -159,29 +174,33 @@
     return true;
   });
 
+  /** 是否显示下拉框中搜索框 */
+  const showFilterInput = computed(() => {
+    if (props.filterable === true && props.popperType !== 'popper') {
+      return true;
+    }
+    return props.filterable === 'popper';
+  });
+
   /** 下拉框类名 */
   const selectPopperClass = computed<string>(() => {
     const classes: string[] = ['ele-icon-select-popper'];
-    if (isResponsive.value) {
-      classes.push('is-responsive');
+    if (props.popperType === 'default') {
+      classes.push('is-icon-select-default');
+    }
+    if (
+      props.popperType === 'modal' &&
+      (tabBar.value || showFilterInput.value || menus.value?.length)
+    ) {
+      classes.push('ele-modal-show-header-border');
+    }
+    if (isResponsive.value && props.popperType === 'popper') {
+      classes.push('is-icon-select-responsive');
     }
     if (props.popperClass) {
       classes.push(props.popperClass);
     }
     return classes.join(' ');
-  });
-
-  /** 下拉框高度 */
-  const iconPopperStyle = computed<StyleValue | undefined>(() => {
-    if (!props.popperHeight) {
-      return;
-    }
-    return {
-      height:
-        typeof props.popperHeight === 'number'
-          ? `${props.popperHeight}px`
-          : props.popperHeight
-    };
   });
 
   /** 更新气泡位置 */

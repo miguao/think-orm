@@ -1,8 +1,8 @@
 <!-- 标签输入 -->
 <template>
   <div
+    class="ele-edit-tag"
     :class="[
-      'ele-edit-tag',
       { 'is-large': size === 'large' },
       { 'is-small': size === 'small' },
       { 'is-disabled': disabled },
@@ -12,7 +12,7 @@
     <template v-if="modelValue">
       <ElTag
         v-for="(item, index) in modelValue"
-        :key="index + '-' + item"
+        :key="`${index}-${item}`"
         :hit="hit"
         :type="type"
         :color="color"
@@ -54,7 +54,8 @@
       :size="size"
       :round="round"
       :disableTransitions="true"
-      :class="['ele-edit-tag-input', { 'is-error': !!errorMessage }]"
+      class="ele-edit-tag-input"
+      :class="{ 'is-error': !!errorMessage }"
       :style="inputTagStyle"
     >
       <ElInput

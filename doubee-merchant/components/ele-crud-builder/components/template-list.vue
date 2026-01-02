@@ -28,7 +28,7 @@
 
 <script lang="ts" setup>
   import { ElEmpty } from 'element-plus';
-  import type { EleCrudProps } from '../../ele-app/plus';
+  import type { EleCrudProps } from '../../ele-app/plusx';
   import { deepCloneObject } from '../../ele-pro-form-builder/components/build-core';
   import type { TemplateItem } from '../types';
   import { itemsGenerateNewKey } from '../util';

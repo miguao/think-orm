@@ -4,10 +4,8 @@
     :data="tableData"
     :columns="tableColumns"
     :tableStyle="{ minWidth: tableMinWidth }"
-    :class="[
-      'ele-pro-form-builder-options-editer',
-      { 'is-table-data': columns === 'tableData' }
-    ]"
+    class="ele-pro-form-builder-options-editer"
+    :class="{ 'is-table-data': columns === 'tableData' }"
   >
     <template #bodyCell="{ row, column, treeLevel }">
       <EleSelect

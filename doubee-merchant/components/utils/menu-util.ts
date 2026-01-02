@@ -120,6 +120,7 @@ export function menuToRoutes(
         path,
         component,
         redirect: item.redirect as string,
+        props: item.props,
         meta,
         children: menuToRoutes(item.children, getComponent, addedRoutes)
       });

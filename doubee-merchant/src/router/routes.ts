@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import { menuToRoutes, eachTree } from 'ele-admin-plus';
 import type { MenuItem } from 'ele-admin-plus/es/ele-pro-layout/types';
 import {
+  LOGIN_PATH,
   HOME_PATH,
   LAYOUT_PATH,
   REDIRECT_PATH,
@@ -16,20 +17,11 @@ const modules = import.meta.glob('/src/views/**/index.vue');
  */
 export const routes: RouteRecordRaw[] = [
   {
-    path: '/login',
+    path: LOGIN_PATH,
     component: () => import('@/views/login/index.vue'),
     meta: { title: '登录' }
   },
-  {
-    path: '/register',
-    component: () => import('@/views/register/index.vue'),
-    meta: { title: '注册' }
-  },
-  {
-    path: '/forget',
-    component: () => import('@/views/forget/index.vue'),
-    meta: { title: '找回密码' }
-  },
+  // 404
   {
     path: '/:path(.*)*',
     component: () => import('@/views/exception/404/index.vue')
@@ -60,7 +52,11 @@ export function getMenuRoutes(menus?: MenuItem[], homePath?: string) {
   ];
   // 路由铺平处理
   eachTree(menuToRoutes(menus, getComponent, routes), (route) => {
-    const temp = Object.assign({}, route, { children: void 0 });
+    const temp: RouteRecordRaw = Object.assign({}, route, { children: void 0 });
+    if (!temp.component && !temp.redirect) {
+      // 没有对应组件的路由页面使用 404 组件
+      temp.component = () => import('@/views/exception/404/index.vue');
+    }
     if (temp.meta?.layout === false) {
       layoutRoutes.push(temp); // 不需要外层布局的路由
     } else {

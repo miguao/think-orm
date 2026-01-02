@@ -6,7 +6,7 @@ import type {
   EleBacktopProps,
   EleDropdownProps
 } from '../ele-app/plus';
-import type { MenuItem } from '../ele-menus/types';
+import type { MenuItem, MenuItemClickType } from '../ele-menus/types';
 import type { BreadcrumbItem } from '../ele-breadcrumb/types';
 import type {
   TabPaneItem,
@@ -203,19 +203,31 @@ export const adminLayoutEmits = {
   logoClick: (_e: MouseEvent) => true,
   headMenuOpen: (_index: string, _indexPath: string[]) => true,
   headMenuClose: (_index: string, _indexPath: string[]) => true,
-  headMenuItemClick: (_item: MenuItem, _e: MouseEvent) => true,
+  headMenuItemClick: (
+    _item: MenuItem,
+    _e: MouseEvent,
+    _type?: MenuItemClickType
+  ) => true,
   headMenuItemMouseenter: (_item: MenuItem, _e: MouseEvent) => true,
   headMenuItemMouseleave: (_item: MenuItem, _e: MouseEvent) => true,
   headMouseenter: (_e: MouseEvent) => true,
   headMouseleave: (_e: MouseEvent) => true,
-  boxMenuItemClick: (_item: MenuItem, _e: MouseEvent) => true,
+  boxMenuItemClick: (
+    _item: MenuItem,
+    _e: MouseEvent,
+    _type?: MenuItemClickType
+  ) => true,
   boxMenuItemMouseenter: (_item: MenuItem, _e: MouseEvent) => true,
   boxMenuItemMouseleave: (_item: MenuItem, _e: MouseEvent) => true,
   boxMouseenter: (_e: MouseEvent) => true,
   boxMouseleave: (_e: MouseEvent) => true,
   sideMenuOpen: (_index: string, _indexPath: string[]) => true,
   sideMenuClose: (_index: string, _indexPath: string[]) => true,
-  sideMenuItemClick: (_item: MenuItem, _e: MouseEvent) => true,
+  sideMenuItemClick: (
+    _item: MenuItem,
+    _e: MouseEvent,
+    _type?: MenuItemClickType
+  ) => true,
   sideMouseenter: (_e: MouseEvent) => true,
   sideMouseleave: (_e: MouseEvent) => true,
   tabClick: (_option: TabEventOption) => true,

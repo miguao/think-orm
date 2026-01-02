@@ -1,12 +1,14 @@
 /** 全局配置 */
 import { defineComponent, provide, reactive, watch } from 'vue';
-import { configProviderProps, CONFIG_KEY } from './props';
+import { configProviderProps } from './props';
+import type { GlobalProvide } from './types';
+import { CONFIG_KEY, configValues } from './receiver';
 
 export default defineComponent({
   name: 'EleConfigProvider',
   props: configProviderProps,
   setup(props, { slots }) {
-    const config = reactive({ ...props });
+    const config = reactive<GlobalProvide>({ ...props });
 
     provide(CONFIG_KEY, config);
 
@@ -43,9 +45,20 @@ export default defineComponent({
 
     watch(
       () => props.license,
-      () => {
-        config.license = props.license;
-      }
+      (code) => {
+        const value = code ? code.trim() : void 0;
+        if (!value) {
+          const values = configValues.split('=');
+          if (values.length > 16) {
+            config.key = `${values[16]}${[values[17], values[18]].map((d) => (d == null ? '' : '=')).join('')}`;
+          } else {
+            config.key = value;
+          }
+        } else {
+          config.key = value;
+        }
+      },
+      { immediate: true }
     );
 
     watch(

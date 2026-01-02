@@ -7,10 +7,8 @@
     <div
       v-for="item in pageConfigGroups"
       :key="item.key"
-      :class="[
-        'ele-crud-builder-page-config-group-list-item',
-        { 'is-active': item.key === groupActive }
-      ]"
+      class="ele-crud-builder-page-config-group-list-item"
+      :class="{ 'is-active': item.key === groupActive }"
       @click="handlePageConfigGroupClick(item)"
     >
       {{ item.label }}
@@ -125,7 +123,7 @@
     EleCrudProps,
     EleProFormBuilderProps,
     EleProFormProps
-  } from '../../ele-app/plus';
+  } from '../../ele-app/plusx';
   import EleProForm from '../../ele-pro-form/index.vue';
   import type {
     ProFormItemTypeData,

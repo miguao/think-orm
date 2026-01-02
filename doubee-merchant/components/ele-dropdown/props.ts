@@ -1,4 +1,4 @@
-import type { PropType, ExtractPropTypes } from 'vue';
+import type { PropType, ExtractPropTypes, EmitsToProps } from 'vue';
 import { dropdownProps as elDropdownProps } from 'element-plus';
 import type { StyleValue } from '../ele-app/types';
 import type {
@@ -56,6 +56,8 @@ export const dropdownProps = {
   menuStyle: Object as PropType<StyleValue>,
   /** 自定义图标属性 */
   iconProps: Object as PropType<ElIconProps>,
+  /** 图标尺寸 */
+  iconSize: String as PropType<'small' | 'default'>,
   /** 下拉菜单使用的组件类型 */
   componentType: String as PropType<'pro'>,
   /** 是否阻止下拉菜单的右键事件 */
@@ -89,6 +91,10 @@ export const dropdownEmits = {
   /** 选中改变的事件 */
   change: (_active: DropdownItem['command']) => true
 };
+
+export type DropdownEmitsProps = EmitsToProps<typeof dropdownEmits>;
+
+export type DropdownPropsAndEmits = DropdownProps & DropdownEmitsProps;
 
 /**
  * 属性名

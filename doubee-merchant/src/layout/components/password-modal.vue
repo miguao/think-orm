@@ -4,9 +4,8 @@
     form
     :width="420"
     title="修改密码"
-    :append-to-body="true"
-    v-model="visible"
-    @closed="handleClosed"
+    :loading="loading"
+    v-bind="modalProps"
   >
     <el-form
       ref="formRef"
@@ -44,10 +43,12 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="handleCancel">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="handleOk">
-        保存
-      </el-button>
+      <btn-items
+        :items="[
+          { preset: 'cancel', onClick: () => handleCancel() },
+          { preset: 'save', onClick: () => handleSave() }
+        ]"
+      />
     </template>
   </ele-modal>
 </template>
@@ -55,21 +56,19 @@
 <script lang="ts" setup>
   import { ref, reactive } from 'vue';
   import type { FormInstance, FormRules } from 'element-plus';
-  import { EleMessage } from 'ele-admin-plus';
-  import { useFormData } from '@/utils/use-form-data';
+  import { EleMessage, useModal } from 'ele-admin-plus';
   import { updatePassword } from '@/api/layout';
 
-  /** 弹窗是否打开 */
-  const visible = defineModel({ type: Boolean });
+  const { modalProps, closeModal } = useModal();
 
-  /** 提交loading */
-  const loading = ref<boolean>(false);
+  /** 提交状态 */
+  const loading = ref(false);
 
-  /** 表单实例 */
+  /** 表单组件 */
   const formRef = ref<FormInstance | null>(null);
 
   /** 表单数据 */
-  const [form, resetFields] = useFormData({
+  const form = reactive({
     oldPassword: '',
     password: '',
     password2: ''
@@ -121,11 +120,11 @@
 
   /** 关闭弹窗 */
   const handleCancel = () => {
-    visible.value = false;
+    closeModal();
   };
 
   /** 保存修改 */
-  const handleOk = () => {
+  const handleSave = () => {
     formRef.value?.validate?.((valid) => {
       if (!valid) {
         return;
@@ -142,12 +141,5 @@
           EleMessage.error({ message: e.message, plain: true });
         });
     });
-  };
-
-  /** 弹窗关闭事件 */
-  const handleClosed = () => {
-    resetFields();
-    formRef.value?.clearValidate?.();
-    loading.value = false;
   };
 </script>

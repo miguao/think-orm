@@ -16,8 +16,7 @@ import type {
   ProFormItemProps,
   ProFormItemTypeData,
   ProFormItemRenderSlots,
-  ProFormItemPropsFunctionParams,
-  ProFormLocale
+  ProFormItemPropsFunctionParams
 } from '../types';
 import type {
   RenderProFormItemProps,
@@ -363,11 +362,15 @@ export function renderProFormItem(
   ).result;
   const componentNode = typeSlot
     ? typeSlot({
-        item: props.item,
+        item: {
+          ...props.item,
+          props: componentPropsData
+        },
         model: formData,
         modelValue: modelValue,
         updateValue: handleUpdateModelValue,
         updatePropValue: props.updateItemValue,
+        itemComponentRef: getComponentRefName(props.item),
         proForm: slotProFormParams
       })
     : h(
@@ -769,7 +772,7 @@ export const ChildrenRender = defineComponent({
   },
   setup(props, { emit, slots }) {
     /** 国际化语言 */
-    const { lang } = useLocale<ProFormLocale>('proForm', props);
+    const { lang } = useLocale('proForm', props);
 
     /** 更新表单数据属性值 */
     const handleUpdateItemValue = (prop: string, value: unknown) => {

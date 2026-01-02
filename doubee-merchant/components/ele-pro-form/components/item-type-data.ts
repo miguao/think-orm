@@ -237,9 +237,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'input',
     component: markRaw(ElInput),
-    defaultProps: ({ item }) => ({
-      clearable: true,
-      placeholder: `请输入${item.label ?? ''}`
+    defaultProps: () => ({
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -250,9 +249,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'textarea',
     component: markRaw(ElInput),
-    defaultProps: ({ item }) => ({
-      rows: 4,
-      placeholder: `请输入${item.label ?? ''}`
+    defaultProps: () => ({
+      rows: 4
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       type: 'textarea',
@@ -264,10 +262,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'select',
     component: markRaw(EleSelect),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      clearable: true,
-      placeholder: `请输入${item.label ?? ''}`
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -277,10 +274,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'multipleSelect',
     component: markRaw(EleSelect),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      clearable: true,
-      placeholder: `请输入${item.label ?? ''}`
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       multiple: true,
@@ -325,10 +321,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'date',
     component: markRaw(ElDatePicker),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      valueFormat: 'YYYY-MM-DD',
-      placeholder: `请选择${item.label ?? ''}`
+      valueFormat: 'YYYY-MM-DD'
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -338,10 +333,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'datetime',
     component: markRaw(ElDatePicker),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      valueFormat: 'YYYY-MM-DD HH:mm:ss',
-      placeholder: `请选择${item.label ?? ''}`
+      valueFormat: 'YYYY-MM-DD HH:mm:ss'
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       type: 'datetime',
@@ -356,8 +350,6 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
       class: 'ele-fluid',
       valueFormat: 'YYYY-MM-DD',
       rangeSeparator: '-',
-      startPlaceholder: '开始日期',
-      endPlaceholder: '结束日期',
       unlinkPanels: true,
       type: 'daterange'
     }),
@@ -373,8 +365,6 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
       class: 'ele-fluid',
       valueFormat: 'YYYY-MM-DD HH:mm:ss',
       rangeSeparator: '-',
-      startPlaceholder: '开始日期',
-      endPlaceholder: '结束日期',
       unlinkPanels: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
@@ -386,10 +376,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'time',
     component: markRaw(ElTimePicker),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      valueFormat: 'HH:mm:ss',
-      placeholder: `请选择${item.label ?? ''}`
+      valueFormat: 'HH:mm:ss'
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -402,9 +391,7 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
     defaultProps: () => ({
       class: 'ele-fluid',
       valueFormat: 'HH:mm:ss',
-      rangeSeparator: '-',
-      startPlaceholder: '开始日期',
-      endPlaceholder: '结束日期'
+      rangeSeparator: '-'
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       isRange: true,
@@ -415,9 +402,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'timeSelect',
     component: markRaw(ElTimeSelect),
-    defaultProps: ({ item }) => ({
-      class: 'ele-fluid',
-      placeholder: `请选择${item.label ?? ''}`
+    defaultProps: () => ({
+      class: 'ele-fluid'
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -439,10 +425,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'inputNumber',
     component: markRaw(ElInputNumber),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      controlsPosition: 'right',
-      placeholder: `请输入${item.label ?? ''}`
+      controlsPosition: 'right'
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -452,9 +437,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'autocomplete',
     component: markRaw(EleAutocomplete),
-    defaultProps: ({ item }) => ({
-      class: 'ele-fluid',
-      placeholder: `请输入${item.label ?? ''}`
+    defaultProps: () => ({
+      class: 'ele-fluid'
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -464,10 +448,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'cascader',
     component: markRaw(EleCascader),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      clearable: true,
-      placeholder: `请选择${item.label ?? ''}`
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -477,10 +460,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'multipleCascader',
     component: markRaw(EleCascader),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      clearable: true,
-      placeholder: `请选择${item.label ?? ''}`
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       multiple: true,
@@ -516,9 +498,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'mention',
     component: markRaw(EleMention),
-    defaultProps: ({ item }) => ({
-      clearable: true,
-      placeholder: `请输入${item.label ?? ''}`
+    defaultProps: () => ({
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -544,10 +525,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'treeSelect',
     component: markRaw(EleSelectTree),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
-      clearable: true,
-      placeholder: `请选择${item.label ?? ''}`
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -557,11 +537,10 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'treeMultipleSelect',
     component: markRaw(EleSelectTree),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       class: 'ele-fluid',
       clearable: true,
-      showCheckbox: true,
-      placeholder: `请选择${item.label ?? ''}`
+      showCheckbox: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       multiple: true,
@@ -572,9 +551,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'virtualTreeSelect',
     component: markRaw(EleTreeSelect),
-    defaultProps: ({ item }) => ({
-      clearable: true,
-      placeholder: `请选择${item.label ?? ''}`
+    defaultProps: () => ({
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -584,10 +562,9 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'virtualTreeMultipleSelect',
     component: markRaw(EleTreeSelect),
-    defaultProps: ({ item }) => ({
+    defaultProps: () => ({
       clearable: true,
-      maxTagCount: 1,
-      placeholder: `请选择${item.label ?? ''}`
+      maxTagCount: 1
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       multiple: true,
@@ -598,9 +575,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'tableSelect',
     component: markRaw(EleTableSelect),
-    defaultProps: ({ item }) => ({
-      clearable: true,
-      placeholder: `请选择${item.label ?? ''}`
+    defaultProps: () => ({
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       modelValue: modelValue,
@@ -610,9 +586,8 @@ export const defaultItemTypeData: ProFormItemTypeData[] = [
   {
     type: 'tableMultipleSelect',
     component: markRaw(EleTableSelect),
-    defaultProps: ({ item }) => ({
-      clearable: true,
-      placeholder: `请选择${item.label ?? ''}`
+    defaultProps: () => ({
+      clearable: true
     }),
     reservedProps: ({ modelValue, updateModelValue }) => ({
       multiple: true,

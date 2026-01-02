@@ -1,9 +1,10 @@
 <!-- 表单构建器 -->
 <template>
   <EleSplitPanel
-    space="0px"
-    size="280px"
+    :space="0"
+    :size="280"
     :allowCollapse="true"
+    :collapseBtnOffset="2"
     v-bind="splitPanelProps || {}"
     v-model:collapse="leftSideCollapse"
     class="ele-pro-form-builder-wrapper"
@@ -44,10 +45,11 @@
     </div>
     <template #body>
       <EleSplitPanel
-        space="0px"
-        size="220px"
+        :space="0"
+        :size="220"
         :reverse="true"
         :allowCollapse="true"
+        :collapseBtnOffset="2"
         v-bind="rightSplitPanelProps || {}"
         v-model:collapse="rightSideCollapse"
         class="ele-pro-form-builder-main-wrapper"
@@ -162,7 +164,7 @@
 
 <script lang="ts" setup>
   import { ref, reactive, watch, useModel, onBeforeUnmount } from 'vue';
-  import type { EleProFormProps } from '../ele-app/plus';
+  import type { EleProFormProps } from '../ele-app/plusx';
   import { findTree, eachTree, omit } from '../utils/common';
   import { useMobile, useMobileDevice } from '../utils/hook';
   import { setValue } from '../ele-pro-form/util';

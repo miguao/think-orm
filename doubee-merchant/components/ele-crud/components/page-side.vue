@@ -1,28 +1,5 @@
 <!-- 侧栏 -->
 <template>
-  <div
-    v-if="sideConfig?.searchProps !== false"
-    class="ele-crud-search-bar"
-    v-bind="searchBarProps"
-  >
-    <ElInput
-      placeholder="搜索"
-      :clearable="true"
-      v-model="keywords"
-      :prefixIcon="SearchOutlined"
-      v-bind="sideConfig?.searchInputProps || {}"
-    >
-      <template
-        v-for="(slotName, name) in getSlotsMap(
-          $slots,
-          sideConfig?.searchInputSlots
-        )"
-        #[name]="slotProps"
-      >
-        <slot :name="slotName" v-bind="slotProps || {}"></slot>
-      </template>
-    </ElInput>
-  </div>
   <EleLoading
     :loading="loading"
     class="ele-crud-tree-wrapper"
@@ -48,10 +25,12 @@
         />
       </template>
       <template
-        v-for="(slotName, name) in getSlotsMap($slots, sideConfig?.treeSlots, [
-          'empty'
-        ])"
-        #[name]="slotProps"
+        v-for="(slotName, compSlotName) in getSlotsMap(
+          $slots,
+          sideConfig?.treeSlots,
+          ['empty']
+        )"
+        #[compSlotName]="slotProps"
       >
         <slot :name="slotName" v-bind="slotProps || {}"></slot>
       </template>
@@ -61,9 +40,8 @@
 
 <script lang="ts" setup>
   import type { PropType } from 'vue';
-  import { ref, computed, watch, onMounted } from 'vue';
-  import { ElInput, ElTree, ElEmpty } from 'element-plus';
-  import { SearchOutlined } from '../../icons/index';
+  import { ref, watch, onMounted } from 'vue';
+  import { ElTree, ElEmpty } from 'element-plus';
   import type { ElTreeInstance } from '../../ele-app/el';
   import { getSlotsMap } from '../../utils/common';
   import EleLoading from '../../ele-loading/index.vue';
@@ -72,7 +50,7 @@
     getTreeValueField,
     getTreeLabelField
   } from '../util';
-  import type { SideConfig } from '../types';
+  import type { SideConfig, CrudLocale } from '../types';
 
   defineOptions({ name: 'PageSide' });
 
@@ -86,7 +64,14 @@
     /** 加载错误信息 */
     errorMessage: String,
     /** 选中值 */
-    selectedValue: [String, Number, Boolean, Object, Array] as PropType<any>
+    selectedValue: [String, Number, Boolean, Object, Array] as PropType<any>,
+    /** 侧栏树搜索关键字 */
+    keywords: String,
+    /** 国际化 */
+    lang: {
+      type: Object as PropType<Partial<CrudLocale>>,
+      required: true
+    }
   });
 
   const emit = defineEmits({
@@ -94,23 +79,8 @@
     treeNodeClick: (_nodeValue?: any) => true
   });
 
-  /** 搜索关键字 */
-  const keywords = ref('');
-
   /** 树组件 */
   const treeRef = ref<ElTreeInstance>(null);
-
-  /** 搜索栏属性 */
-  const searchBarProps = computed(() => {
-    const searchProps = props.sideConfig?.searchProps;
-    if (!searchProps || searchProps === true) {
-      return {};
-    }
-    return {
-      class: searchProps.class,
-      style: searchProps.style
-    };
-  });
 
   /** 设置树选中 */
   const setTreeCurrentKey = (key: any) => {
@@ -140,9 +110,12 @@
   };
 
   /** 树过滤 */
-  watch(keywords, (value) => {
-    treeRef.value?.filter?.(value);
-  });
+  watch(
+    () => props.keywords,
+    (value) => {
+      treeRef.value?.filter?.(value);
+    }
+  );
 
   /** 更新选中 */
   watch(

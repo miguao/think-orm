@@ -137,7 +137,7 @@
       // 对齐方式
       const align = col.headerAlign || col.align;
       if (align) {
-        classes.push('is-align-' + align);
+        classes.push(`is-align-${align}`);
       }
       // 可排序
       if (col.sortable === true || col.sortable === 'custom') {
@@ -147,7 +147,7 @@
       if (props.sortBy != null && getColKey(col) === props.sortBy.key) {
         const sortClass = getOrderValue(props.sortBy.order as any);
         if (sortClass) {
-          classes.push('is-' + sortClass);
+          classes.push(`is-${sortClass}`);
         }
       }
       // 筛选状态

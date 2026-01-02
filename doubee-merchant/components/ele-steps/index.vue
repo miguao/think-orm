@@ -3,10 +3,8 @@
   <ElSteps
     v-bind="omit($props, ['items', 'type'])"
     ref="stepsRef"
-    :class="[
-      'ele-steps',
-      { 'is-inline': direction === 'horizontal' && type === 'inline' }
-    ]"
+    class="ele-steps"
+    :class="{ 'is-inline': direction === 'horizontal' && type === 'inline' }"
   >
     <ElStep v-for="(item, index) in optionData" :key="index" v-bind="item">
       <template

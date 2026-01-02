@@ -7,7 +7,9 @@
     :class="cellClass"
   >
     <template v-if="'expand' === col.column?.type">
-      <template v-if="col.text">{{ col.text }}</template>
+      <template v-if="col.text != null && col.text !== ''">
+        {{ col.text }}
+      </template>
       <ElIcon
         v-else
         style="vertical-align: middle"
@@ -112,7 +114,7 @@
     if (column) {
       // 对齐方式
       if (column.align) {
-        classes.push('is-align-' + column.align);
+        classes.push(`is-align-${column.align}`);
       }
       // 自定义类名
       if (typeof props.bodyCellClass === 'function') {

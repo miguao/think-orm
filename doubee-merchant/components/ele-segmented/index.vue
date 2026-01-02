@@ -4,8 +4,8 @@
     ref="tabRef"
     :modelValue="modelValue"
     :stretch="block"
+    class="ele-segmented"
     :class="[
-      'ele-segmented',
       { 'is-block': block },
       { 'is-large': size === 'large' },
       { 'is-small': size === 'small' },
@@ -17,7 +17,7 @@
   >
     <ElTabPane
       v-for="(item, index) in items"
-      :key="index + '-' + item.value + '-' + item.label"
+      :key="`${index}-${item.value}-${item.label}`"
       :name="item.value"
       :disabled="disabled || item.disabled"
     >

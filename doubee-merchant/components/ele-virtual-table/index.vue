@@ -2,8 +2,8 @@
 <template>
   <div
     ref="rootRef"
+    class="ele-virtual-table"
     :class="[
-      'ele-virtual-table',
       { 'is-border': border || headerRows.length > 1 },
       { 'is-stripe': stripe },
       { 'is-sticky': sticky },
@@ -124,7 +124,7 @@
           :bodyCols="bodyCols"
           :colSizes="bodyColSizes"
           :sumWidth="colsSumWidth"
-          :tableData="tableData"
+          :tableData="tableCurrentData"
           :rowHeight="tableRowHeight"
           :sumText="tableSumText"
           :summaryMethod="summaryMethod"
@@ -169,9 +169,11 @@
     DataItem,
     Column,
     Filter,
-    OrderValue
+    OrderValue,
+    Sorter
   } from '../ele-data-table/types';
   import { getValue, eachTree, findTree, queryChild } from '../utils/common';
+  import { useResizeObserver } from '../utils/hook';
   import EleTooltip from '../ele-tooltip/index.vue';
   import {
     useEmits,
@@ -184,7 +186,6 @@
     getRowKeys
   } from '../ele-data-table/util';
   import {
-    useAutoResize,
     getRowHeight,
     getColKey,
     analyseColumns,
@@ -204,7 +205,9 @@
     cellIsOverflow,
     getColumnByKey,
     getRowByKey,
-    getKeysAndList
+    getKeysAndList,
+    getSortCompareValue,
+    getDefaultSorter
   } from './util';
   import HeaderRow from './components/header-row.vue';
   import BodyRow from './components/body-row.vue';
@@ -241,14 +244,15 @@
 
   const { t } = useLocale();
   const events = useEmits(emit);
-  const { wrapWidth, wrapHeight, updateWrapSize } = useAutoResize(
-    () => rootRef.value
-  );
+  const [wrapWidth, wrapHeight, updateWrapSize] = useResizeObserver({
+    getEl: () => rootRef.value
+  });
   const { isLayoutFixedHead, isLayoutMaximized } = useStickyHeader();
   const tableState: TableState = {
     checked: new Map(),
     reserveChecked: false,
-    scrollTop: 0
+    scrollTop: 0,
+    sorter: getDefaultSorter(props.defaultSort, props.columns)
   };
 
   /** 根节点 */
@@ -283,6 +287,9 @@
 
   /** 表格数据 */
   const tableData: Ref<VirtualRow[]> = ref<VirtualRow[]>([]);
+
+  /** 表格当前排序筛选后的数据 */
+  const tableCurrentData: Ref<VirtualRow[]> = ref<VirtualRow[]>([]);
 
   /** 表格列配置 */
   const tableColumns: Ref<VirtualColumns> = ref<VirtualColumns>([]);
@@ -400,7 +407,7 @@
 
   /** 是否显示表尾 */
   const hasFooter = computed<boolean>(() => {
-    return !!(props.showSummary && tableData.value.length);
+    return !!(props.showSummary && tableCurrentData.value.length);
   });
 
   /** 表格属性 */
@@ -470,7 +477,7 @@
       rowHeight: autoRowHeight.value ? void 0 : rowHeight,
       //cellProps: void 0,
       columns: tableColumns.value as any,
-      data: tableData.value,
+      data: tableCurrentData.value,
       //dataGetter: void 0,
       //fixedData: void 0,
       expandColumnKey: tableExpandColumnKey.value,
@@ -516,6 +523,12 @@
     return props.errorText || props.emptyText || t('el.table.emptyText');
   });
 
+  /** 关闭省略提示 */
+  const hideTooltip = () => {
+    tableTooltipProps.visible = false;
+    tableTooltipProps.disabled = true;
+  };
+
   /** 触发省略提示 */
   const triggerTooltip = (cell: HTMLElement, col?: Column) => {
     const cellText = cell.innerText;
@@ -550,10 +563,40 @@
     }
   };
 
-  /** 关闭省略提示 */
-  const hideTooltip = () => {
-    tableTooltipProps.visible = false;
-    tableTooltipProps.disabled = true;
+  /** 排序并筛选表格数据 */
+  const sortAndFilterTableData = (sorter?: Sorter) => {
+    if (sorter && tableState.sorter !== sorter) {
+      tableState.sorter = sorter;
+    }
+    let data = [...tableData.value];
+    // 排序
+    if (tableState.sorter) {
+      const { prop, order, column: col } = tableState.sorter;
+      if (col?.sortable === true) {
+        const reverse = order === 'descending' ? -1 : 1;
+        data.sort((a, b) => {
+          if (!order) {
+            return a.rowIndex - b.rowIndex;
+          }
+          const v = getSortCompareValue(col.sortMethod, a, b, prop);
+          return v * reverse;
+        });
+      }
+    }
+    // 筛选
+    Object.keys(filtered).forEach((key) => {
+      const col = getColumnByKey(props.columns, key);
+      const filterMethod = col?.filterMethod;
+      const values = filtered[key];
+      if (!values?.length || !filterMethod) {
+        return;
+      }
+      data = data.filter((d) => {
+        const row = d.rowData;
+        return values.some((value) => filterMethod(value, row, col as any));
+      });
+    });
+    tableCurrentData.value = data;
   };
 
   /** 表头筛选改变事件 */
@@ -561,6 +604,7 @@
     const key = getColKey(params.column);
     if (key) {
       filtered[key] = params.value;
+      sortAndFilterTableData();
       events.onFilterChange(filtered);
     }
   };
@@ -635,7 +679,7 @@
         events.onSelectionChange(getSelectionRows());
       }
     }
-    events.onRowClick(rowData, col, e);
+    events.onRowClick(rowData, col, e, row.isDisabled, getSelectionRows());
   };
 
   /** 单元格双击事件 */
@@ -682,13 +726,13 @@
     // 排序
     if (col && (col.sortable === true || col.sortable === 'custom')) {
       sortBy.value = getSortBy(sortBy.value, col);
-      events.onSortChange({
-        prop: col.property || col.prop,
-        order: getOrderValue(
-          (sortBy.value ? sortBy.value.order : void 0) as any
-        ),
-        column: col
-      });
+      const prop = col.property || col.prop;
+      const order = getOrderValue(
+        (sortBy.value ? sortBy.value.order : void 0) as any
+      );
+      const sorter = { prop, order, column: col };
+      sortAndFilterTableData(sorter);
+      events.onSortChange(sorter);
     }
     events.onHeaderClick(col as Column, e);
   };
@@ -756,6 +800,7 @@
       props.rowKey,
       getSelectableFunction(bodyCols.value)
     );
+    sortAndFilterTableData();
     // 默认展开行
     if (props.defaultExpandAll) {
       toggleRowExpansionAll(true);
@@ -1127,6 +1172,8 @@
     if (sortBy.value != null) {
       //const key = sortBy.value.key as string;
       sortBy.value = void 0;
+      tableState.sorter = void 0;
+      sortAndFilterTableData();
       //const col = getColumnByKey(props.columns, key);
       //const prop = col ? col.property || col.prop : void 0;
       //events.onSortChange({ prop: prop ?? key, column: col });
@@ -1144,9 +1191,10 @@
         //num++;
       }
     });
+    sortAndFilterTableData();
     /* if (num > 0) {
-          events.onFilterChange(filtered);
-        } */
+      events.onFilterChange(filtered);
+    } */
   };
 
   /** 重新布局 */
@@ -1180,7 +1228,9 @@
       key: getColKey(col) as any,
       order: getSortOrder(order) as any
     };
-    events.onSortChange({ prop, order, column: col });
+    const sorter = { prop, order, column: col };
+    sortAndFilterTableData(sorter);
+    events.onSortChange(sorter);
   };
 
   /** 修改滚动位置 */

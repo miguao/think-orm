@@ -7,9 +7,8 @@
     <div
       v-for="col in sumCols"
       :key="col.key"
+      class="ele-table-td is-ellipsis"
       :class="[
-        'ele-table-td',
-        'is-ellipsis',
         { 'is-align-left': col.align === 'left' },
         { 'is-align-center': col.align === 'center' },
         { 'is-align-right': col.align === 'right' },
@@ -90,7 +89,7 @@
       const sumValue = getSumValue(data.value, column.dataKey);
       const col = column.originalCol;
       return {
-        key: i + '-' + column.key,
+        key: `${i}-${column.key}`,
         width: (colSize && colSize.width) || 0,
         fixedLeft: colSize ? colSize.fixedLeft : void 0,
         fixedRight: colSize ? colSize.fixedRight : void 0,

@@ -1,8 +1,8 @@
 <!-- 主体表单区 -->
 <template>
   <div
+    class="ele-pro-form-builder-body"
     :class="[
-      'ele-pro-form-builder-body',
       { 'is-pc': currentScreen === 'pc' },
       { 'is-pad': currentScreen === 'pad' },
       { 'is-phone': currentScreen === 'phone' }
@@ -61,7 +61,10 @@
   import { ref, reactive, watch } from 'vue';
   import { ElEmpty } from 'element-plus';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleProFormInstance, EleProFormProps } from '../../ele-app/plus';
+  import type {
+    EleProFormInstance,
+    EleProFormProps
+  } from '../../ele-app/plusx';
   import { eachTree } from '../../utils/common';
   import type {
     ProFormItemKey,

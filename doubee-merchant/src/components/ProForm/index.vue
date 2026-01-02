@@ -1,16 +1,9 @@
 <!-- 高级表单 -->
 <template>
   <EleProForm
-    v-bind="$props"
+    v-bind="{ ...emitProps, ...$props }"
     ref="proFormRef"
     :httpRequest="request"
-    @update:searchExpand="emitMethods['update:searchExpand']"
-    @updateValue="emitMethods['updateValue']"
-    @update:items="emitMethods['update:items']"
-    @update:activeItemKey="emitMethods['update:activeItemKey']"
-    @submit="emitMethods['submit']"
-    @reset="emitMethods['reset']"
-    @validate="emitMethods['validate']"
   >
     <template
       v-for="name in Object.keys($slots).filter((k) => !ownSlots.includes(k))"
@@ -39,7 +32,6 @@
     <template #dictSelect="{ item, modelValue, updateValue }">
       <DictData
         code=""
-        :placeholder="'请选择' + item.label"
         v-bind="item.props || {}"
         type="select"
         :modelValue="modelValue"
@@ -49,7 +41,6 @@
     <template #dictMultipleSelect="{ item, modelValue, updateValue }">
       <DictData
         code=""
-        :placeholder="'请选择' + item.label"
         v-bind="item.props || {}"
         type="multipleSelect"
         :modelValue="modelValue"
@@ -76,7 +67,6 @@
     </template>
     <template #regions="{ item, modelValue, updateValue }">
       <RegionsSelect
-        :placeholder="'请选择' + item.label"
         v-bind="item.props || {}"
         :modelValue="modelValue"
         @update:modelValue="updateValue"
@@ -84,7 +74,6 @@
     </template>
     <template #multipleRegions="{ item, modelValue, updateValue }">
       <RegionsSelect
-        :placeholder="'请选择' + item.label"
         v-bind="item.props || {}"
         :multiple="true"
         :modelValue="modelValue"
@@ -93,7 +82,6 @@
     </template>
     <template #iconSelect="{ item, modelValue, updateValue }">
       <IconSelect
-        :placeholder="'请选择' + item.label"
         v-bind="item.props || {}"
         :modelValue="modelValue"
         @update:modelValue="updateValue"
@@ -110,14 +98,17 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed } from 'vue';
-  import type { ElFormInstanceMethods } from 'ele-admin-plus/es/ele-app/el';
-  import type { EleProFormInstance } from 'ele-admin-plus/es/ele-app/plus';
-  import { useComponentEvents } from 'ele-admin-plus/es/utils/hook';
+  import { ref } from 'vue';
+  import type { EleProFormInstance } from 'ele-admin-plus/es/ele-app/plusx';
+  import {
+    useComponentEvents,
+    useComponentExpose
+  } from 'ele-admin-plus/es/utils/hook';
   import {
     proFormProps,
     proFormEmits
   } from 'ele-admin-plus/es/ele-pro-form/props';
+  import DictData from '@/components/DictData/index.vue';
   import ImageUpload from '@/components/ImageUpload/index.vue';
   import FileUpload from '@/components/FileUpload/index.vue';
   import RegionsSelect from '@/components/RegionsSelect/index.vue';
@@ -144,30 +135,22 @@
 
   const emit = defineEmits(proFormEmits);
 
-  const { emitMethods } = useComponentEvents(proFormEmits, emit);
+  const { emitProps } = useComponentEvents(proFormEmits, emit);
 
-  /** 高级表单实例 */
+  /** 高级表单组件 */
   const proFormRef = ref<EleProFormInstance>(null);
 
-  /** 表单实例 */
-  const formRef = computed(() => proFormRef.value?.formRef);
+  const exposeValues = useComponentExpose(
+    proFormRef,
+    [
+      'validate',
+      'validateField',
+      'resetFields',
+      'scrollToField',
+      'clearValidate'
+    ],
+    ['formRef']
+  );
 
-  /** 实例方法 */
-  const exposeMethods = {} as ElFormInstanceMethods;
-  [
-    'validate',
-    'validateField',
-    'resetFields',
-    'scrollToField',
-    'clearValidate'
-  ].forEach((key) => {
-    exposeMethods[key] = (...params: any) => {
-      if (!proFormRef.value) {
-        throw new Error('proFormRef is null');
-      }
-      return proFormRef.value[key](...params);
-    };
-  });
-
-  defineExpose({ ...exposeMethods, proFormRef, formRef });
+  defineExpose({ ...exposeValues, proFormRef });
 </script>

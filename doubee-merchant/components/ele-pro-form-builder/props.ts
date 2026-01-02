@@ -1,6 +1,7 @@
 import type { PropType, ExtractPropTypes } from 'vue';
 import type { UserComponent } from '../ele-app/types';
-import type { EleProFormProps, EleSplitPanelProps } from '../ele-app/plus';
+import type { EleSplitPanelProps } from '../ele-app/plus';
+import type { EleProFormProps } from '../ele-app/plusx';
 import type {
   ProFormItemProps,
   ProFormItemTypeData

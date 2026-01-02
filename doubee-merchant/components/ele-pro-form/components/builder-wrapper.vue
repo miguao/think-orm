@@ -1,7 +1,7 @@
 <template>
   <div
+    class="ele-pro-form-builder-item-wrapper"
     :class="[
-      'ele-pro-form-builder-item-wrapper',
       { 'is-div-type': item.type === 'div' },
       { 'is-active': activeItemKey != null && activeItemKey === item.key }
     ]"

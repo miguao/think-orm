@@ -1,18 +1,10 @@
 import type { SetupContext, VNode } from 'vue';
-import {
-  ref,
-  onMounted,
-  onBeforeUnmount,
-  onActivated,
-  onDeactivated
-} from 'vue';
 import { TableV2SortOrder } from 'element-plus';
 import {
   getValue,
   eachTree,
   findTree,
   mapTree,
-  debounce,
   omit,
   contentIsEllipsis
 } from '../utils/common';
@@ -431,7 +423,7 @@ export function transformTableData(
     return data.map<VirtualRow>((d, i) => {
       const key = getValue<string, DataItem>(d, rowKey) ?? i;
       const temp: VirtualRow = {
-        rowId: '_expand_' + key,
+        rowId: `_expand_${key}`,
         rowIndex: i,
         rowData: d,
         isExpandRow: true
@@ -620,6 +612,23 @@ export function getDefaultSort(defaultSort?: Sorter): SortBy | undefined {
       ? TableV2SortOrder.ASC
       : TableV2SortOrder.DESC) as any
   };
+}
+
+/**
+ * 获取默认排序状态
+ * @param defaultSort 默认排序值
+ * @param columns 列配置
+ */
+export function getDefaultSorter(
+  defaultSort?: Sorter,
+  columns?: Columns
+): Sorter | undefined {
+  if (!defaultSort) {
+    return;
+  }
+  const { prop, order } = defaultSort;
+  const col = findTree(columns, (c) => c.prop === prop);
+  return { prop, order, column: col };
 }
 
 /**
@@ -842,72 +851,31 @@ export function cellIsOverflow(cell: HTMLElement): boolean {
 }
 
 /**
- * 表格自适应容器宽高
- * @param getEl 获取根节点的方法
+ * 获取排序对比值
+ * @param sortMethod 自定义的排序方法
+ * @param a 排序数据
+ * @param b 排序比较数据
+ * @param prop 排序字段名
  */
-export function useAutoResize(getEl: () => HTMLElement | null) {
-  /** 容器宽度 */
-  const wrapWidth = ref<number>(0);
-
-  /** 容器高度 */
-  const wrapHeight = ref<number>(0);
-
-  /** 获取当前容器尺寸 */
-  const updateWrapSize = () => {
-    const el = getEl();
-    if (el) {
-      const width = Math.floor(el.clientWidth);
-      if (wrapWidth.value !== width) {
-        wrapWidth.value = width;
-      }
-      const height = Math.floor(el.clientHeight);
-      if (wrapWidth.value !== height) {
-        wrapHeight.value = height;
-      }
-    }
-  };
-
-  /** 容器尺寸改变监听器 */
-  const observer = new ResizeObserver(
-    debounce(() => {
-      updateWrapSize();
-    }, 400)
-  );
-
-  /** 开始监听容器尺寸改变 */
-  const observe = () => {
-    unobserve();
-    const el = getEl();
-    if (el) {
-      observer.observe(el);
-    }
-  };
-
-  /** 结束监听容器尺寸改变 */
-  const unobserve = () => {
-    const el = getEl();
-    if (el) {
-      observer.unobserve(el);
-    }
-  };
-
-  onMounted(() => {
-    updateWrapSize();
-    observe();
-  });
-
-  onBeforeUnmount(() => {
-    observer.disconnect();
-  });
-
-  onActivated(() => {
-    updateWrapSize();
-    observe();
-  });
-
-  onDeactivated(() => {
-    unobserve();
-  });
-
-  return { wrapWidth, wrapHeight, updateWrapSize };
+export function getSortCompareValue(
+  sortMethod: Column['sortMethod'],
+  a: DataItem,
+  b: DataItem,
+  prop?: string
+) {
+  if (sortMethod) {
+    return sortMethod(a.rowData, b.rowData);
+  }
+  if (!prop) {
+    return a.rowIndex - b.rowIndex;
+  }
+  const aValue = getValue<any, DataItem>(a.rowData, prop);
+  const bValue = getValue<any, DataItem>(b.rowData, prop);
+  if (aValue < bValue) {
+    return -1;
+  }
+  if (aValue > bValue) {
+    return 1;
+  }
+  return 0;
 }

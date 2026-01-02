@@ -26,10 +26,8 @@
           </div>
           <div v-if="allowFixed" class="ele-tool-column-fixed">
             <div
-              :class="[
-                'ele-tool-column-fixed-item',
-                { 'is-active': d.fixed === true || d.fixed === 'left' }
-              ]"
+              class="ele-tool-column-fixed-item"
+              :class="{ 'is-active': d.fixed === true || d.fixed === 'left' }"
               @click="handleFixedLeft(d)"
               @mouseover="handleFixedLeftTooltip"
             >
@@ -38,10 +36,8 @@
               </ElIcon>
             </div>
             <div
-              :class="[
-                'ele-tool-column-fixed-item',
-                { 'is-active': d.fixed === 'right' }
-              ]"
+              class="ele-tool-column-fixed-item"
+              :class="{ 'is-active': d.fixed === 'right' }"
               @click="handleFixedRight(d)"
               @mouseover="handleFixedRightTooltip"
             >
@@ -82,6 +78,7 @@
 
 <script lang="ts" setup>
   import type { PropType } from 'vue';
+  import { inject } from 'vue';
   import VueDraggable from 'vuedraggable';
   import { ElCheckbox, ElIcon, ElInput } from 'element-plus';
   import {
@@ -89,6 +86,7 @@
     VerticalRightOutlined,
     VerticalLeftOutlined
   } from '../../icons/index';
+  import { modalItemContextKey } from '../../utils/hook';
   import type { ColItem } from '../types';
 
   defineOptions({ name: 'ToolColumnList' });
@@ -118,53 +116,63 @@
     colWidthChange: (_item: ColItem, _width?: string | number) => true
   });
 
-  /** 拖动顺序改变 */
-  const handleSortChange = (colItems: ColItem[]) => {
-    handleChildSortChange(colItems, props.parent);
-  };
+  const modalItem = inject(modalItemContextKey, null);
 
-  /** 选中改变 */
-  const handleCheckedChange = (colItem: ColItem, checked: boolean) => {
-    emit('checkedChange', colItem, checked);
-  };
-
-  /** 固定左侧 */
-  const handleFixedLeft = (colItem: ColItem) => {
-    emit('fixedLeft', colItem);
-  };
-
-  /** 固定右侧 */
-  const handleFixedRight = (colItem: ColItem) => {
-    emit('fixedRight', colItem);
-  };
-
-  /** 固定左侧提示 */
-  const handleFixedLeftTooltip = (e: MouseEvent) => {
-    handleChildFixedLeftTooltip(e.currentTarget as HTMLElement);
-  };
-
-  /** 固定右侧提示 */
-  const handleFixedRightTooltip = (e: MouseEvent) => {
-    handleChildFixedRightTooltip(e.currentTarget as HTMLElement);
-  };
-
-  /** 拖动顺序改变 */
-  const handleChildSortChange = (colItems: ColItem[], parent?: ColItem) => {
-    emit('sortChange', colItems, parent);
-  };
-
-  /** 固定左侧提示 */
+  /** 显示固定左侧提示 */
   const handleChildFixedLeftTooltip = (el: HTMLElement) => {
     emit('fixedLeftTooltip', el);
   };
 
-  /** 固定右侧提示 */
+  /** 显示固定右侧提示 */
   const handleChildFixedRightTooltip = (el: HTMLElement) => {
     emit('fixedRightTooltip', el);
+  };
+
+  /** 固定左侧按钮 hover 事件 */
+  const handleFixedLeftTooltip = (e: MouseEvent) => {
+    handleChildFixedLeftTooltip(e.currentTarget as HTMLElement);
+  };
+
+  /** 固定右侧按钮 hover 事件 */
+  const handleFixedRightTooltip = (e: MouseEvent) => {
+    handleChildFixedRightTooltip(e.currentTarget as HTMLElement);
+  };
+
+  /** 固定左侧 */
+  const handleFixedLeft = (colItem: ColItem) => {
+    if (modalItem?.label) {
+      emit('fixedLeft', colItem);
+    }
+  };
+
+  /** 固定右侧 */
+  const handleFixedRight = (colItem: ColItem) => {
+    if (modalItem?.label) {
+      emit('fixedRight', colItem);
+    }
+  };
+
+  /** 拖动顺序改变 */
+  const handleChildSortChange = (colItems: ColItem[], parent?: ColItem) => {
+    if (modalItem?.label) {
+      emit('sortChange', colItems, parent);
+    }
+  };
+
+  /** 选中改变 */
+  const handleCheckedChange = (colItem: ColItem, checked: boolean) => {
+    if (modalItem?.label) {
+      emit('checkedChange', colItem, checked);
+    }
   };
 
   /** 列宽输入改变 */
   const handleColWidthChange = (item: ColItem, width?: string) => {
     emit('colWidthChange', item, width);
+  };
+
+  /** 拖动顺序改变 */
+  const handleSortChange = (colItems: ColItem[]) => {
+    handleChildSortChange(colItems, props.parent);
   };
 </script>

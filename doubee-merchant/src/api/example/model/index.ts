@@ -1,64 +1,6 @@
 import { PageParam } from '@/api';
 
 /**
- * 通知数据格式
- */
-export interface NoticeModel {
-  /** 通知id */
-  id: number;
-  /** 图标颜色 */
-  color?: string;
-  /** 图标 */
-  icon?: string;
-  /** 标题 */
-  title?: string;
-  /** 时间 */
-  time?: string;
-}
-
-/**
- * 私信数据格式
- */
-export interface LetterModel {
-  /** 私信id */
-  id: number;
-  /** 头像 */
-  avatar?: string;
-  /** 标题 */
-  title?: string;
-  /** 内容 */
-  content?: string;
-  /** 时间 */
-  time?: string;
-}
-
-/**
- * 待办数据格式
- */
-export interface TodoModel {
-  /** 待办id */
-  id: number;
-  /** 状态 */
-  status?: number;
-  /** 标题 */
-  title?: string;
-  /** 描述 */
-  description?: string;
-}
-
-/**
- * 查询未读通知返回结果
- */
-export interface NoticeResult {
-  /** 通知 */
-  notice: NoticeModel[];
-  /** 私信 */
-  letter: LetterModel[];
-  /** 待办 */
-  todo: TodoModel[];
-}
-
-/**
  * 消息
  */
 export interface Message {

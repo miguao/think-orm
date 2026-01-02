@@ -42,7 +42,6 @@
 
 <script lang="ts" setup>
   import { useLocale } from '../ele-config-provider/receiver';
-  import type { CropperLocale } from '../ele-cropper/types';
   import EleModal from '../ele-modal/index.vue';
   import EleCropper from '../ele-cropper/index.vue';
   import { cropperModalProps, cropperModalEmits } from './props';
@@ -53,7 +52,7 @@
 
   const emit = defineEmits(cropperModalEmits);
 
-  const { lang } = useLocale<CropperLocale>('cropper', props);
+  const { lang } = useLocale('cropper', props);
 
   /** 更新绑定值 */
   const updateModelValue = (value: boolean) => {

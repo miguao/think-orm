@@ -2,14 +2,25 @@
 <template>
   <Teleport to="body" :disabled="!teleported">
     <Transition :name="transitionName" :appear="true">
-      <div
+      <MainContent
         v-if="modelValue"
-        :class="['ele-image-viewer', customClass]"
+        class="ele-image-viewer"
+        :class="customClass"
         :style="customStyle"
       >
         <ElImageViewer
-          v-bind="viewerProps"
+          v-bind="{
+            ...$attrs,
+            ...omit($props, [
+              'modelValue',
+              'customClass',
+              'customStyle',
+              'transitionName',
+              'keepAlive'
+            ])
+          }"
           ref="imageViewerRef"
+          :teleported="false"
           @close="handleClose"
           @switch="handleSwitch"
           @rotate="handleRotate"
@@ -18,39 +29,27 @@
             <slot :name="name" v-bind="slotProps || {}"></slot>
           </template>
         </ElImageViewer>
-      </div>
+      </MainContent>
     </Transition>
   </Teleport>
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed, onDeactivated } from 'vue';
+  import { ref, onDeactivated } from 'vue';
   import { ElImageViewer } from 'element-plus';
-  import type { ElImageViewerInstance } from '../ele-app/el';
   import { omit } from '../utils/common';
+  import type { ElImageViewerInstance } from '../ele-app/el';
+  import MainContent from '../ele-loading/components/main-content.vue';
   import { imageViewerProps, imageViewerEmits } from './props';
 
-  defineOptions({ name: 'EleImageViewer' });
+  defineOptions({ name: 'EleImageViewer', inheritAttrs: false });
 
-  const props = defineProps(imageViewerProps);
+  defineProps(imageViewerProps);
 
   const emit = defineEmits(imageViewerEmits);
 
   /** 组件实例 */
   const imageViewerRef = ref<ElImageViewerInstance>(null);
-
-  /** 组件属性 */
-  const viewerProps = computed(() => {
-    const options = omit(props, [
-      'modelValue',
-      'customClass',
-      'customStyle',
-      'transitionName',
-      'keepAlive'
-    ]);
-    options.teleported = false;
-    return options;
-  });
 
   /** 关闭 */
   const handleClose = () => {

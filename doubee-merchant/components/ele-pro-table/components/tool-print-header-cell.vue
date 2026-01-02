@@ -81,7 +81,7 @@
       // 对齐方式
       const align = column.headerAlign || column.align;
       if (align) {
-        classes.push('is-align-' + align);
+        classes.push(`is-align-${align}`);
       }
       // 自定义类名
       if (typeof props.headerCellClass === 'function') {

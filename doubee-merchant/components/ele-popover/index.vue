@@ -15,7 +15,7 @@
       <slot name="reference"></slot>
     </template>
     <template #body>
-      <div :class="['ele-popover-body', bodyClass]" :style="bodyStyle">
+      <div class="ele-popover-body" :class="bodyClass" :style="bodyStyle">
         <slot name="body">
           <div
             v-if="(title != null && title != '') || $slots.title"

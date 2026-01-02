@@ -125,11 +125,13 @@
     TableLocale,
     ExportDataType,
     BeforeExport,
+    ExportPlugin,
     Datasource,
     DatasourceFunction,
     FetchFunction,
     ColItem,
-    TableExportParams
+    TableExportParams,
+    GetDatasourceResultFunction
   } from '../types';
   import {
     getExportData,
@@ -195,7 +197,14 @@
     /** 默认是否勾选层级序号 */
     defaultShowTreeIndex: Boolean,
     /** 导出前的钩子函数 */
-    beforeExport: Function as PropType<BeforeExport>
+    beforeExport: Function as PropType<BeforeExport>,
+    /** 导出插件 */
+    exportPlugin: Function as PropType<ExportPlugin>,
+    /** 获取数据源返回结果方法 */
+    getDatasourceResult: {
+      type: Function as PropType<GetDatasourceResultFunction>,
+      required: true
+    }
   });
 
   /** 弹窗是否显示 */
@@ -287,6 +296,7 @@
         colItems.value
       );
     const tableColumns =
+      params?.tableColumns ||
       params?.columns ||
       getCheckedColumns(
         props.columns,
@@ -309,30 +319,43 @@
       isShowTreeIndex,
       isShowHeader
     );
+    const exportParams = {
+      data: exportDataValue,
+      columns: exportColumns,
+      headerData,
+      bodyData,
+      footerData,
+      bodyCols,
+      fileName: exportFileName,
+      dataType: exportDataType,
+      hideLoading,
+      closeModal,
+      showHeader: isShowHeader,
+      showFooter: isShowFooter,
+      showTreeIndex: isShowTreeIndex,
+      tableColumns
+    };
     if (typeof props.beforeExport === 'function') {
-      const flag = props.beforeExport({
-        data: exportDataValue,
-        columns: exportColumns,
-        headerData,
-        bodyData,
-        footerData,
-        bodyCols,
-        fileName: exportFileName,
-        dataType: exportDataType,
-        hideLoading,
-        closeModal,
-        showHeader: isShowHeader,
-        showFooter: isShowFooter,
-        showTreeIndex: isShowTreeIndex,
-        tableColumns
-      });
+      const flag = props.beforeExport(exportParams);
       if (flag === false) {
         return;
       }
     }
-    exportCSV(exportFileName, headerData, bodyData, footerData);
-    hideLoading();
-    closeModal();
+    if (props.exportPlugin == null) {
+      exportCSV(exportFileName, headerData, bodyData, footerData);
+      hideLoading();
+      closeModal();
+      return;
+    }
+    props
+      .exportPlugin(exportParams)
+      .then(() => {
+        hideLoading();
+        closeModal();
+      })
+      .catch(() => {
+        hideLoading();
+      });
   };
 
   /** 处理导出 */
@@ -356,16 +379,48 @@
       ) {
         return;
       }
+      const columns = getCheckedColumns(
+        props.columns,
+        colItems.value,
+        true,
+        void 0,
+        columnsExportFilter,
+        false,
+        colItems.value
+      );
+      const tableColumns = getCheckedColumns(
+        props.columns,
+        colItems.value,
+        true,
+        void 0,
+        columnsExportFilter,
+        true,
+        colItems.value
+      );
       showLoading();
       props.fetch((params) => {
-        (props.datasource as DatasourceFunction)(params)
+        (props.datasource as DatasourceFunction)({
+          ...params,
+          columns,
+          tableColumns
+        })
           .then((result) => {
             if (result == null) {
               hideLoading();
               closeModal();
               return;
             }
-            exportData({ data: result as DataItem[] });
+            if (Array.isArray(result)) {
+              exportData({ data: result as DataItem[] });
+              return;
+            }
+            const { data } = props.getDatasourceResult(result);
+            if (data == null) {
+              hideLoading();
+              closeModal();
+              return;
+            }
+            exportData({ data });
           })
           .catch((e) => {
             console.error(e);
@@ -377,20 +432,20 @@
 
   /** 缓存配置 */
   /* const cacheSettingCols = () => {
-        if (props.cacheKey) {
-          localStorage.setItem(
-            getExportColsCacheKey(props.cacheKey),
-            JSON.stringify(colItems.value)
-          );
-        }
-      }; */
+    if (props.cacheKey) {
+      localStorage.setItem(
+        getExportColsCacheKey(props.cacheKey),
+        JSON.stringify(colItems.value)
+      );
+    }
+  }; */
 
   /** 清除缓存配置 */
   /* const cleanSettingCols = () => {
-        if (props.cacheKey) {
-          localStorage.removeItem(getExportColsCacheKey(props.cacheKey));
-        }
-      }; */
+    if (props.cacheKey) {
+      localStorage.removeItem(getExportColsCacheKey(props.cacheKey));
+    }
+  }; */
 
   /** 初始化列数据 */
   const initColItems = () => {

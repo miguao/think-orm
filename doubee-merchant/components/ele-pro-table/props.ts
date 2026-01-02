@@ -117,7 +117,9 @@ export const proTableProps = {
   /** 导出配置 */
   exportConfig: Object as PropType<ExportConfig>,
   /** 打印配置 */
-  printConfig: Object as PropType<PrintConfig>
+  printConfig: Object as PropType<PrintConfig>,
+  /** 表格是否最大化状态 */
+  maximized: Boolean
 };
 
 export type ProTableProps = ExtractPropTypes<typeof proTableProps>;
@@ -143,6 +145,8 @@ export const proTableEmits = {
   sizeChange: (_size: TableSize) => true,
   /** 表格最大化切换事件 */
   maximizedChange: (_maximized: boolean) => true,
+  /** 表格最大化状态更新 */
+  'update:maximized': (_maximized: boolean) => true,
   /** 数组数据源时刷新按钮点击事件 */
   refresh: () => true
 };

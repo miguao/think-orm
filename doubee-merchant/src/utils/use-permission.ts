@@ -1,5 +1,8 @@
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/modules/user';
+/** 超级管理员全部权限标识 */
+const SUPER_ADMIN_AUTH = null;
+//const SUPER_ADMIN_AUTH = '*:*:*';
 
 /**
  * 权限判断hook
@@ -13,10 +16,9 @@ export function usePermission() {
    * @param value 权限字符或字符数组
    */
   const hasPermission = (value: string | string[]): boolean => {
-    // 如果需要某个特殊标识代表全部权限可添加如下
-    /* if (authorities.value && authorities.value.includes('*:*:*')) {
+    if (SUPER_ADMIN_AUTH && authorities.value?.includes?.(SUPER_ADMIN_AUTH)) {
       return true;
-    } */
+    }
     return arrayHas(authorities.value, value);
   };
 
@@ -25,10 +27,9 @@ export function usePermission() {
    * @param value 权限字符或字符数组
    */
   const hasAnyPermission = (value: string | string[]): boolean => {
-    // 如果需要某个特殊标识代表全部权限可添加如下
-    /* if (authorities.value && authorities.value.includes('*:*:*')) {
+    if (SUPER_ADMIN_AUTH && authorities.value?.includes?.(SUPER_ADMIN_AUTH)) {
       return true;
-    } */
+    }
     return arrayHasAny(authorities.value, value);
   };
 
@@ -56,7 +57,10 @@ export function usePermission() {
  * @param array 数组
  * @param value 单个值或数组
  */
-function arrayHas(array: (string | undefined)[], value: string | string[]) {
+function arrayHas(
+  array?: (string | undefined)[] | null,
+  value?: string | string[]
+) {
   if (!value) {
     return true;
   }
@@ -74,7 +78,10 @@ function arrayHas(array: (string | undefined)[], value: string | string[]) {
  * @param array 数组
  * @param value 单个值或数组
  */
-function arrayHasAny(array: (string | undefined)[], value: string | string[]) {
+function arrayHasAny(
+  array?: (string | undefined)[] | null,
+  value?: string | string[]
+) {
   if (!value) {
     return true;
   }

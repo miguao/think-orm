@@ -98,8 +98,7 @@
     FileItem,
     SortValue,
     ItemContextMenuOption,
-    ContextOpenOption,
-    FileListLocale
+    ContextOpenOption
   } from './types';
   import { fileListProps, fileListEmits } from './props';
   const GRID_ITEM_SEL = '.ele-file-list-body>.ele-file-list-item';
@@ -110,7 +109,7 @@
 
   const emit = defineEmits(fileListEmits);
 
-  const { lang } = useLocale<FileListLocale>('fileList', props);
+  const { lang } = useLocale('fileList', props);
 
   /** 鼠标选择框样式 */
   const selectorStyle = reactive({

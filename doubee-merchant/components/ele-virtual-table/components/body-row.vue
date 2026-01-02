@@ -2,7 +2,7 @@
 <template>
   <BodyCell
     v-for="(column, columnIndex) in bodyCols"
-    :key="(rowId ?? rowIndex) + '-' + (column.key ?? columnIndex)"
+    :key="`${rowId ?? rowIndex}-${column.key ?? columnIndex}`"
     :column="column"
     :columnIndex="columnIndex"
     :rowIndex="rowIndex"

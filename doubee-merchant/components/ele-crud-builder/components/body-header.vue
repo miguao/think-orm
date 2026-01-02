@@ -5,11 +5,8 @@
       <ElIcon
         v-for="item in screenItems"
         :key="item.value"
-        :class="[
-          'ele-crud-builder-header-tool',
-          'ele-crud-builder-screen-icon',
-          { 'is-active': item.value === currentScreen }
-        ]"
+        class="ele-crud-builder-header-tool ele-crud-builder-screen-icon"
+        :class="{ 'is-active': item.value === currentScreen }"
         @click="handleUpdateScreen(item.value)"
       >
         <component :is="item.icon" :style="item.iconStyle" />
@@ -17,22 +14,16 @@
     </div>
     <div class="ele-crud-builder-header-left">
       <ElIcon
-        :class="[
-          'ele-crud-builder-header-tool',
-          'ele-crud-builder-header-tool-undo',
-          { 'is-disabled': undoDisabled }
-        ]"
+        class="ele-crud-builder-header-tool ele-crud-builder-header-tool-undo"
+        :class="{ 'is-disabled': undoDisabled }"
         title="撤销"
         @click="handleUndo"
       >
         <RollbackOutlined />
       </ElIcon>
       <ElIcon
-        :class="[
-          'ele-crud-builder-header-tool',
-          'ele-crud-builder-header-tool-redo',
-          { 'is-disabled': redoDisabled }
-        ]"
+        class="ele-crud-builder-header-tool ele-crud-builder-header-tool-redo"
+        :class="{ 'is-disabled': redoDisabled }"
         title="恢复"
         @click="handleRedo"
       >
@@ -113,7 +104,7 @@
     CodeOutlined
   } from '../../icons/index';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleCrudProps } from '../../ele-app/plus';
+  import type { EleCrudProps } from '../../ele-app/plusx';
   import type {
     ProFormItemTypeData,
     ScreenSize

@@ -1,8 +1,8 @@
 <!-- 表格布局条目 -->
 <template>
   <div
+    class="ele-file-list-item"
     :class="[
-      'ele-file-list-item',
       { 'is-checked': selected },
       { 'is-active': ctxMenuDropdownVisible }
     ]"
@@ -12,8 +12,8 @@
       <!-- 复选框列 -->
       <div v-if="selectable" class="ele-file-list-item-checkbox">
         <i
+          class="ele-file-list-checkbox"
           :class="[
-            'ele-file-list-checkbox',
             { 'is-radio': selectionType === 'radio' },
             { 'is-checked': selected }
           ]"

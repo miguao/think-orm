@@ -18,6 +18,12 @@ export interface ToTreeOption<T> {
   parentIdsField?: string | null;
   /** 所有父级的 id */
   parentIds?: (number | string)[] | null;
+  /** 是否添加包含所有父级的字段 */
+  addParents?: boolean | null;
+  /** 包含所有父级字段的名称 */
+  parentsField?: string | null;
+  /** 所有父级 */
+  parents?: T[] | null;
 }
 
 /**
@@ -35,6 +41,9 @@ export function toTree<T>(option: ToTreeOption<T>): T[] {
   const addParentIds = option.addParentIds;
   const parentIdsField = option.parentIdsField || 'parentIds';
   const parentIds = option.parentIds ?? [];
+  const addParents = option.addParents;
+  const parentsField = option.parentsField || 'parents';
+  const parents = option.parents ?? [];
 
   if (data == null) {
     return [];
@@ -67,7 +76,7 @@ export function toTree<T>(option: ToTreeOption<T>): T[] {
         ? parentId.includes(d[parentIdField])
         : d[parentIdField] == parentId
     ) {
-      const t = { ...d };
+      const t: T = { ...d };
       const children = toTree({
         data,
         idField,
@@ -76,13 +85,19 @@ export function toTree<T>(option: ToTreeOption<T>): T[] {
         parentId: d[idField],
         addParentIds,
         parentIdsField,
-        parentIds: [...parentIds, d[idField]]
+        parentIds: addParentIds ? [...parentIds, d[idField]] : [],
+        addParents,
+        parentsField,
+        parents: addParents ? [...parents, t] : []
       });
       if (children.length > 0) {
         t[childrenField] = children;
       }
       if (addParentIds) {
         t[parentIdsField] = parentIds;
+      }
+      if (addParents) {
+        t[parentsField] = parents;
       }
       result.push(t);
     }
@@ -366,11 +381,87 @@ export function uuid(length = 32, radix?: number): string {
 }
 
 /**
+ * 数字千分位格式化参数
+ */
+export interface FormatNumberOption {
+  /** 小数位数, 默认保留所有小数位 */
+  decimals?: number;
+  /** 小数分隔符, 默认 '.' */
+  decimalSeparator?: string;
+  /** 千分位分隔符, 默认 ',' */
+  thousandSeparator?: string;
+  /** 是否在数字为 0 时显示 '-' */
+  zeroDisplay?: boolean;
+}
+
+/**
  * 数字千分位
  * @param num 数字
+ * @param option 参数
  */
-export function formatNumber(num?: number | null): string {
-  return String(num ?? '').replace(/(\d{1,3})(?=(\d{3})+(?:$|\.))/g, '$1,');
+export function formatNumber(
+  num?: number | string | null,
+  option?: FormatNumberOption
+): string {
+  // 处理空值
+  if (num == null || num === '') {
+    return '';
+  }
+  // 处理零显示
+  if (option?.zeroDisplay && Number(num) === 0) {
+    return '-';
+  }
+  // 处理数字
+  let numStr = String(num);
+  let negative = false;
+  let integerPart = '';
+  let decimalPart = '';
+  // 处理负数
+  if (numStr.startsWith('-')) {
+    negative = true;
+    numStr = numStr.slice(1);
+  }
+  // 分离整数部分和小数部分
+  const parts = numStr.split('.');
+  integerPart = parts[0];
+  if (parts.length > 1) {
+    decimalPart = parts[1];
+  }
+  // 处理小数位数
+  const decimals = option?.decimals ?? decimalPart.length;
+  if (decimals >= 0) {
+    // 四舍五入处理
+    const roundedNum =
+      Math.round(
+        Number(`${integerPart}.${decimalPart}`) * Math.pow(10, decimals)
+      ) / Math.pow(10, decimals);
+    const roundedStr = String(roundedNum);
+    const roundedParts = roundedStr.split('.');
+    integerPart = roundedParts[0];
+    decimalPart = roundedParts.length > 1 ? roundedParts[1] : '';
+    // 补齐小数位
+    while (decimalPart.length < decimals) {
+      decimalPart += '0';
+    }
+  }
+  // 格式化整数部分（添加千分位）
+  const thousandSeparator = option?.thousandSeparator || ',';
+  const formattedInteger = integerPart.replace(
+    /(\d)(?=(\d{3})+(?!\d))/g,
+    `$1${thousandSeparator}`
+  );
+  // 组合结果
+  const decimalSeparator = option?.decimalSeparator || '.';
+  let result = formattedInteger;
+  if (decimalPart && decimals > 0) {
+    result += `${decimalSeparator}${decimalPart}`;
+  }
+  // 添加负号
+  if (negative && Number(num) !== 0) {
+    result = `-${result}`;
+  }
+  return result;
+  //return String(num ?? '').replace(/(\d{1,3})(?=(\d{3})+(?:$|\.))/g, '$1,');
 }
 
 /**

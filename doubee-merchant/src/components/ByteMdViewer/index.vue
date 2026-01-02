@@ -1,4 +1,4 @@
-<!-- markdown解析 -->
+<!-- markdown 解析器 -->
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <div
@@ -71,7 +71,7 @@
     }
     const $root = rootRef.value;
     if ($root) {
-      const dest = $root.querySelector('#user-content-' + href.slice(1));
+      const dest = $root.querySelector(`#user-content-${href.slice(1)}`);
       if (dest) {
         dest.scrollIntoView();
       }

@@ -1,8 +1,8 @@
 <!-- 状态仪表盘 -->
 <template>
   <div
+    class="ele-dashboard"
     :class="[
-      'ele-dashboard',
       { 'is-success': type === 'success' },
       { 'is-warning': type === 'warning' },
       { 'is-danger': type === 'danger' }

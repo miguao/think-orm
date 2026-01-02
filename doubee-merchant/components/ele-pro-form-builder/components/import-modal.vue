@@ -31,7 +31,7 @@
   import { ElButton } from 'element-plus';
   import { mapTree } from '../../utils/common';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleProFormProps } from '../../ele-app/plus';
+  import type { EleProFormProps } from '../../ele-app/plusx';
   import EleModal from '../../ele-modal/index.vue';
   import {
     getItemTypeName,

@@ -14,9 +14,9 @@
       componentType="pro"
       @command="handleCommand"
     >
-      <div style="text-align: center; outline: none">
+      <div :style="{ textAlign: 'center', outline: 'none' }">
         <slot name="icon">
-          <ElIcon class="ele-tab-icon" style="vertical-align: -3px">
+          <ElIcon class="ele-tab-icon" :style="{ verticalAlign: '-3px' }">
             <ArrowDown />
           </ElIcon>
         </slot>

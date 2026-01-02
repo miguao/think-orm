@@ -8,7 +8,7 @@ export const phoneReg = /^1\d{10}$/;
 /**
  * 手机号正则表达式(强校验)
  */
-export const phoneStrongReg = /^1[3|5|7|8|9][0-9]{9}$/;
+export const phoneStrongReg = /^1[3|4|5|6|7|8|9][0-9]{9}$/;
 
 /**
  * 固话正则表达式
@@ -288,11 +288,10 @@ export function isIdentityStrong(value: string): string | null | undefined {
   const ai =
     value.length === 18
       ? value.substring(0, 17)
-      : value.substring(0, 6) + '19' + value.substring(6, 15);
+      : `${value.substring(0, 6)}19${value.substring(6, 15)}`;
   // 验证出生年月
   const year = ai.substring(6, 10); // 年
-  const birthday =
-    year + '/' + ai.substring(10, 12) + '/' + ai.substring(12, 14);
+  const birthday = `${year}/${ai.substring(10, 12)}/${ai.substring(12, 14)}`;
   if (!isDate(birthday)) {
     return '身份证号码出生日期无效';
   }

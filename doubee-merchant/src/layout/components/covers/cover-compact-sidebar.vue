@@ -1,9 +1,16 @@
 <template>
-  <div :style="{ height: '100%', display: 'flex' }">
-    <div class="setting-layout-cover-bg-dark" :style="{ width: '14px' }"></div>
+  <div :style="{ display: 'flex' }">
+    <div
+      class="ele-setting-layout-cover-bg-light ele-setting-layout-cover-border-lighter"
+      :style="{
+        width: '14px',
+        borderRightStyle: 'solid',
+        borderRightWidth: '1px'
+      }"
+    ></div>
     <div :style="{ flex: 1 }">
       <div
-        class="setting-layout-cover-bg-light"
+        class="ele-setting-layout-cover-bg-light"
         :style="{
           height: '14px',
           display: 'flex',
@@ -15,7 +22,7 @@
         <IconSkeleton :style="{ width: '8px', height: '8px' }" />
       </div>
       <div
-        class="setting-layout-cover-bg-light setting-layout-cover-border-lighter"
+        class="ele-setting-layout-cover-bg-light ele-setting-layout-cover-border-lighter"
         :style="{
           height: '8px',
           borderTopStyle: 'solid',

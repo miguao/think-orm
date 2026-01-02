@@ -2,8 +2,8 @@
 <template>
   <component
     :is="tag || 'div'"
+    class="ele-text"
     :class="[
-      'ele-text',
       { 'is-heading': type === 'heading' },
       { 'is-regular': type === 'regular' },
       { 'is-secondary': type === 'secondary' },

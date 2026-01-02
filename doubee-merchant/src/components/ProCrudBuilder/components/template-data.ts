@@ -66,7 +66,7 @@ export const defaultTemplateData: TemplateItem[] = [
         "/*__PRO_CRUD__*/async (data) => {\n    const res = await httpRequest.post('/system/user', data);\n    if (res.data.code === 0) {\n        return res.data.message;\n    }\n    return Promise.reject(new Error(res.data.message));\n}\n",
       editApi:
         "/*__PRO_CRUD__*/async (data) => {\n    const res = await httpRequest.put('/system/user', data);\n    if (res.data.code === 0) {\n        return res.data.message;\n    }\n    return Promise.reject(new Error(res.data.message));\n}\n",
-      searchConfig: { cardProps: { bodyStyle: { paddingBottom: '2px' } } },
+      searchConfig: { cardProps: true },
       listConfig: {
         cardProps: { bodyStyle: { paddingTop: '8px' } },
         tableProps: { rowKey: 'userId', showOverflowTooltip: true }
@@ -157,7 +157,7 @@ export const defaultTemplateData: TemplateItem[] = [
       editApi:
         "/*__PRO_CRUD__*/async (data) => {\n    const res = await httpRequest.put('/system/user', data);\n    if (res.data.code === 0) {\n        return res.data.message;\n    }\n    return Promise.reject(new Error(res.data.message));\n}\n",
       searchConfig: {
-        cardProps: { bodyStyle: { paddingBottom: '2px' } },
+        cardProps: true,
         formProps: { showSearchExpand: true }
       },
       listConfig: {
@@ -259,7 +259,7 @@ export const defaultTemplateData: TemplateItem[] = [
         "/*__PRO_CRUD__*/async (data) => {\n    const res = await httpRequest.post('/system/organization', data);\n    if (res.data.code === 0) {\n        return res.data.message;\n    }\n    return Promise.reject(new Error(res.data.message));\n}",
       editApi:
         "/*__PRO_CRUD__*/async (data) => {\n    const res = await httpRequest.put('/system/organization', data);\n    if (res.data.code === 0) {\n        return res.data.message;\n    }\n    return Promise.reject(new Error(res.data.message));\n}",
-      searchConfig: { cardProps: { bodyStyle: { paddingBottom: '2px' } } },
+      searchConfig: { cardProps: true },
       listConfig: {
         cardProps: { bodyStyle: { paddingTop: '8px' } },
         tableProps: {
@@ -361,19 +361,13 @@ export const defaultTemplateData: TemplateItem[] = [
       searchConfig: { cardProps: false },
       listConfig: {
         cardProps: false,
-        tableProps: {
-          rowKey: 'userId',
-          showOverflowTooltip: true,
-          style: { paddingBottom: '16px', marginTop: '-14px' }
-        }
+        tableProps: { rowKey: 'userId', showOverflowTooltip: true }
       },
       pageConfig: {
-        splitPanelProps: {
-          bodyStyle: { padding: '16px 16px 0 16px' },
-          flexTable: true
-        },
+        splitPanelProps: { flexTable: 'auto' },
+        splitSearchForm: true,
         cardProps: {
-          flexTable: true,
+          flexTable: 'auto',
           bodyStyle: { padding: '0' }
         },
         pageProps: { flexTable: true },

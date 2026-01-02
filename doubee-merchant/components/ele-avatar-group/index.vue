@@ -1,9 +1,9 @@
 <!-- 头像组 -->
 <template>
-  <div :class="['ele-avatar-group', { 'is-hover-open': hoverOpen }]">
+  <div class="ele-avatar-group" :class="{ 'is-hover-open': hoverOpen }">
     <ElAvatar
       v-for="(item, index) in avatarData"
-      :key="item.key ?? index + '-' + (item.value || item.label)"
+      :key="item.key ?? `${index}-${item.value || item.label}`"
       :size="size"
       :shape="shape"
       :src="item.value"
@@ -48,7 +48,7 @@
           <slot name="overflow" :overflowData="overflowData">
             <ElAvatar
               v-for="(item, index) in overflowData"
-              :key="item.key ?? index + '-' + (item.value || item.label)"
+              :key="item.key ?? `${index}-${item.value || item.label}`"
               :size="size"
               :shape="shape"
               :src="item.value"

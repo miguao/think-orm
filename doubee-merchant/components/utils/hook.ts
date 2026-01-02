@@ -1,15 +1,20 @@
-import type { Ref, EmitsOptions, EmitsToProps } from 'vue';
-import { ref, computed, watch, provide, onBeforeUnmount } from 'vue';
-import { formItemContextKey } from 'element-plus';
+import type { Ref, InjectionKey, EmitsOptions, EmitsToProps } from 'vue';
 import type { EmitMethods } from '../ele-app/types';
-import { getValue, capitalize } from './common';
-
-/**
- * 重置组件表单验证
- */
-export function useFormItemRest() {
-  provide(formItemContextKey, null as any);
-}
+import {
+  ref,
+  unref,
+  computed,
+  watch,
+  provide,
+  onMounted,
+  onBeforeUnmount,
+  onActivated,
+  onDeactivated,
+  nextTick
+} from 'vue';
+import { formItemContextKey } from 'element-plus';
+import { useContentRatio } from '../ele-viewer/util';
+import { getValue, capitalize, debounce } from './common';
 
 /**
  * useTimer 返回结果
@@ -104,6 +109,11 @@ export function useMediaQuery(
 }
 
 /**
+ * 移动端小屏幕媒体查询
+ */
+export const mobileMediaQuery = '(max-width: 767.99px)';
+
+/**
  * useMobile 返回结果
  */
 export type UseMobileResult = [Ref<boolean>, () => void, () => void];
@@ -117,16 +127,13 @@ export function useMobile(
 ): UseMobileResult {
   const mobile = ref<boolean>(false);
 
-  const [media, startMedia, stopMedia] = useMediaQuery(
-    '(max-width: 768px)',
-    () => {
-      const isMobile = media.matches;
-      if (mobile.value !== isMobile) {
-        mobile.value = isMobile;
-        onChange && onChange(isMobile);
-      }
+  const [media, startMedia, stopMedia] = useMediaQuery(mobileMediaQuery, () => {
+    const isMobile = media.matches;
+    if (mobile.value !== isMobile) {
+      mobile.value = isMobile;
+      onChange && onChange(isMobile);
     }
-  );
+  });
 
   startMedia();
 
@@ -161,29 +168,6 @@ export function useMobileDevice(
   startMedia();
 
   return [mobileDevice, startMedia, stopMedia];
-}
-
-/**
- * 窗口事件监听
- * @param event 事件
- * @param listener 回调
- */
-export function useWindowListener(
-  event: string | EventListenerOrEventListenerObject,
-  listener?: EventListenerOrEventListenerObject
-) {
-  const eventName = typeof event === 'string' ? event : 'resize';
-  const callback = typeof event === 'function' ? event : listener;
-
-  if (callback != null) {
-    window.addEventListener(eventName, callback);
-  }
-
-  onBeforeUnmount(() => {
-    if (callback != null) {
-      window.removeEventListener(eventName, callback);
-    }
-  });
 }
 
 /**
@@ -251,6 +235,13 @@ export function useCollapseAnim() {
     handleAfterLeave
   };
 }
+
+/**
+ * 弹窗挂载容器
+ */
+export const modalItemContextKey = Symbol(
+  'modalItemContextKey'
+) as InjectionKey<Record<string, any>>;
 
 /**
  * 鼠标滚轮事件回调方法参数
@@ -321,6 +312,8 @@ export interface UseTouchEventOption<T> {
   move?: (param: UseTouchEventCallbackParam<T>) => void;
   /** 触摸结束的回调 */
   end?: (param: UseTouchEventCallbackParam<T>) => void;
+  /** touchstart 事件参数 */
+  touchstartOptions?: any;
   /** touchmove 事件参数 */
   touchmoveOptions?: any;
 }
@@ -366,8 +359,12 @@ export function useTouchEvent(option?: UseTouchEventOption<TouchEvent>) {
   };
 
   const bindTouchEvent = (el: HTMLElement) => {
-    el.addEventListener('touchstart', handleTouchStart);
-    el.addEventListener('touchmove', handleTouchMove);
+    el.addEventListener(
+      'touchstart',
+      handleTouchStart,
+      option?.touchstartOptions
+    );
+    el.addEventListener('touchmove', handleTouchMove, option?.touchmoveOptions);
     el.addEventListener('touchend', handleTouchEnd);
   };
 
@@ -476,10 +473,7 @@ export function useMoveEvent(option?: UseTouchEventOption<MoveEvent>) {
     unbindEvent();
   });
 
-  return {
-    handleMousedown,
-    handleTouchstart
-  };
+  return { handleMousedown, handleTouchstart };
 }
 
 /**
@@ -517,9 +511,177 @@ export function useComponentEvents<T extends EmitsOptions>(
 }
 
 /**
+ * 二次封装组件导出处理 hook
+ */
+export function useComponentExpose<
+  T extends {},
+  M extends keyof T,
+  R extends keyof T
+>(componentRef: Ref<T | null>, methodNames: M[], refNames: R[]) {
+  const exposeValues: Pick<T, M> & Record<R, Ref<T[R]>> = {} as any;
+  methodNames.forEach((name) => {
+    exposeValues[name] = ((...args: any) => {
+      if (!componentRef.value) {
+        throw new Error('componentRef is null');
+      }
+      // @ts-ignore
+      return componentRef.value[name](...args);
+    }) as any;
+  });
+  refNames.forEach((name) => {
+    exposeValues[name] = computed(() => {
+      const val = componentRef.value?.[name];
+      return val == null ? val : unref(val);
+    }) as any;
+  });
+  return exposeValues;
+}
+
+/**
+ * 组件插槽传递处理
+ */
+export function useContentSlot() {
+  const customProps = ref<Record<string, any> | any>();
+  const contentRatio = useContentRatio((merged: Record<string, any>) => {
+    customProps.value = merged;
+  });
+  return { ...contentRatio, customProps };
+}
+
+/**
+ * 监听节点宽高改变参数
+ */
+export interface UseResizeObserverOption {
+  /** 获取要观测的节点方法 */
+  getEl: () => HTMLElement | null | undefined;
+  /** 宽度改变事件 */
+  onWidthChange?: (width: number) => void;
+  /** 高度改变事件 */
+  onHeightChange?: (height: number) => void;
+  /** 挂载时立即更新尺寸延迟 */
+  mountedUpdateDelay?: number;
+  /** 失活又激活时立即更新尺寸延迟 */
+  activatedUpdateDelay?: number;
+}
+
+/**
+ * 监听节点宽高改变
+ * @param option 参数
+ */
+export function useResizeObserver(option: UseResizeObserverOption) {
+  /** 容器宽度 */
+  const width = ref<number>(0);
+
+  /** 容器高度 */
+  const height = ref<number>(0);
+
+  /** 获取当前容器尺寸 */
+  const updateWrapSize = () => {
+    const el = option.getEl();
+    if (el) {
+      const w = Math.floor(el.clientWidth);
+      if (width.value !== w) {
+        width.value = w;
+        option.onWidthChange && option.onWidthChange(w);
+      }
+      const h = Math.floor(el.clientHeight);
+      if (height.value !== h) {
+        height.value = h;
+        option.onHeightChange && option.onHeightChange(h);
+      }
+    }
+  };
+
+  /** 容器尺寸改变监听器 */
+  const observer = new ResizeObserver(
+    debounce(() => {
+      updateWrapSize();
+    }, 400)
+  );
+
+  /** 开始监听容器尺寸改变 */
+  const observe = () => {
+    unobserve();
+    const el = option.getEl();
+    if (el) {
+      observer.observe(el);
+    }
+  };
+
+  /** 结束监听容器尺寸改变 */
+  const unobserve = () => {
+    const el = option.getEl();
+    if (el) {
+      observer.unobserve(el);
+    }
+  };
+
+  /** 延迟更新尺寸 */
+  const delayUpdateWrapSize = (delay?: number) => {
+    if (delay == null) {
+      updateWrapSize();
+    } else if (delay === 0) {
+      nextTick(() => {
+        updateWrapSize();
+      });
+    } else if (delay > 0) {
+      setTimeout(() => {
+        updateWrapSize();
+      }, delay);
+    }
+  };
+
+  onMounted(() => {
+    delayUpdateWrapSize(option.mountedUpdateDelay);
+    observe();
+  });
+
+  onBeforeUnmount(() => {
+    observer.disconnect();
+  });
+
+  onActivated(() => {
+    delayUpdateWrapSize(option.activatedUpdateDelay);
+    observe();
+  });
+
+  onDeactivated(() => {
+    unobserve();
+  });
+
+  return [width, height, updateWrapSize] as const;
+}
+
+/**
+ * 窗口事件监听
+ * @param event 事件
+ * @param listener 回调
+ */
+export function useWindowListener(
+  event: string | EventListenerOrEventListenerObject,
+  listener?: EventListenerOrEventListenerObject
+) {
+  const eventName = typeof event === 'string' ? event : 'resize';
+  const callback = typeof event === 'function' ? event : listener;
+
+  if (callback != null) {
+    window.addEventListener(eventName, callback);
+  }
+
+  onBeforeUnmount(() => {
+    if (callback != null) {
+      window.removeEventListener(eventName, callback);
+    }
+  });
+}
+
+/**
  * 高级选项数据 hook
  */
-export function useProOptions<T>(props: Record<string, any>, name = 'options') {
+export function useProOptions<T extends Record<string, any>>(
+  props: Record<string, any>,
+  name = 'options'
+) {
   /** 选项数据 */
   const optionData = ref<Array<T>>([]) as Ref<Array<T>>;
 
@@ -560,4 +722,11 @@ export function useProOptions<T>(props: Record<string, any>, name = 'options') {
     optionData,
     reloadOptions
   };
+}
+
+/**
+ * 重置组件表单验证
+ */
+export function useFormItemRest() {
+  provide(formItemContextKey, null as any);
 }

@@ -1,4 +1,4 @@
-import type { ExtractPropTypes } from 'vue';
+import type { ExtractPropTypes, PropType } from 'vue';
 
 /**
  * 属性
@@ -12,7 +12,7 @@ export const pageProps = {
     default: true
   },
   /** 内部表格是否弹性布局 */
-  flexTable: Boolean,
+  flexTable: [Boolean, String] as PropType<boolean | 'auto'>,
   /** 是否关闭页脚 */
   hideFooter: Boolean
 };

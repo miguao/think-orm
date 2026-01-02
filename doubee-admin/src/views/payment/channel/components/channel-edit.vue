@@ -30,6 +30,14 @@
         />
       </el-form-item>
 
+      <el-form-item label="选择插件" prop="plugin">
+        <dict-data
+          code="payment_bank,code,name"
+          v-model="form.plugin"
+          placeholder="请选择支付插件"
+        />
+      </el-form-item>
+
       <el-form-item label="状态" prop="status">
         <dict-data
           type="radio"

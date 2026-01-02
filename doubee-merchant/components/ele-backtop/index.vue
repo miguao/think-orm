@@ -3,6 +3,7 @@
   <Transition :name="transitionName">
     <div
       v-if="visible"
+      v-bind="$attrs"
       class="ele-backtop"
       :style="{
         bottom: typeof bottom === 'number' ? `${bottom}px` : bottom,
@@ -20,13 +21,21 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, shallowRef, watch, onMounted, onBeforeUnmount } from 'vue';
+  import {
+    ref,
+    shallowRef,
+    watch,
+    onMounted,
+    onBeforeUnmount,
+    onDeactivated,
+    onActivated
+  } from 'vue';
   import { ElIcon } from 'element-plus';
   import { ArrowUp } from '../icons/index';
   import { throttle } from '../utils/common';
   import { backtopProps, backtopEmits } from './props';
 
-  defineOptions({ name: 'EleBacktop' });
+  defineOptions({ name: 'EleBacktop', inheritAttrs: false });
 
   const props = defineProps(backtopProps);
 
@@ -102,5 +111,13 @@
 
   onBeforeUnmount(() => {
     unbindEvent();
+  });
+
+  onDeactivated(() => {
+    visible.value = false;
+  });
+
+  onActivated(() => {
+    handleScroll();
   });
 </script>

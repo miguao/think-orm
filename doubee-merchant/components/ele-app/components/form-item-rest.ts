@@ -1,10 +1,3 @@
-import { defineComponent } from 'vue';
-import { useFormItemRest } from '../../utils/hook';
+import EleFormItemRest from '../../ele-form-item-rest/index';
 
-export default defineComponent({
-  name: 'FormItemRest',
-  setup(_props, { slots }) {
-    useFormItemRest();
-    return () => slots.default?.();
-  }
-});
+export default EleFormItemRest;

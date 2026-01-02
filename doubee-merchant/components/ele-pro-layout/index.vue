@@ -58,7 +58,8 @@
     :logoTitle="logoTitle"
     :menuScrollToActive="menuScrollToActive"
     :mobile="mobile"
-    :class="['ele-pro-layout', { 'ele-admin-limited': !fluid }]"
+    class="ele-pro-layout"
+    :class="{ 'ele-admin-limited': !fluid }"
     @update:collapse="updateCollapse"
     @logoClick="handleLogoClick"
     @headMenuOpen="handleHeadMenuOpen"
@@ -84,13 +85,19 @@
     <slot></slot>
     <slot v-if="!hideFooter" name="footer"></slot>
     <template #body>
-      <ProIframe
+      <IframeGroup
         v-if="tabBar && keepAlive"
         :keepAlive="keepAlive"
         :transitionName="transitionName"
         :transitionDelay="transitionDelay"
         :tabData="tabData"
         :tabActive="tabActive"
+      />
+      <EleModalRender
+        :modals="modals"
+        @removeItem="removeModal"
+        @updateItemVisible="updateModalVisible"
+        @updateItemProps="updateModalProps"
       />
     </template>
     <template v-if="$slots.logo" #logo>
@@ -161,9 +168,16 @@
     EleBacktopProps,
     EleMenusProps
   } from '../ele-app/plus';
-  import { useTimer, useMediaQuery, useWindowListener } from '../utils/hook';
+  import {
+    useTimer,
+    useMediaQuery,
+    useWindowListener,
+    mobileMediaQuery
+  } from '../utils/hook';
   import { mapTree, isExternalLink, debounce } from '../utils/common';
-  import ProIframe from './components/pro-iframe.vue';
+  import EleModalRender from '../ele-modal-render/index';
+  import { useModalRenderProvider } from '../ele-modal-render/util';
+  import IframeGroup from './components/iframe-group.vue';
   import {
     getRouteMatched,
     findMenuByPath,
@@ -184,7 +198,10 @@
   } from './types';
   import { proLayoutProps, proLayoutEmits, PRO_LAYOUT_KEY } from './props';
   import EleAdminLayout from '../ele-admin-layout/index.vue';
-  import type { MenuItem as MenuItemProps } from '../ele-menus/types';
+  import type {
+    MenuItem as MenuItemProps,
+    MenuItemClickType
+  } from '../ele-menus/types';
   import type { BreadcrumbItem } from '../ele-breadcrumb/types';
   import type { TabPaneItem, TabEventOption } from '../ele-tabs/types';
   import type {
@@ -201,9 +218,17 @@
   const emit = defineEmits(proLayoutEmits);
 
   const { currentRoute, push } = useRouter();
+  const {
+    modals,
+    openModal,
+    closeModal,
+    closeAllModal,
+    removeModal,
+    updateModalVisible,
+    updateModalProps
+  } = useModalRenderProvider();
   const [startTimer, stopTimer] = useTimer(() => props.menuHoverTimeout);
   const state: LayoutState = { navData: [], sideData: [], boxData: [] };
-  const mobileQuery = '(max-width: 768px)';
 
   /** 布局组件 */
   const layoutRef = ref<EleAdminLayoutInstance>(null);
@@ -324,7 +349,14 @@
         name: d.key,
         label: d.title,
         closable: onlyOne && d.home ? false : d.closable,
-        meta: d.meta
+        meta: {
+          path: d.path,
+          fullPath: d.fullPath,
+          home: d.home,
+          components: d.components,
+          refresh: d.refresh,
+          ...(d.meta || {})
+        }
       };
     });
   });
@@ -578,7 +610,11 @@
   };
 
   /** 顶栏子菜单项点击事件 */
-  const handleHeadMenuItemClick = (item: MenuItemProps, e: MouseEvent) => {
+  const handleHeadMenuItemClick = (
+    item: MenuItemProps,
+    e: MouseEvent,
+    type?: MenuItemClickType
+  ) => {
     const path = item.index;
     const trigger = props.navTrigger;
     if (!path || (trigger !== 'click' && trigger !== 'hover')) {
@@ -587,6 +623,9 @@
     if (isExternalLink(path)) {
       e.stopPropagation();
       if (props.beforeClick && props.beforeClick(item, e) === false) {
+        return;
+      }
+      if (type === 'parent' || type === 'group') {
         return;
       }
       window.open(path);
@@ -599,6 +638,9 @@
       return;
     }
     if (props.beforeClick && props.beforeClick(item, e) === false) {
+      return;
+    }
+    if (type === 'parent' || type === 'group') {
       return;
     }
     if (isChild && path !== unref(currentRoute).fullPath) {
@@ -675,7 +717,11 @@
   };
 
   /** 双侧栏一级子菜单项点击事件 */
-  const handleBoxMenuItemClick = (item: MenuItemProps, e: MouseEvent) => {
+  const handleBoxMenuItemClick = (
+    item: MenuItemProps,
+    e: MouseEvent,
+    type?: MenuItemClickType
+  ) => {
     const path = item.index;
     const trigger = props.boxTrigger;
     if (!path || (trigger !== 'click' && trigger !== 'hover')) {
@@ -686,11 +732,17 @@
       if (props.beforeClick && props.beforeClick(item, e) === false) {
         return;
       }
+      if (type === 'parent' || type === 'group') {
+        return;
+      }
       window.open(path);
       return;
     }
     if (props.collapse) {
       if (props.beforeClick && props.beforeClick(item, e) === false) {
+        return;
+      }
+      if (type === 'parent' || type === 'group') {
         return;
       }
       if (path !== unref(currentRoute).fullPath) {
@@ -705,6 +757,9 @@
       return;
     }
     if (props.beforeClick && props.beforeClick(item, e) === false) {
+      return;
+    }
+    if (type === 'parent' || type === 'group') {
       return;
     }
     if (isChild && path !== unref(currentRoute).fullPath) {
@@ -765,13 +820,20 @@
   };
 
   /** 侧栏子菜单项点击事件 */
-  const handleSideMenuItemClick = (item: MenuItemProps, e: MouseEvent) => {
+  const handleSideMenuItemClick = (
+    item: MenuItemProps,
+    e: MouseEvent,
+    type?: MenuItemClickType
+  ) => {
     const path = item.index;
     const trigger = props.itemTrigger;
     if (!path || (trigger !== 'click' && trigger !== 'hover')) {
       return;
     }
     if (props.beforeClick && props.beforeClick(item, e) === false) {
+      return;
+    }
+    if (type === 'parent' || type === 'group') {
       return;
     }
     if (isExternalLink(path)) {
@@ -1142,7 +1204,7 @@
   });
 
   /** 移动端小屏幕媒体查询 */
-  const [media, startMedia, stopMedia] = useMediaQuery(mobileQuery, () => {
+  const [media, startMedia, stopMedia] = useMediaQuery(mobileMediaQuery, () => {
     const isMobile = props.responsive ? media.matches : false;
     if (mobile.value !== isMobile) {
       mobile.value = isMobile;
@@ -1217,6 +1279,11 @@
   });
 
   defineExpose({
-    layoutRef
+    layoutRef,
+    // 弹窗操作
+    openModal,
+    closeModal,
+    closeAllModal,
+    updateModalProps
   });
 </script>

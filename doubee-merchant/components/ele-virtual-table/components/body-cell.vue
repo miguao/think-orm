@@ -18,7 +18,8 @@
         ></div>
         <div
           v-if="hasChildren"
-          :class="['ele-table-expand', { 'is-collapse': isCollapse }]"
+          class="ele-table-expand"
+          :class="{ 'is-collapse': isCollapse }"
           @click.stop="handleExpandChange"
         >
           <ElIcon :class="{ 'is-loading': loading }">
@@ -216,7 +217,7 @@
     if (col) {
       // 对齐方式
       if (col.align) {
-        classes.push('is-align-' + col.align);
+        classes.push(`is-align-${col.align}`);
       }
       // 溢出省略
       if (isEllipsis.value) {

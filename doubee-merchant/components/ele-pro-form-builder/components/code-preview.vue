@@ -15,10 +15,8 @@
       <EleTabBar v-model="tabActive" :items="tabItems">
         <template #extra>
           <ElIcon
-            :class="[
-              'ele-pro-form-builder-code-icon-tool',
-              { 'is-copied': copied }
-            ]"
+            class="ele-pro-form-builder-code-icon-tool"
+            :class="{ 'is-copied': copied }"
             title="复制"
             @click="handleCopy"
           >
@@ -55,7 +53,7 @@
   import { download, copyText } from '../../utils/common';
   import { useTimer } from '../../utils/hook';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleProFormProps } from '../../ele-app/plus';
+  import type { EleProFormProps } from '../../ele-app/plusx';
   import EleModal from '../../ele-modal/index.vue';
   import EleTabBar from '../../ele-tab-bar/index.vue';
   import type { ComponentGroup } from '../types';

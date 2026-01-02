@@ -1,7 +1,8 @@
 <template>
   <div
+    class="ele-dropdown-menu"
     :class="[
-      'ele-dropdown-menu',
+      { 'ele-dropdown-icon-small': iconSize === 'small' },
       { 'is-small': size === 'small' },
       { 'is-large': size === 'large' }
     ]"
@@ -9,7 +10,7 @@
   >
     <template
       v-for="item in items"
-      :key="item.key == null ? JSON.stringify(item.command) : item.key"
+      :key="JSON.stringify(item.key ?? item.command ?? item.title)"
     >
       <DropdownMenuItem
         :item="item"
@@ -72,21 +73,23 @@
     menuStyle: Object as PropType<StyleValue>,
     /** 自定义图标属性 */
     iconProps: Object as PropType<ElIconProps>,
+    /** 图标尺寸 */
+    iconSize: String as PropType<'small' | 'default'>,
     /** 尺寸 */
     size: String as PropType<ElButtonProps['size']>
   });
 
   const emit = defineEmits({
-    itemClick: (_item: DropdownItem) => true,
+    itemClick: (_item: DropdownItem, _e: MouseEvent) => true,
     wrapperContext: (_e: MouseEvent) => true
   });
 
   /** 菜单项点击事件 */
-  const handleItemClick = (item: DropdownItem) => {
+  const handleItemClick = (item: DropdownItem, e: MouseEvent) => {
     if (item.disabled) {
       return;
     }
-    emit('itemClick', item);
+    emit('itemClick', item, e);
   };
 
   /** 菜单容器右键事件 */

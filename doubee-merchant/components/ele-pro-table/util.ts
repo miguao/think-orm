@@ -327,29 +327,33 @@ export function getRequestPages(
 
 /**
  * 获取数据源请求结果
- * @param data 数据源请求的原始数据
+ * @param result 数据源请求的原始数据
  * @param response 响应参数配置
  * @param globalResponse 全局响应参数配置
  * @param lazy 表格是否开启懒加载
  * @param treeOpt 树形表格字段名配置
  */
 export function getResponseResult(
-  data: DatasourceResult,
+  result: DatasourceResult,
   response?: ResponseOption,
   globalResponse?: ResponseOption,
   lazy?: boolean,
   treeOpt?: TreeProps
 ): ResponseResult {
-  if (!data || Array.isArray(data)) {
-    return { data: getResponseData(data as DataItem[], lazy, treeOpt) };
+  if (!result || Array.isArray(result)) {
+    return {
+      data: getResponseData(result as DataItem[], lazy, treeOpt),
+      result
+    };
   }
   const { dataName, countName } = getResponseName(globalResponse, response);
   if (!dataName) {
-    return {};
+    return { result };
   }
   return {
-    data: getResponseData(getValue(data, dataName), lazy, treeOpt),
-    total: (countName ? getValue(data, countName) : void 0) ?? 0
+    data: getResponseData(getValue(result, dataName), lazy, treeOpt),
+    total: (countName ? getValue(result, countName) : void 0) ?? 0,
+    result
   };
 }
 
@@ -391,12 +395,9 @@ export function sortData(datasource?: DataItem[], sorter?: Sorter): DataItem[] {
         const r = item.sortMethod(a, b);
         return item.descend ? -r : r;
       }
-      const aValue: any = a[item.field];
-      const bValue: any = b[item.field];
-      if (aValue == bValue) {
-        return 0;
-      }
-      const r = aValue < bValue ? -1 : 1;
+      const aValue = getValue<any, DataItem>(a, item.field);
+      const bValue = getValue<any, DataItem>(b, item.field);
+      const r = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       return item.descend ? -r : r;
     });
   });
@@ -899,7 +900,7 @@ export function getHeaderCellText(
     return '';
   }
   if (typeof column.renderHeader === 'function') {
-    return column.renderHeader({ column: column as any, $index: index }) as any;
+    return column.renderHeader({ column, $index: index } as any) as any;
   }
   return column.label == null ? '' : String(column.label);
 }
@@ -1018,7 +1019,7 @@ export function getExportData(
           dataItem.rowspan = 2;
         }
         const expandDataItem: ExportDataItem = {
-          key: '_expand_' + key,
+          key: `_expand_${key}`,
           row,
           index,
           column,
@@ -1028,7 +1029,7 @@ export function getExportData(
         };
         if (showExpandIndex) {
           expandRowData[0] = {
-            key: '_expand_0-' + key,
+            key: `_expand_0-${key}`,
             row,
             index,
             rowspan: 0,
@@ -1158,7 +1159,7 @@ export function exportCSV(
   });
   const content = encodeURIComponent(csvRows.join('\n'));
   const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + content;
+  a.href = `data:text/csv;charset=utf-8,${content}`;
   a.download = fileName + '.csv';
   a.style.display = 'none';
   document.body.appendChild(a);

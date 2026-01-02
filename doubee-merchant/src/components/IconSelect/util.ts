@@ -1,10 +1,21 @@
 import type { App } from 'vue';
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useThemeStore } from '@/store/modules/theme';
 import * as elIcons from '@element-plus/icons-vue';
 import * as eleIcons from '@/components/icons';
 /** element-plus 的图标全局安装的前缀 */
 const elIconPrefix = 'IconEl';
 /** ele-admin-plus 的图标全局安装的前缀 */
 const eleIconPrefix = 'IconPro';
+
+/**
+ * 组件文案
+ */
+export interface IconSelectLocale {
+  outlined: string;
+  filled: string;
+}
 
 /**
  * 获取全部图标数据
@@ -31,38 +42,6 @@ export const iconsInstaller = {
     });
   }
 };
-
-/**
- * 获取图标下拉选择器数据
- */
-export function getIconSelectData() {
-  const iconNames = Object.keys(getIconData());
-  const proIconNames = iconNames.filter((name) =>
-    name.startsWith(eleIconPrefix)
-  );
-  return [
-    {
-      title: 'EleAdminPlus',
-      children: [
-        {
-          title: '线框风格',
-          icons: proIconNames.filter((name) => !name.endsWith('Filled'))
-        },
-        {
-          title: '实底风格',
-          icons: proIconNames.filter((name) => name.endsWith('Filled'))
-        }
-      ]
-    },
-    {
-      title: 'ElementPlus',
-      children: elementIconData.map((group) => ({
-        ...group,
-        icons: group.icons.map((icon) => `IconEl${icon}`)
-      }))
-    }
-  ];
-}
 
 /**
  * 图标下拉选择器的 element-plus 的图标数据
@@ -407,3 +386,66 @@ export const elementIconData = [
     ]
   }
 ];
+
+/**
+ * 获取图标下拉选择器数据
+ */
+export function getIconSelectData(lang: IconSelectLocale) {
+  const iconNames = Object.keys(getIconData());
+  const proIconNames = iconNames.filter((name) =>
+    name.startsWith(eleIconPrefix)
+  );
+  return [
+    {
+      title: 'EleAdminPlus',
+      children: [
+        {
+          title: lang.outlined,
+          icons: proIconNames.filter((name) => !name.endsWith('Filled'))
+        },
+        {
+          title: lang.filled,
+          icons: proIconNames.filter((name) => name.endsWith('Filled'))
+        }
+      ]
+    },
+    {
+      title: 'ElementPlus',
+      children: elementIconData.map((group) => ({
+        ...group,
+        icons: group.icons.map((icon) => `IconEl${icon}`)
+      }))
+    }
+  ];
+}
+
+/**
+ * 清新主题图标图片地址数据
+ */
+export const imgIconUrls: Record<string, string> = import.meta.glob(
+  '/src/assets/menu-icons/*.png',
+  {
+    import: 'default',
+    eager: true
+  }
+);
+
+/**
+ * 清新主题图标图片名称数据
+ */
+export const imgIconNames = Object.keys(imgIconUrls).map((name) =>
+  name.slice(0, name.lastIndexOf('.')).replace('/src/assets/menu-icons/', '')
+);
+
+/**
+ * 判断是否是清新主题
+ */
+export function useIsSimpleTheme() {
+  const themeStore = useThemeStore();
+  const { skinConfig } = storeToRefs(themeStore);
+
+  /** 是否是清新主题 */
+  const isSimpleTheme = computed(() => skinConfig.value?.name === 'simple');
+
+  return { isSimpleTheme };
+}

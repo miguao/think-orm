@@ -1,6 +1,21 @@
 import { generate } from '@ant-design/colors';
 import { FastColor } from '@ant-design/fast-color';
 import type { RGB } from '@ant-design/fast-color';
+import type { UserComponent } from '../ele-app/types';
+
+/**
+ * 预设常用布局
+ */
+export interface PredefinedLayout {
+  /** 布局名称 */
+  name: string;
+  /** 缩略图 */
+  cover: UserComponent;
+  /** 布局配置 */
+  config: Record<string, any>;
+  /** 非圆角主题下需要调整的布局配置 */
+  traditionalThemeConfig?: Record<string, any>;
+}
 
 /**
  * 主题皮肤配置
@@ -29,7 +44,13 @@ export interface SkinConfig {
   /** 弹层背景蒙层 */
   overlayMaskColor?: string;
   /** 暗黑主题配置 */
-  darkConfig?: Omit<SkinConfig, 'name' | 'darkConfig'>;
+  darkConfig: Omit<SkinConfig, 'name' | 'darkConfig' | 'layouts'>;
+  /** 主题样式 */
+  themeCss?: string;
+  /** 主题类名 */
+  themeClass?: string;
+  /** 预设常用布局 */
+  layouts?: PredefinedLayout[];
 }
 
 /**
@@ -292,18 +313,36 @@ export function changeSkin(
     el.parentNode.removeChild(el);
   }
   const className = themeClass ?? 'is-transparent';
-  if (!skinConfig) {
+  const skinCfg = dark ? skinConfig?.darkConfig : skinConfig;
+  const isTransparent = !(
+    !skinCfg ||
+    (!skinCfg.wallpaper &&
+      !skinCfg.maskColor &&
+      !skinCfg.headerBg &&
+      !skinCfg.sidebarBg &&
+      !skinCfg.cardBg &&
+      !skinCfg.overlayBg &&
+      !skinCfg.overlayMaskColor)
+  );
+  if (!isTransparent) {
     $el.classList.remove(className);
+    if (skinCfg?.themeCss) {
+      const elem = document.createElement('style');
+      elem.id = id;
+      elem.setAttribute('type', 'text/css');
+      elem.innerHTML = skinCfg.themeCss;
+      document.head.appendChild(elem);
+    }
     return;
   }
-  const selector = themeSelector ?? 'html.is-transparent';
-  const skin = dark ? skinConfig.darkConfig || {} : skinConfig;
+  const skin = skinCfg || {};
   const wallpaper = getBgValue(skin.wallpaper, skin.maskColor);
   const overlayBg = getBgValue(skin.overlayBg, skin.overlayMaskColor);
   const tooltipBg = getBgValue(
-    skinConfig.darkConfig?.overlayBg,
-    skinConfig.darkConfig?.overlayMaskColor
+    skinConfig?.darkConfig?.overlayBg,
+    skinConfig?.darkConfig?.overlayMaskColor
   );
+  const selector = themeSelector ?? 'html.is-transparent';
   const cssVar = [
     `${selector}{`,
     wallpaper ? `--ele-skin-bg-wallpaper:${wallpaper};` : void 0,
@@ -312,7 +351,8 @@ export function changeSkin(
     skin.cardBg ? `--ele-skin-bg-card:${skin.cardBg};` : void 0,
     overlayBg ? `--ele-skin-bg-overlay:${overlayBg};` : void 0,
     tooltipBg ? `--ele-skin-bg-tooltip:${tooltipBg};` : void 0,
-    '}'
+    '}',
+    skin.themeCss
   ];
   const elem = document.createElement('style');
   elem.id = id;

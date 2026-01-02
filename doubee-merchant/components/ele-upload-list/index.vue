@@ -5,8 +5,8 @@
     :animation="300"
     :setData="() => void 0"
     handle=".ele-upload-handle"
+    class="ele-upload-list"
     :class="[
-      'ele-upload-list',
       { 'is-file-list': listType === 'file' },
       { 'is-disabled': disabled }
     ]"
@@ -98,7 +98,7 @@
   import EleImageViewer from '../ele-image-viewer/index.vue';
   import { PlusOutlined } from '../icons/index';
   import ListItem from './components/list-item.vue';
-  import type { UploadItem, UploadLocale, ImageObjectUrl } from './types';
+  import type { UploadItem, ImageObjectUrl } from './types';
   import { uploadListProps, uploadListEmits } from './props';
   const ownSlots = ['default', 'icon'];
 
@@ -109,7 +109,7 @@
   const emit = defineEmits(uploadListEmits);
 
   /** 国际化 */
-  const { lang } = useLocale<UploadLocale>('upload', props);
+  const { lang } = useLocale('upload', props);
 
   /** 图片预览是否打开 */
   const previewVisible = ref(false);
@@ -145,7 +145,7 @@
   /** 文件选择后生成数据 */
   const buildItem = (file: File): UploadItem => {
     return {
-      key: 'ele' + uuid(16, 10) + String(Date.now()),
+      key: `ele${uuid(16, 10)}${String(Date.now())}`,
       name: file.name,
       status: void 0,
       progress: 0,
@@ -267,14 +267,36 @@
     }
   };
 
-  /** 预读图片文件 */
+  /** 释放全部图片文件预读 */
+  const clearImageObjectUrls = () => {
+    const temp = imageObjectUrls.value;
+    imageObjectUrls.value = [];
+    temp.forEach((item) => {
+      URL.revokeObjectURL(item.url);
+    });
+  };
+
+  /** 更新图片文件预读 */
   watch(
     () => props.modelValue,
     () => {
-      if (props.modelValue != null) {
-        props.modelValue.forEach((item) => {
-          getItemImageUrl(item);
-        });
+      if (props.modelValue == null) {
+        clearImageObjectUrls();
+        return;
+      }
+      const urls: string[] = [];
+      props.modelValue.forEach((item) => {
+        const url = getItemImageUrl(item);
+        if (url) {
+          urls.push(url);
+        }
+      });
+      for (let i = imageObjectUrls.value.length - 1; i >= 0; i--) {
+        const url = imageObjectUrls.value[i].url;
+        if (!urls.includes(url)) {
+          imageObjectUrls.value.splice(i, 1);
+          URL.revokeObjectURL(url);
+        }
       }
     },
     {
@@ -285,10 +307,7 @@
 
   /** 释放图片文件预读 */
   onBeforeUnmount(() => {
-    imageObjectUrls.value.forEach((item) => {
-      URL.revokeObjectURL(item.url);
-    });
-    imageObjectUrls.value = [];
+    clearImageObjectUrls();
   });
 
   defineExpose({

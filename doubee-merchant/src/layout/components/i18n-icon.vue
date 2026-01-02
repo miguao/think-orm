@@ -15,19 +15,10 @@
     style="line-height: inherit"
     @command="changeLanguage"
   >
-    <div
-      :style="{
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        outline: 'none'
-      }"
-    >
-      <slot>
-        <el-icon>
-          <GlobalOutlined :style="iconStyle" />
-        </el-icon>
-      </slot>
+    <div style="display: flex; align-items: center; height: 100%">
+      <el-icon>
+        <GlobalOutlined :style="iconStyle" />
+      </el-icon>
     </div>
   </ele-dropdown>
 </template>

@@ -1,6 +1,6 @@
 <!-- 文本复制 -->
 <template>
-  <div :class="['ele-copyable', { 'ele-copyable-done': copied }]">
+  <div class="ele-copyable" :class="{ 'ele-copyable-done': copied }">
     <div ref="innerRef" class="ele-copyable-inner" :style="innerStyle">
       <slot></slot>
     </div>
@@ -43,7 +43,6 @@
   import { useLocale } from '../ele-config-provider/receiver';
   import type { EleTooltipInstance } from '../ele-app/plus';
   import EleTooltip from '../ele-tooltip/index.vue';
-  import type { CopyableLocale } from './types';
   import { copyableProps, copyableEmits } from './props';
 
   defineOptions({ name: 'EleCopyable' });
@@ -52,7 +51,7 @@
 
   const emit = defineEmits(copyableEmits);
 
-  const { lang } = useLocale<CopyableLocale>('copyable', props);
+  const { lang } = useLocale('copyable', props);
   const state: { timer: number | null } = { timer: null };
 
   /** 文本组件 */

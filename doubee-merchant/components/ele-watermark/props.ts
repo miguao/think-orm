@@ -21,22 +21,23 @@ export const watermarkProps = {
   gap: Array as unknown as PropType<WatermarkGap>,
   /** 距离左上角的偏移量 */
   offset: Array as unknown as PropType<WatermarkOffset>,
-  /** 多行水印的行间距 */
-  lineGap: {
-    type: Number,
-    default: 3
-  },
+  /** 多行文字的行间距 */
+  lineGap: Number,
   /** 自定义样式 */
   customStyle: Object as PropType<Exclude<StyleValue, string>>,
+  /** 是否使用 svg 渲染 */
+  svgRender: Boolean,
+  /** 是否禁用 */
+  disabled: Boolean,
   /** 是否使用固定定位 */
   fixed: Boolean,
-  /** 是否为外层添加定位样式 */
+  /** 是否为容器添加定位样式 */
   wrapPosition: {
     type: Boolean,
     default: true
   },
-  /** 是否禁用 */
-  disabled: Boolean
+  /** 容器高度 */
+  wrapHeight: [String, Number]
 };
 
 export type WatermarkProps = ExtractPropTypes<typeof watermarkProps>;

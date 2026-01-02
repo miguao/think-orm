@@ -3,7 +3,7 @@
   <component v-if="inlineEditor" :is="tagName" :id="elementId" />
   <textarea v-else :id="elementId"></textarea>
   <!-- 文件选择弹窗 -->
-  <FormItemRest>
+  <EleFormItemRest>
     <FilePicker
       title="文件选择"
       :limit="1"
@@ -14,7 +14,7 @@
       @done="handleFilePickerDone"
       @close="handleFilePickerClose"
     />
-  </FormItemRest>
+  </EleFormItemRest>
 </template>
 
 <script lang="ts" setup>
@@ -28,7 +28,6 @@
     nextTick,
     useAttrs
   } from 'vue';
-  import FormItemRest from 'ele-admin-plus/es/ele-app/components/form-item-rest';
   import FilePicker from '@/components/FilePicker/index.vue';
   import type { UserFile } from '@/api/system/user-file/model';
   import tinymce from 'tinymce/tinymce';
@@ -120,8 +119,15 @@
   /** 编辑器唯一id */
   const elementId: string = props.id || uuid('tiny-vue');
 
-  /** 编辑器实例 */
-  let editorIns: TinyMCEEditor | null = null;
+  /** 实例导出 */
+  const exposeData = {
+    /** 编辑器实例 */
+    editorIns: null as TinyMCEEditor | null,
+    /** 弹出提示框 */
+    alert(option?: AlertOption) {
+      openAlert(this.editorIns, option);
+    }
+  };
 
   /** 是否内联模式 */
   const inlineEditor: boolean = props.init?.inline || props.inline;
@@ -134,11 +140,11 @@
   /** 修改内容 */
   const setContent = (value?: string) => {
     if (
-      editorIns &&
+      exposeData.editorIns &&
       typeof value === 'string' &&
-      value !== editorIns.getContent()
+      value !== exposeData.editorIns.getContent()
     ) {
-      editorIns.setContent(value);
+      exposeData.editorIns.setContent(value);
     }
   };
 
@@ -175,7 +181,7 @@
       readonly: props.disabled,
       inline: inlineEditor,
       setup: (editor: TinyMCEEditor) => {
-        editorIns = editor;
+        exposeData.editorIns = editor;
         editor.on('init', (e: EditorEvent<any>) => {
           // 回显初始值
           if (props.modelValue) {
@@ -197,18 +203,13 @@
 
   /** 销毁编辑器 */
   const destory = () => {
-    if (tinymce != null && editorIns != null) {
-      tinymce.remove(editorIns as any);
-      editorIns = null;
+    if (tinymce != null && exposeData.editorIns != null) {
+      tinymce.remove(exposeData.editorIns as any);
+      exposeData.editorIns = null;
     }
   };
 
-  /** 弹出提示框 */
-  const alert = (option?: AlertOption) => {
-    openAlert(editorIns, option);
-  };
-
-  defineExpose({ editorIns, alert });
+  defineExpose(exposeData);
 
   watch(
     () => props.modelValue,
@@ -222,11 +223,11 @@
   watch(
     () => props.disabled,
     (disable) => {
-      if (editorIns !== null) {
-        if (typeof editorIns.mode?.set === 'function') {
-          editorIns.mode.set(disable ? 'readonly' : 'design');
+      if (exposeData.editorIns !== null) {
+        if (typeof exposeData.editorIns.mode?.set === 'function') {
+          exposeData.editorIns.mode.set(disable ? 'readonly' : 'design');
         } else {
-          editorIns.setMode(disable ? 'readonly' : 'design');
+          exposeData.editorIns.setMode(disable ? 'readonly' : 'design');
         }
       }
     }
@@ -295,6 +296,8 @@
 </script>
 
 <style lang="scss">
+  @use 'ele-admin-plus/es/style/util.scss' as *;
+
   body {
     .tox.tox-tinymce-aux,
     &.tox-fullscreen .tox.tox-tinymce-aux {
@@ -325,7 +328,11 @@
     .tox .tox-toolbar__overflow,
     .tox .tox-toolbar__primary {
       background: none;
-      box-shadow: 0 -0.8px 0 var(--el-border-color-light) inset;
+      box-shadow: 0 -0.8px 0 elVar('border-color', 'light') inset;
+    }
+
+    .tox.tox-tinymce.tox-fullscreen {
+      background: elVar('bg-color');
     }
   }
 </style>

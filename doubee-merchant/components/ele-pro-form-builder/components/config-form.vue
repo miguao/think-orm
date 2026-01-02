@@ -41,7 +41,7 @@
 <script lang="ts" setup>
   import { reactive, watch } from 'vue';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleProFormProps } from '../../ele-app/plus';
+  import type { EleProFormProps } from '../../ele-app/plusx';
   import type {
     ProFormItemProps,
     ProFormItemTypeData

@@ -1,11 +1,11 @@
 <!-- 网格布局 -->
 <template>
-  <ReceiverView class="ele-file-list">
+  <MainContent class="ele-file-list">
     <div v-if="selectionType === 'checkbox'" class="ele-file-list-header">
       <div class="ele-file-list-selection" @click.stop="handleCheckAllChange">
         <i
+          class="ele-file-list-checkbox"
           :class="[
-            'ele-file-list-checkbox',
             { 'is-checked': isCheckAll },
             { 'is-indeterminate': isIndeterminate }
           ]"
@@ -34,13 +34,13 @@
         </template>
       </FileGridItem>
     </div>
-  </ReceiverView>
+  </MainContent>
 </template>
 
 <script lang="ts" setup>
   import type { PropType } from 'vue';
   import { computed } from 'vue';
-  import ReceiverView from '../../ele-config-provider/components/receiver-view';
+  import MainContent from '../../ele-loading/components/main-content.vue';
   import FileGridItem from './file-grid-item.vue';
   import type {
     IconItem,

@@ -3,7 +3,7 @@
     <ElMenuItem
       v-if="!item.children || !item.children.length"
       v-bind="pick(item, ['route', 'disabled', 'class', 'style'])"
-      :key="(item.key || item.index || item.path) + '-' + tipDisabled"
+      :key="`${item.key || item.index || item.path}-${tipDisabled}`"
       :index="item.index || item.path"
       :class="[{ 'ele-menu-overflow': item.overflow }]"
       @click="handleMenuItemClick"
@@ -35,6 +35,7 @@
       <template #title>
         <ItemTitle
           :item="item"
+          @itemClick="handleGroupClick"
           @itemMouseenter="handleParentMouseenter"
           @itemMouseleave="handleParentMouseleave"
         >
@@ -101,6 +102,7 @@
       <template #title>
         <ItemTitle
           :item="item"
+          @itemClick="handleParentClick"
           @itemMouseenter="handleParentMouseenter"
           @itemMouseleave="handleParentMouseleave"
         >
@@ -147,7 +149,8 @@
     MenuTheme,
     PopupMenuTheme,
     PopupColorful,
-    MenuItemEvent
+    MenuItemEvent,
+    MenuItemClickType
   } from '../types';
 
   defineOptions({ name: 'MenuItems' });
@@ -176,7 +179,8 @@
   });
 
   const emit = defineEmits({
-    itemClick: (_item: MenuItem, _e: MouseEvent) => true,
+    itemClick: (_item: MenuItem, _e: MouseEvent, _type?: MenuItemClickType) =>
+      true,
     itemMouseenter: (_item: MenuItem, _e: MouseEvent) => true,
     itemMouseleave: (_item: MenuItem, _e: MouseEvent) => true,
     parentMouseenter: (_item: MenuItem, _e: MouseEvent) => true,
@@ -187,8 +191,22 @@
   const handleMenuItemClick = () => {};
 
   /** 菜单项点击事件 */
-  const handleItemClick: MenuItemEvent = (item, e) => {
-    emit('itemClick', item, e);
+  const handleItemClick: MenuItemEvent = (
+    item,
+    e,
+    type?: MenuItemClickType
+  ) => {
+    emit('itemClick', item, e, type);
+  };
+
+  /** 父级标题菜单项点击事件 */
+  const handleParentClick: MenuItemEvent = (item, e) => {
+    handleItemClick(item, e, 'parent');
+  };
+
+  /** 分组标题菜单项点击事件 */
+  const handleGroupClick: MenuItemEvent = (item, e) => {
+    handleItemClick(item, e, 'group');
   };
 
   /** 菜单项鼠标进入事件 */

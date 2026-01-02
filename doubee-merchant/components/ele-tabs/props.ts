@@ -40,7 +40,7 @@ export const tabsProps = {
   /** 是否自己处理页签点击事件 */
   handleClick: Boolean,
   /** 内部表格是否弹性布局 */
-  flexTable: Boolean
+  flexTable: [Boolean, String] as PropType<boolean | 'auto'>
 };
 
 export type TabsProps = ExtractPropTypes<typeof tabsProps>;

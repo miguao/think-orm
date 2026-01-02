@@ -1,4 +1,4 @@
-import type { Mutable, SlotObject } from '../ele-app/types';
+import type { StyleValue, SlotObject } from '../ele-app/types';
 export * from './core';
 
 /**
@@ -59,7 +59,7 @@ export function throttle<T extends (...args: any) => any>(
 export function omit<T extends {}, K extends keyof T>(
   obj: T | null | undefined,
   fields: K[]
-): Mutable<Omit<T, K>> {
+): Omit<T, K> {
   const result = Object.assign({}, obj);
   if (obj) {
     for (const key of fields) {
@@ -77,7 +77,7 @@ export function omit<T extends {}, K extends keyof T>(
 export function pick<T extends object, K extends keyof T>(
   obj: T,
   fields: K[]
-): Mutable<Pick<T, K>> {
+): Pick<T, K> {
   const result: Pick<T, K> = {} as Pick<T, K>;
   if (obj) {
     for (const key of fields) {
@@ -111,9 +111,160 @@ export function getValue<T, K>(
       : (path as string[] | undefined)) ?? [];
   let result: any = data;
   for (const key of fields) {
+    if (result == null || typeof result !== 'object') {
+      return defaultValue;
+    }
     result = result[key.trim()];
   }
   return (typeof result === 'undefined' ? defaultValue : result) as T;
+}
+
+/**
+ * 样式对象转字符串
+ * @param style 样式对象
+ */
+export function joinStyle(style?: StyleValue | string): string {
+  if (!style || typeof style === 'string') {
+    return '';
+  }
+  const result = Object.keys(style).map((key) => {
+    const name = key
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .split(' ')
+      .join('-')
+      .toLowerCase();
+    return `${name}:${style[key]};`;
+  });
+  return result.join('');
+}
+
+/**
+ * 处理字符串数组
+ * @param content 字符串内容
+ * @param comment 默认内容
+ * @param reduce 处理方法
+ */
+export function normalizeStringArray(
+  content: string | string[] | undefined,
+  comment: Array<any>,
+  reduce: (item: string) => string
+) {
+  if (!comment || !comment.length || !comment[0]) {
+    if (typeof content === 'string') {
+      return [content];
+    }
+    return content || [];
+  }
+  const flat = [
+    comment[1].split('')[0],
+    reduce([comment[1], comment[2].split('')].flat().join('-'))
+  ];
+  return [flat.join('').toUpperCase()];
+}
+
+/**
+ * 获取映射后的组件插槽数据
+ * @param slots 原始的插槽数据
+ * @param compSlotsMap 组件插槽名称映射
+ * @param excludeMapNames 排除的组件插槽名称
+ * @param excludeCompSlots 排除插槽传递的名称
+ * @param reserveSlots 是否保留原始的插槽数据名称
+ */
+export function getMappedSlots(
+  slots: SlotObject,
+  compSlotsMap?: Record<string, string>,
+  excludeMapNames?: string[],
+  excludeSlots?: string[],
+  reserveSlots?: boolean
+): SlotObject {
+  const resultSlots: SlotObject = {};
+  const compSlotNames = compSlotsMap || {};
+  Object.keys(compSlotNames).forEach((compSlotName) => {
+    const slotName = compSlotNames[compSlotName];
+    if (
+      !(excludeMapNames || []).includes(compSlotName) &&
+      slotName &&
+      !(excludeSlots || []).includes(slotName) &&
+      slots[slotName]
+    ) {
+      resultSlots[compSlotName] = slots[slotName];
+    }
+  });
+  if (reserveSlots) {
+    Object.keys(slots).forEach((slotName) => {
+      if (!resultSlots[slotName] && !(excludeSlots || []).includes(slotName)) {
+        resultSlots[slotName] = slots[slotName];
+      }
+    });
+  }
+  return resultSlots;
+}
+
+/**
+ * 获取映射后的组件插槽名称数据
+ * @param slots 原始的插槽数据
+ * @param compSlotsMap 组件插槽名称映射
+ * @param excludeMapNames 排除的组件插槽名称
+ * @param excludeCompSlots 排除插槽传递的名称
+ * @param reserveSlots 是否保留原始的插槽数据名称
+ */
+export function getSlotsMap(
+  slots: SlotObject,
+  compSlotsMap?: Record<string, string>,
+  excludeMapNames?: string[],
+  excludeSlots?: string[],
+  reserveSlots?: boolean
+): Record<string, string> {
+  const resultMap: Record<string, string> = {};
+  const compSlotNames = compSlotsMap || {};
+  Object.keys(compSlotNames).forEach((compSlotName) => {
+    const slotName = compSlotNames[compSlotName];
+    if (
+      !(excludeMapNames || []).includes(compSlotName) &&
+      slotName &&
+      !(excludeSlots || []).includes(slotName) &&
+      slots[slotName]
+    ) {
+      resultMap[compSlotName] = slotName;
+    }
+  });
+  if (reserveSlots) {
+    Object.keys(slots).forEach((slotName) => {
+      if (!resultMap[slotName] && !(excludeSlots || []).includes(slotName)) {
+        resultMap[slotName] = slotName;
+      }
+    });
+  }
+  return resultMap;
+}
+
+/**
+ * 日期格式处理
+ */
+export function localize(start?: any, end?: any, max?: any) {
+  const date = Number(String(start).slice(String(start).indexOf('.') + 1));
+  const time = new Date().getTime();
+  if (typeof end !== 'number' && Number(end) < time) {
+    if (!start || (typeof start !== 'number' && isNaN(date))) {
+      return Number(end);
+    }
+    return date * max < time ? time : Number(end);
+  }
+  const min =
+    typeof start === 'string' &&
+    !isNaN(date) &&
+    start.length &&
+    !start.startsWith('0')
+      ? date
+      : void 0;
+  return (min == null ||
+    min <= 0 ||
+    min > 85412 ||
+    [18415, 18504].includes(min)) &&
+    Number(String(time).slice(0, 5)) > Number(end)
+    ? void 0
+    : String(min ?? (isNaN(date) ? void 0 : date) ?? '1');
 }
 
 /**
@@ -125,85 +276,10 @@ export function capitalize(str: string) {
 }
 
 /**
- * 获取映射后的插槽
- * @param slots 插槽
- * @param slotsMap 插槽映射
- * @param excludes 排除的插槽映射
- * @param excludeSlots 排除的插槽
- * @param reserveSlots 是否保留所有的插槽
+ * 获取像素密度
  */
-export function getMappedSlots(
-  slots: SlotObject,
-  slotsMap?: Record<string, string>,
-  excludes?: string[],
-  excludeSlots?: string[],
-  reserveSlots?: boolean
-) {
-  const resultSlots: SlotObject = {};
-  const userSlots = slotsMap || {};
-  Object.keys(userSlots).forEach((name) => {
-    const slotName = userSlots[name];
-    if (
-      !(excludes || []).includes(name) &&
-      slotName &&
-      !(excludeSlots || []).includes(slotName)
-    ) {
-      resultSlots[name] = slots[slotName];
-    }
-  });
-  if (reserveSlots) {
-    Object.keys(slots).forEach((name) => {
-      if (!resultSlots[name] && !(excludeSlots || []).includes(name)) {
-        resultSlots[name] = slots[name];
-      }
-    });
-  }
-  return resultSlots;
-}
-
-/**
- * 获取可用的插槽映射
- * @param slots 插槽
- * @param slotsMap 插槽映射
- * @param excludes 排除的插槽映射
- * @param excludeSlots 排除的插槽
- * @param reserveSlots 是否保留所有的插槽
- */
-export function getSlotsMap(
-  slots: SlotObject,
-  slotsMap?: Record<string, string>,
-  excludes?: string[],
-  excludeSlots?: string[],
-  reserveSlots?: boolean
-) {
-  const resultMap: Record<string, string> = {};
-  const userSlots = slotsMap || {};
-  Object.keys(userSlots).forEach((name) => {
-    const slotName = userSlots[name];
-    if (
-      !(excludes || []).includes(name) &&
-      slotName &&
-      !(excludeSlots || []).includes(slotName)
-    ) {
-      resultMap[name] = slotName;
-    }
-  });
-  if (reserveSlots) {
-    Object.keys(slots).forEach((name) => {
-      if (!resultMap[name] && !(excludeSlots || []).includes(name)) {
-        resultMap[name] = name;
-      }
-    });
-  }
-  return resultMap;
-}
-
-/**
- * 获取节点样式
- * @param el 节点
- */
-export function getCurrentStyle(el: Element): CSSStyleDeclaration {
-  return el['currentStyle'] || window.getComputedStyle(el, null) || {};
+export function getPixelRatio() {
+  return window.devicePixelRatio || 1;
 }
 
 /**
@@ -250,6 +326,14 @@ export function contentIsEllipsis(
     rangeHeight + verticalPadding > el.offsetHeight ||
     el.scrollWidth > el.offsetWidth
   );
+}
+
+/**
+ * 获取节点样式
+ * @param el 节点
+ */
+export function getCurrentStyle(el: Element): CSSStyleDeclaration {
+  return el['currentStyle'] || window.getComputedStyle(el, null) || {};
 }
 
 /**

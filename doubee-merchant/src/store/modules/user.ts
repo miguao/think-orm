@@ -1,79 +1,81 @@
+import { defineStore } from 'pinia';
+import type { BadgeProps } from 'element-plus';
+import { toTree, mapTree } from 'ele-admin-plus';
+import type { MenuItem } from 'ele-admin-plus/es/ele-pro-layout/types';
+import type { UserMenuResult } from '@/utils/menu-util';
+import { formatUserMenu } from '@/utils/menu-util';
+import { getUserInfo } from '@/api/layout';
+import type { Merchant } from '@/api/layout/model';
+
 /**
  * 登录用户状态管理
  */
-import { defineStore } from 'pinia';
-import type { BadgeProps } from 'element-plus';
-import { toTree, mapTree, isExternalLink } from 'ele-admin-plus';
-import type { MenuItem } from 'ele-admin-plus/es/ele-pro-layout/types';
-import type { User } from '@/api/system/user/model';
-import type { Menu } from '@/api/system/menu/model';
-import type { DictionaryData } from '@/api/system/dictionary-data/model';
-import { getUserInfo } from '@/api/layout';
-/** 直接指定菜单数据 */
-const USER_MENUS: Menu[] | null = null;
-
-export interface UserState {
-  info: User | null;
-  menus: MenuItem[] | null;
-  authorities: (string | undefined)[];
-  roles: (string | undefined)[];
-  dicts: Record<string, DictionaryData[]>;
-}
-
 export const useUserStore = defineStore('user', {
-  state: (): UserState => ({
+  state: () => ({
     /** 当前登录用户的信息 */
-    info: null,
-    /** 当前登录用户的菜单 */
-    menus: null,
-    /** 当前登录用户的权限 */
-    authorities: [],
-    /** 当前登录用户的角色 */
-    roles: [],
-    /** 字典数据缓存 */
-    dicts: {}
+    info: null as Merchant | null | undefined,
+    /** 当前登录用户的菜单数据 */
+    menus: null as MenuItem[] | null | undefined,
+    /** 当前登录用户的按钮权限数据 */
+    authorities: [] as (string | undefined)[] | null | undefined,
+    /** 当前登录用户的角色权限数据 */
+    roles: [] as (string | undefined)[] | null | undefined
   }),
   actions: {
     /**
      * 请求登录用户的个人信息/权限/角色/菜单
+     * @param toRoute 路由守卫中要进入的路由
+     * @returns UserMenuResult 用户菜单结果
      */
-    async fetchUserInfo() {
-      const result = await getUserInfo().catch((e) => console.error(e));
-      if (!result) {
-        return {};
-      }
-      // 用户信息
-      this.setInfo(result);
-      // 用户权限
-      if (result.authorities) {
-        this.authorities =
-          result.authorities.map((d) => d.authority).filter((a) => !!a) ?? [];
-      }
-      // 用户角色
-      this.roles = result.roles?.map?.((d) => d.roleCode) ?? [];
-      // 用户菜单, 过滤掉按钮类型并转为children形式
-      const { menus, homePath } = formatMenus(
-        USER_MENUS ??
-          toTree({
-            data: result.authorities?.filter?.((d) => d.menuType !== 1),
-            idField: 'menuId',
-            parentIdField: 'parentId'
-          })
-      );
-      this.setMenus(menus);
-      return { menus, homePath };
+    async fetchUserInfo(toRoute: any): Promise<UserMenuResult> {
+      const userInfo = await getUserInfo(toRoute);
+      const userMenu = toTree({ data: userInfo.authorities, idField: 'menuId', parentIdField: 'parentId' });
+
+      this.setInfo(userInfo);
+      this.setAuthorities(userInfo?.authorities);
+      this.setRoles([userInfo?.merchantGroup?.id]);
+
+      const userMenuResult: UserMenuResult = formatUserMenu(userMenu);
+      this.setMenus(userMenuResult.menus);
+
+      return userMenuResult ?? {};
     },
     /**
      * 更新用户信息
      */
-    setInfo(value: User) {
-      this.info = value;
+    setInfo(data?: Merchant | null) {
+      if (data == null) {
+        this.info = null;
+      } else {
+        this.info = data;
+      }
     },
     /**
      * 更新菜单数据
      */
-    setMenus(menus: MenuItem[] | null) {
+    setMenus(menus?: MenuItem[] | null) {
       this.menus = menus;
+    },
+    /**
+     * 更新按钮权限数据
+     */
+    setAuthorities(authorities?: (string | undefined)[] | null) {
+      this.authorities = authorities;
+    },
+    /**
+     * 更新角色权限数据
+     */
+    setRoles(roles?: (string | undefined)[] | null) {
+      this.roles = roles;
+    },
+    /**
+     * 清空状态数据
+     */
+    clearData() {
+      this.setInfo(null);
+      this.setMenus(null);
+      this.setAuthorities(null);
+      this.setRoles(null);
     },
     /**
      * 更新菜单的徽章
@@ -102,69 +104,6 @@ export const useUserStore = defineStore('user', {
         }
         return m;
       });
-    },
-    /**
-     * 更新字典数据
-     */
-    setDicts(
-      value: DictionaryData[] | Record<string, DictionaryData[]>,
-      code?: string | null
-    ) {
-      if (code == null) {
-        this.dicts = value as Record<string, DictionaryData[]>;
-        return;
-      }
-      this.dicts[code] = value as DictionaryData[];
     }
   }
 });
-
-/**
- * 菜单数据处理为EleProLayout所需要的格式
- * @param data 菜单数据
- * @param childField 子级的字段名称
- */
-function formatMenus(data: Menu[], childField = 'children') {
-  let homePath: string | undefined;
-  let homeTitle: string | undefined;
-  const menus = mapTree<Menu, MenuItem>(
-    data,
-    (item) => {
-      const meta: MenuItem['meta'] =
-        typeof item.meta === 'string'
-          ? JSON.parse(item.meta || '{}')
-          : item.meta;
-      const menu: MenuItem = {
-        path: item.path,
-        component: item.component,
-        meta: { title: item.title, icon: item.icon, hide: !!item.hide, ...meta }
-      };
-      const children = item[childField]
-        ? item[childField].filter((d: any) => !(d.meta?.hide ?? d.hide))
-        : void 0;
-      if (!children?.length) {
-        if (!homePath && menu.path && !isExternalLink(menu.path)) {
-          homePath = menu.path;
-          homeTitle = menu.meta?.title;
-        }
-      } else {
-        const childPath = children[0].path;
-        if (childPath) {
-          if (!menu.redirect) {
-            menu.redirect = childPath;
-          }
-          if (!menu.path) {
-            menu.path = childPath.substring(0, childPath.lastIndexOf('/'));
-          }
-        }
-      }
-      if (!menu.path) {
-        console.error('菜单path不能为空且要唯一:', item);
-        return;
-      }
-      return menu;
-    },
-    childField
-  );
-  return { menus, homePath, homeTitle };
-}

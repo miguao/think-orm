@@ -1,3 +1,4 @@
+<!-- 附件上传 -->
 <template>
   <CommonUpload
     v-model="files"
@@ -21,6 +22,7 @@
     :beforeItemEdit="beforeItemEdit"
     :beforePreview="handleBeforePreview"
     :locale="locale"
+    :componentLang="componentLang"
   />
 </template>
 
@@ -39,7 +41,9 @@
     BeforeItemEdit,
     UploadLocale
   } from 'ele-admin-plus/es/ele-upload-list/types';
-  import CommonUpload from '../CommonUpload/index.vue';
+  import { isImageUrl } from '@/utils/common';
+  import type { CommonUploadLocale } from '@/components/CommonUpload/config';
+  import CommonUpload from '@/components/CommonUpload/index.vue';
 
   defineOptions({ name: 'FileUpload' });
 
@@ -85,6 +89,8 @@
       beforeItemEdit?: BeforeItemEdit;
       /** 国际化 */
       locale?: Partial<UploadLocale>;
+      /** 自定义文案 */
+      componentLang?: CommonUploadLocale;
     }>(),
     {
       fileLimit: 100,
@@ -113,12 +119,7 @@
 
   /** 判断是否是图片 */
   const isImage = (url?: string) => {
-    const parts = url ? url.split('.') : [];
-    const suffix =
-      parts.length <= 1 || (parts[0] === '' && parts.length === 2)
-        ? ''
-        : parts.pop()?.toLowerCase?.();
-    return suffix && ['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(suffix);
+    return isImageUrl(url);
   };
 
   /** 图片预览钩子 */

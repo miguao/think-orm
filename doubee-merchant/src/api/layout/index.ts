@@ -1,19 +1,21 @@
 import request from '@/utils/request';
 import type { ApiResult } from '@/api';
-import type { User } from '@/api/system/user/model';
-import type { UpdatePasswordParam } from './model';
+import type { UpdatePasswordParam, Merchant } from './model';
 
 /**
  * 获取当前登录用户的个人信息/菜单/权限/角色
+ * @param toRoute 路由守卫中要进入的路由
+ * @returns Promise<Merchant> 
  */
-export async function getUserInfo(): Promise<User> {
-  const res = await request.get<ApiResult<User>>(
-    '/merchant/api/personal/account/getMeInfo'
-  );
-  if (res.data.code === 200 && res.data.data) {
-    return res.data.data;
+export async function getUserInfo(toRoute: any): Promise<Merchant> {
+  const response = await request.get<ApiResult<Merchant>>('/personal/account/getMeInfo', {
+    toRoute
+  } as any);
+  if (response.data.code === 200 && response.data.data) {
+    return response.data.data;
   }
-  return Promise.reject(new Error(res.data.message));
+
+  return Promise.reject(new Error(response.data.message));
 }
 
 /**
@@ -32,8 +34,8 @@ export async function updatePassword(
 /**
  * 修改当前登录用户的个人信息
  */
-export async function updateUserInfo(data: User): Promise<User> {
-  const res = await request.put<ApiResult<User>>('/auth/user', data);
+export async function updateUserInfo(data: Merchant): Promise<Merchant> {
+  const res = await request.put<ApiResult<Merchant>>('/auth/user', data);
   if (res.data.code === 0 && res.data.data) {
     return res.data.data;
   }

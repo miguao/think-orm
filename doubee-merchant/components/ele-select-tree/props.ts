@@ -1,6 +1,6 @@
 import type { PropType, ExtractPropTypes } from 'vue';
 import type { TreeComponentProps } from 'element-plus/es/components/tree/src/tree.type';
-import { SelectProps as elSelectProps } from 'element-plus/es/components/select/src/select';
+import { selectProps as elSelectProps } from 'element-plus/es/components/select/src/select';
 import type { SelectTreeData, SelectTreeDataFunction } from './types';
 
 export const elTreeProps = {

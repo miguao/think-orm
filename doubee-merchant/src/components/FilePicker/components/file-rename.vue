@@ -2,7 +2,7 @@
   <EleModal
     :form="true"
     :width="460"
-    title="重命名"
+    :title="lang.renameTitle"
     :zIndex="baseIndex"
     :appendToBody="false"
     v-bind="modalProps || {}"
@@ -12,12 +12,14 @@
   >
     <ElForm ref="formRef" :model="form" labelWidth="82px" @submit.prevent="">
       <ElFormItem
-        :label="`${data && data.isDirectory ? '分组' : '文件'}名称`"
+        :label="isEditFile ? lang.fileName : lang.groupName"
         prop="name"
         :rules="[
           {
             required: true,
-            message: `请输入${data && data.isDirectory ? '分组' : '文件'}名称`,
+            message: isEditFile
+              ? lang.fileNamePlaceholder
+              : lang.groupNamePlaceholder,
             type: 'string',
             trigger: 'blur'
           }
@@ -27,15 +29,19 @@
           :maxlength="20"
           :clearable="true"
           v-model="form.name"
-          :placeholder="`请输入${data && data.isDirectory ? '分组' : '文件'}名称`"
+          :placeholder="
+            isEditFile ? lang.fileNamePlaceholder : lang.groupNamePlaceholder
+          "
         />
       </ElFormItem>
     </ElForm>
     <template #footer>
-      <ElButton @click="handleCancel">取消</ElButton>
-      <ElButton type="primary" :loading="loading" @click="save">
-        保存
-      </ElButton>
+      <BtnItems
+        :items="[
+          { preset: 'cancel', onClick: () => handleCancel() },
+          { preset: 'save', onClick: () => save() }
+        ]"
+      />
     </template>
   </EleModal>
 </template>
@@ -45,10 +51,13 @@
   import type { FormInstance } from 'element-plus';
   import type { EleModalProps } from 'ele-admin-plus/es/ele-app/plus';
   import { useFormData } from '@/utils/use-form-data';
-  import { updateUserFile } from '@/api/system/user-file';
-  import type { UserFile } from '@/api/system/user-file/model';
+  import BtnItems from '@/components/BtnItems/index.vue';
+  import type { FilePickerLocale, UserFile } from '../types';
+  import { renameGroupApi, renameFileApi } from '../config';
 
   const props = defineProps<{
+    /** 是否是操作文件 */
+    isEditFile?: boolean;
     /** 文件数据 */
     data?: UserFile | null;
     /** 弹窗参数 */
@@ -57,6 +66,8 @@
     baseIndex?: number;
     /** 消息提示组件 */
     messageIns?: any;
+    /** 组件文案 */
+    lang: FilePickerLocale;
   }>();
 
   const emit = defineEmits<{
@@ -86,8 +97,9 @@
       if (!valid) {
         return;
       }
+      const renameApi = props.isEditFile ? renameFileApi : renameGroupApi;
       loading.value = true;
-      updateUserFile({ ...form, id: props.data?.id })
+      renameApi({ ...form, id: props.data?.id })
         .then((msg) => {
           loading.value = false;
           props.messageIns?.success?.(msg);

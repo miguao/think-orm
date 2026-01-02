@@ -4,7 +4,8 @@
     v-bind="textProps"
     ref="textRef"
     :style="rootStyle"
-    :class="['ele-ellipsis', { 'is-multi-line': multiLine }]"
+    class="ele-ellipsis"
+    :class="{ 'is-multi-line': multiLine }"
     @mouseover="handleHover"
   >
     <slot></slot>

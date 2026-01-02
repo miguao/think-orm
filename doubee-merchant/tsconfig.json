@@ -29,12 +29,18 @@
     }
   },
   "include": [
+    "components/**/*.ts",
+    "components/**/*.d.ts",
+    "components/**/*.tsx",
+    "components/**/*.vue",
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "components.d.ts",
-    "vite.config.ts"
+    "vite.build.ts",
+    "vite.config.ts",
+    "node_modules/unplugin-vue-components/dist/*.d.ts"
   ],
-  "exclude": ["node_modules", "dist", "**/*.js"]
+  "exclude": ["node_modules", "dist", "es", "lib", "typings", "**/*.js"]
 }

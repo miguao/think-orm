@@ -1,9 +1,7 @@
 <template>
   <ElFormItem
-    :class="[
-      'ele-pro-form-footer',
-      { 'is-search-expand': autoFooterCol && searchExpand }
-    ]"
+    class="ele-pro-form-footer"
+    :class="{ 'is-search-expand': autoFooterCol && searchExpand }"
     v-bind="footerProps || {}"
     :labelWidth="
       typeof footerProps?.labelWidth === 'number'
@@ -12,18 +10,18 @@
     "
   >
     <template
-      v-for="(slotName, name) in getSlotsMap(
+      v-for="(slotName, compSlotName) in getSlotsMap(
         $slots,
         footerSlots,
         ['default'],
         ownSlots
       )"
-      #[name]="slotProps"
+      #[compSlotName]="slotProps"
     >
       <slot :name="slotName" v-bind="slotProps || {}"></slot>
     </template>
     <div class="ele-pro-form-footer-body" :style="footerStyle">
-      <slot name="footer">
+      <slot name="footer" :submitForm="handleSubmit" :resetForm="handleReset">
         <ElButton
           type="primary"
           v-bind="submitButtonProps || {}"
@@ -39,24 +37,28 @@
         v-if="showSearchExpand"
         type="primary"
         underline="never"
-        style="margin-left: 12px"
+        :style="{ marginLeft: '12px' }"
         v-bind="searchExpandButtonProps || {}"
         @click="toggleSearchExpand"
       >
         <template v-if="searchExpand">
           <span>{{ searchShrinkText }}</span>
-          <ElIcon style="vertical-align: -1px">
+          <ElIcon :style="{ verticalAlign: '-1px' }">
             <ArrowUp />
           </ElIcon>
         </template>
         <template v-else>
           <span>{{ searchExpandText }}</span>
-          <ElIcon style="vertical-align: -2px">
+          <ElIcon :style="{ verticalAlign: '-2px' }">
             <ArrowDown />
           </ElIcon>
         </template>
       </ElLink>
-      <slot name="footerExtra"></slot>
+      <slot
+        name="footerExtra"
+        :submitForm="handleSubmit"
+        :resetForm="handleReset"
+      ></slot>
     </div>
   </ElFormItem>
 </template>

@@ -127,10 +127,12 @@ export default defineComponent({
       column: Column,
       event: MouseEvent
     ) => {
-      if (
-        props.rowClickChecked &&
-        !isDisableRow(row, props.data.indexOf(row), props.columns)
-      ) {
+      const disabled = isDisableRow(
+        row,
+        props.data.indexOf(row),
+        props.columns
+      );
+      if (props.rowClickChecked && !disabled) {
         const selections = methods.getSelectionRows();
         if (
           props.rowClickChecked === 'smart' &&
@@ -142,7 +144,13 @@ export default defineComponent({
           toggleRowSelection(row);
         }
       }
-      events.onRowClick(row, column, event);
+      events.onRowClick(
+        row,
+        column,
+        event,
+        disabled,
+        methods.getSelectionRows()
+      );
     };
 
     /** 支持始终点击表头排序 */
@@ -566,14 +574,15 @@ export default defineComponent({
               ) : (
                 h(col.filterIcon)
               ),
-            default: (slotProps: any) =>
-              col.slot &&
-              !ownSlots.includes(col.slot) &&
-              slots[col.slot] &&
-              (!props.slotNormalize || slotProps?.$index != -1)
-                ? slots[col.slot]?.(slotProps)
-                : col.children && col.children.length
-                  ? col.children.map(renderTableColumn)
+            default:
+              col.children && col.children.length
+                ? () => col?.children?.map?.(renderTableColumn)
+                : col.slot && !ownSlots.includes(col.slot) && slots[col.slot]
+                  ? (slotProps: any) =>
+                      (!props.slotNormalize || slotProps?.$index != -1) &&
+                      col.slot
+                        ? slots[col.slot]?.(slotProps)
+                        : void 0
                   : void 0
           }}
         </ElTableColumn>

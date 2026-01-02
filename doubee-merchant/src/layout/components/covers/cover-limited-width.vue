@@ -1,7 +1,7 @@
 <template>
-  <div :style="{ height: '100%', display: 'flex', flexDirection: 'column' }">
+  <div :style="{ display: 'flex', flexDirection: 'column' }">
     <div
-      class="setting-layout-cover-bg-light"
+      class="ele-setting-layout-cover-bg-light"
       :style="{
         height: '14px',
         display: 'flex',
@@ -13,7 +13,7 @@
       <IconSkeleton :style="{ width: '8px', height: '8px' }" />
     </div>
     <div
-      class="setting-layout-cover-bg-light"
+      class="ele-setting-layout-cover-bg-light"
       :style="{
         flex: 1,
         width: '68%',

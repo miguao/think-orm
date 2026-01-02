@@ -1,11 +1,8 @@
 <!-- 树表格 -->
 <template>
   <div
-    :class="[
-      'ele-tree-table-wrapper',
-      { 'is-ping-left': isPingLeft },
-      { 'is-ping-right': isPingRight }
-    ]"
+    class="ele-tree-table-wrapper"
+    :class="[{ 'is-ping-left': isPingLeft }, { 'is-ping-right': isPingRight }]"
   >
     <div
       ref="tableRef"
@@ -23,8 +20,8 @@
                 width: `${indexColWidth}px`,
                 left: `${(num - 1) * indexColWidth}px`
               }"
+              class="ele-tree-table-cell is-tree-index is-fixed-left"
               :class="[
-                'ele-tree-table-cell is-tree-index is-fixed-left',
                 { 'is-placeholder': num !== 1 },
                 { 'is-fixed-left-last': num === depth }
               ]"
@@ -34,8 +31,8 @@
               v-for="col in columns || []"
               :key="col.key ?? col.prop"
               :style="col.style"
-              :class="col.class"
               class="ele-tree-table-cell"
+              :class="col.class"
             >
               <slot name="headerCell" :column="col">{{ col.label }}</slot>
             </div>

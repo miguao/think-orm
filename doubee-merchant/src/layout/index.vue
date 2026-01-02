@@ -5,6 +5,7 @@
     :collapse="collapse"
     :compact="compact"
     :maximized="maximized"
+    :expanded="expanded"
     :tab-bar="tabBar ? (tabInHeader ? 'header' : true) : false"
     :breadcrumb="layout === 'default' && (!tabBar || !tabInHeader)"
     :layout="layout"
@@ -19,7 +20,14 @@
     :fluid="fluid"
     :logo-in-header="logoInHeader"
     :colorful-icon="colorfulIcon"
-    :sidebox-menu-props="colorfulIcon ? { colorful: true } : void 0"
+    :sidebox-menu-props="{
+      colorful: colorfulIcon,
+      ...(sideboxMenuProps || {})
+    }"
+    :sidebar-menu-props="{
+      ...(sidebarMenuProps || {}),
+      colorful: sidebarLayout === 'mix' ? sidebarMenuProps?.colorful : void 0
+    }"
     :unique-opened="uniqueOpened"
     :fixed-home="fixedHome"
     :home-path="HOME_PATH"
@@ -28,24 +36,26 @@
     :i18n="i18n"
     :tab-sortable="!mobileDevice"
     :tab-context-menu="{
-      iconProps: { size: 15 },
       popperOptions: {
         strategy: 'fixed',
         modifiers: [{ name: 'offset', options: { offset: [0, 8] } }]
-      }
+      },
+      menuStyle: tabDropdownMenuStyle
     }"
-    :tab-context-menus="tabContext"
+    :tab-context-menus="getTabContext"
     :nav-trigger="layout === 'top' ? void 0 : menuItemTrigger"
     :box-trigger="menuItemTrigger"
     :keep-alive="pageKeepAlive"
     :transition-name="transitionName"
     :ellipsis-props="{ hideTimeout: 800 }"
-    :sidebarCustomStyle="sidebarCustomStyle"
-    :sideboxCustomStyle="sideboxCustomStyle"
-    :sideCustomStyle="sideCustomStyle"
-    :headerCustomStyle="headerCustomStyle"
-    :tabsCustomStyle="tabsCustomStyle"
-    :contentCustomStyle="contentCustomStyle"
+    :sidebar-custom-style="sidebarCustomStyle"
+    :sidebox-custom-style="sideboxCustomStyle"
+    :side-custom-style="sideCustomStyle"
+    :header-custom-style="headerCustomStyle"
+    :tabs-custom-style="tabsCustomStyle"
+    :content-custom-style="contentCustomStyle"
+    :class="layoutCustomClass"
+    :style="layoutCustomStyle"
     :responsive="responsive"
     @update:collapse="updateCollapse"
     @update:maximized="updateMaximized"
@@ -59,10 +69,7 @@
     <router-layout />
     <!-- logo -->
     <template #logo>
-      <img src="@/assets/logo.svg" style="width: 30px; height: 30px" />
-    </template>
-    <template #logoTitle>
-      <h1>{{ PROJECT_NAME }}</h1>
+      <img src="@/assets/logo.svg" style="width: 180px; height: 30px" />
     </template>
     <!-- 顶栏左侧按钮 -->
     <template #left="{ sidebar }">
@@ -73,69 +80,21 @@
           <MenuFoldOutlined v-else />
         </el-icon>
       </layout-tool>
-      <!-- 刷新 -->
-      <!-- <layout-tool
-        :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }"
-        @click="reloadPageTab()"
-      >
-        <el-icon style="transform: scale(1.09)">
-          <ReloadOutlined />
-        </el-icon>
-      </layout-tool> -->
     </template>
     <!-- 顶栏右侧按钮 -->
     <template #right>
-      <!-- 全屏切换 -->
-      <layout-tool class="hidden-sm-and-down" @click="toggleFullscreen">
-        <el-icon style="transform: scale(1.18)">
-          <CompressOutlined v-if="isFullscreen" style="stroke-width: 4" />
-          <ExpandOutlined v-else style="stroke-width: 4" />
-        </el-icon>
-      </layout-tool>
-      <!-- 语言切换 -->
-      <layout-tool :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }">
-        <i18n-icon :icon-style="{ transform: 'scale(1.15)' }" />
-      </layout-tool>
-      <!-- 消息通知 -->
-      <layout-tool :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }">
-        <header-notice />
-      </layout-tool>
-      <!-- 用户信息 -->
-      <layout-tool>
-        <header-user />
-      </layout-tool>
-      <!-- 夜间模式 -->
-      <layout-tool
-        ref="darkSwitchRef"
-        :class="[
-          'dark-switch',
-          { 'hidden-sm-and-down': tabBar && tabInHeader }
-        ]"
-      >
-        <el-switch
-          :active-action-icon="MoonOutlined"
-          :inactive-action-icon="SunOutlined"
-          :model-value="darkMode"
-          @update:modelValue="updateDarkMode"
-        />
-      </layout-tool>
-      <!-- 主题设置 -->
-      <!-- <layout-tool @click="openSetting">
-        <el-icon>
-          <MoreOutlined />
-        </el-icon>
-      </layout-tool> -->
+      <header-right v-model:isFullscreen="isFullscreen" />
     </template>
     <!-- 页签栏右侧下拉菜单 -->
     <template v-if="tabBar && !tabInHeader" #tabExtra="{ active }">
       <tab-dropdown
-        :items="tabExtra"
+        :items="getTabContext(void 0, active)"
         :dropdown-props="{
-          iconProps: { size: 15 },
           popperOptions: {
             strategy: 'fixed',
             modifiers: [{ name: 'offset', options: { offset: [12, 8] } }]
-          }
+          },
+          menuStyle: tabDropdownMenuStyle
         }"
         @menuClick="(key) => handleTabDropdownMenu(key, active)"
       />
@@ -155,74 +114,88 @@
     <template v-if="footer" #footer>
       <page-footer />
     </template>
+    <!-- 清新主题菜单图标使用图片 -->
+    <template v-if="isSimpleTheme" #icon="{ icon }">
+      <menu-icon :icon="icon" img-class="el-icon" />
+    </template>
+    <template v-if="isSimpleTheme" #tabHome>
+      <menu-icon
+        v-if="tabIcon"
+        icon="IconProHomeOutlined"
+        :img-style="{ margin: '0 4px 0 -4px', verticalAlign: '-5px' }"
+      />
+      <span>{{ t('layout.home') }}</span>
+    </template>
     <!-- 页签标题 -->
     <template #tabTitle="{ label, item }">
-      <el-icon
-        v-if="tabIcon && item.meta?.icon"
-        class="ele-tab-icon"
-        v-bind="item.meta?.props?.iconProps || {}"
-      >
-        <component :is="item.meta.icon" :style="item.meta?.props?.iconStyle" />
-      </el-icon>
-      <span :style="tabIcon && item.meta?.icon ? { paddingLeft: '4px' } : {}">
-        {{ label }}
-      </span>
+      <menu-icon
+        v-if="tabIcon"
+        :icon="item.meta?.icon"
+        :component-props="item.meta?.props?.iconProps"
+        component-class="ele-tab-icon"
+        :component-style="{ marginRight: '4px' }"
+        :icon-style="item.meta?.props?.iconStyle"
+        :img-style="{ margin: '0 4px 0 -4px', verticalAlign: '-5px' }"
+      />
+      <span>{{ label }}</span>
     </template>
   </ele-pro-layout>
-  <!-- 主题设置抽屉 -->
-  <setting-drawer v-model="settingVisible" />
+  <!-- 内容全屏退出按钮 -->
+  <el-icon
+    v-if="maximized ? (!tabBar || tabInHeader ? true : expanded) : false"
+    class="ele-layout-fullscreen-icon"
+    @click="updateMaximized(false)"
+  >
+    <FullscreenExitOutlined />
+  </el-icon>
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed, markRaw } from 'vue';
+  import { ref, markRaw } from 'vue';
   import { useRouter } from 'vue-router';
   import { storeToRefs } from 'pinia';
   import { useI18n } from 'vue-i18n';
-  import {
-    LayoutTool,
-    TabDropdown,
-    requestFullscreen,
-    exitFullscreen,
-    checkFullscreen,
-    EleMessage
-  } from 'ele-admin-plus';
+  import { LayoutTool, TabDropdown, checkFullscreen } from 'ele-admin-plus';
   import type {
     MenuI18n,
     TabItemEventOption,
     BodySizeChangeOption
   } from 'ele-admin-plus/es/ele-pro-layout/types';
   import type { DropdownItem } from 'ele-admin-plus/es/ele-dropdown/types';
+  import type { TabPaneItem } from 'ele-admin-plus/es/ele-tabs/types';
   import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     ReloadOutlined,
     ExpandOutlined,
     CompressOutlined,
-    MoreOutlined,
     CloseOutlined,
     ArrowLeftOutlined,
     ArrowRightOutlined,
     MinusCircleOutlined,
     CloseCircleOutlined,
-    MoonOutlined,
-    SunOutlined
+    FullscreenOutlined,
+    FullscreenExitOutlined,
+    ShareOutlined,
+    PinOutlined,
+    UnpinOutlined
   } from '@/components/icons';
-  import { PROJECT_NAME, HOME_PATH, REDIRECT_PATH } from '@/config/setting';
-  import { doWithTransition } from '@/utils/common';
+  import { HOME_PATH, REDIRECT_PATH } from '@/config/setting';
   import { useUserStore } from '@/store/modules/user';
+  import { useTabStore } from '@/store/modules/tab';
   import { useThemeStore } from '@/store/modules/theme';
   import { useMobileDevice } from '@/utils/use-mobile';
   import { usePageTab } from '@/utils/use-page-tab';
+  import { useIsSimpleTheme } from '@/components/IconSelect/util';
+  import MenuIcon from '@/components/IconSelect/components/menu-icon.vue';
   import RouterLayout from '@/components/RouterLayout/index.vue';
-  import HeaderUser from './components/header-user.vue';
-  import HeaderNotice from './components/header-notice.vue';
-  import I18nIcon from './components/i18n-icon.vue';
+  import HeaderRight from './components/header-right.vue';
   import PageFooter from './components/page-footer.vue';
-  import SettingDrawer from './components/setting-drawer.vue';
+  const PROJECT_NAME = import.meta.env.VITE_APP_NAME;
 
   defineOptions({ name: 'Layout' });
 
-  const { push } = useRouter();
+  const { push, resolve } = useRouter();
   const { t, locale } = useI18n();
   const {
     addPageTab,
@@ -232,21 +205,26 @@
     removeRightPageTab,
     removeOtherPageTab,
     reloadPageTab,
-    setPageTabs
+    setPageTabs,
+    setPageTab
   } = usePageTab();
   const { mobileDevice } = useMobileDevice();
   const userStore = useUserStore();
+  const tabStore = useTabStore();
   const themeStore = useThemeStore();
 
   /** 菜单数据 */
   const { menus } = storeToRefs(userStore);
 
+  /** 页签数据 */
+  const { tabs, fixedHome, pageKeepAlive } = storeToRefs(tabStore);
+
   /** 布局风格 */
   const {
-    tabs,
     collapse,
     compact,
     maximized,
+    expanded,
     tabBar,
     layout,
     sidebarLayout,
@@ -262,7 +240,6 @@
     colorfulIcon,
     transitionName,
     uniqueOpened,
-    fixedHome,
     tabInHeader,
     sidebarCustomStyle,
     sideboxCustomStyle,
@@ -270,72 +247,22 @@
     headerCustomStyle,
     tabsCustomStyle,
     contentCustomStyle,
+    layoutCustomClass,
+    layoutCustomStyle,
+    sidebarMenuProps,
+    sideboxMenuProps,
     roundedTheme,
     menuItemTrigger,
     footer,
     tabIcon,
-    pageKeepAlive,
-    responsive,
-    darkMode
+    responsive
   } = storeToRefs(themeStore);
+
+  /** 是否是清新主题 */
+  const { isSimpleTheme } = useIsSimpleTheme();
 
   /** 是否全屏 */
   const isFullscreen = ref(false);
-
-  /** 是否显示主题设置抽屉 */
-  const settingVisible = ref(false);
-
-  /** 页签右键菜单 */
-  const tabContext = computed<DropdownItem[]>(() => {
-    return [
-      {
-        title: t('layout.tabs.reload'),
-        command: 'reload',
-        icon: markRaw(ReloadOutlined),
-        iconStyle: { transform: 'scale(0.98)' }
-      },
-      {
-        title: t('layout.tabs.close'),
-        command: 'close',
-        icon: markRaw(CloseOutlined)
-      },
-      {
-        title: t('layout.tabs.closeLeft'),
-        command: 'left',
-        icon: markRaw(ArrowLeftOutlined),
-        divided: true
-      },
-      {
-        title: t('layout.tabs.closeRight'),
-        command: 'right',
-        icon: markRaw(ArrowRightOutlined)
-      },
-      {
-        title: t('layout.tabs.closeOther'),
-        command: 'other',
-        icon: markRaw(MinusCircleOutlined),
-        divided: true
-      },
-      {
-        title: t('layout.tabs.closeAll'),
-        command: 'all',
-        icon: markRaw(CloseCircleOutlined)
-      }
-    ];
-  });
-
-  /** 页签栏右侧下拉菜单 */
-  const tabExtra = computed<DropdownItem[]>(() => {
-    const isMax = maximized.value;
-    return [
-      {
-        title: t(`layout.tabs.${isMax ? 'fullscreenExit' : 'fullscreen'}`),
-        command: 'fullscreen',
-        icon: isMax ? markRaw(CompressOutlined) : markRaw(ExpandOutlined)
-      },
-      ...tabContext.value
-    ];
-  });
 
   /** 侧栏折叠切换 */
   const updateCollapse = (value: boolean) => {
@@ -348,8 +275,15 @@
   };
 
   /** 内容区全屏切换 */
-  const updateMaximized = (value: boolean) => {
-    themeStore.setValue('maximized', value).catch((e) => console.error(e));
+  const updateMaximized = async (value: boolean, fullscreen?: boolean) => {
+    try {
+      if (value) {
+        await themeStore.setValue('expanded', !!fullscreen);
+      }
+      await themeStore.setValue('maximized', value);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   /** 页签点击事件 */
@@ -369,20 +303,98 @@
     isFullscreen.value = checkFullscreen();
   };
 
-  /** 全屏切换 */
-  const toggleFullscreen = () => {
-    if (isFullscreen.value) {
-      exitFullscreen();
-      isFullscreen.value = false;
-      return;
+  /** 页签右键菜单 */
+  const getTabContext = (item?: TabPaneItem, active?: string) => {
+    const items: DropdownItem[] = [
+      {
+        title: t('layout.tabs.reload'),
+        command: 'reload',
+        icon: markRaw(ReloadOutlined),
+        iconStyle: { transform: 'scale(0.98)' }
+      },
+      {
+        title: t('layout.tabs.close'),
+        command: 'close',
+        icon: markRaw(CloseOutlined)
+      }
+    ];
+    if (maximized.value) {
+      items.push({
+        title: t('layout.tabs.maximizedExit'),
+        command: 'maximizedExit',
+        icon: markRaw(CompressOutlined),
+        divided: true
+      });
+    } else {
+      items.push({
+        title: t('layout.tabs.maximized'),
+        command: 'maximized',
+        icon: markRaw(ExpandOutlined),
+        iconStyle: { transform: 'scale(0.96)' },
+        divided: true
+      });
     }
-    try {
-      requestFullscreen();
-      isFullscreen.value = true;
-    } catch (e) {
-      console.error(e);
-      EleMessage.error({ message: '您的浏览器不支持全屏模式', plain: true });
+    if (!tabInHeader.value) {
+      items.push({
+        title: t('layout.tabs.fullscreen'),
+        command: 'fullscreen',
+        icon: markRaw(FullscreenOutlined),
+        iconStyle: { transform: 'scale(0.98)' }
+      });
     }
+    items.push({
+      title: t('layout.tabs.closeLeft'),
+      command: 'left',
+      icon: markRaw(ArrowLeftOutlined),
+      divided: true
+    });
+    items.push({
+      title: t('layout.tabs.closeRight'),
+      command: 'right',
+      icon: markRaw(ArrowRightOutlined)
+    });
+    items.push({
+      title: t('layout.tabs.closeOther'),
+      command: 'other',
+      icon: markRaw(MinusCircleOutlined)
+    });
+    items.push({
+      title: t('layout.tabs.closeAll'),
+      command: 'all',
+      icon: markRaw(CloseCircleOutlined)
+    });
+    const tab =
+      item || (active ? tabs.value.find((t) => t.key === active) : void 0);
+    const home = (tab as any)?.home ?? tab?.meta?.home;
+    if (
+      tab &&
+      !(fixedHome.value && home) &&
+      !(tabs.value.length === 1 && home)
+    ) {
+      if (tab.closable) {
+        items.push({
+          title: t('layout.tabs.pin'),
+          command: 'pin',
+          icon: markRaw(PinOutlined),
+          divided: true
+        });
+      } else {
+        items.push({
+          title: t('layout.tabs.unpin'),
+          command: 'unpin',
+          icon: markRaw(UnpinOutlined),
+          divided: true
+        });
+      }
+    }
+    items.push({
+      title: t('layout.tabs.blank'),
+      command: 'blank',
+      icon: markRaw(ShareOutlined),
+      iconStyle: { transform: 'scale(0.9)' },
+      divided: !items[items.length - 1]?.divided
+    });
+    return items;
   };
 
   /** 页签右键菜单点击事件 */
@@ -400,6 +412,18 @@
       removeOtherPageTab({ key, active });
     } else if (command === 'all') {
       removeAllPageTab({ key, active });
+    } else if (command === 'maximized') {
+      updateMaximized(true);
+    } else if (command === 'maximizedExit') {
+      updateMaximized(false);
+    } else if (command === 'fullscreen') {
+      updateMaximized(true, true);
+    } else if (command === 'blank') {
+      window.open(resolve(item?.fullPath || '/').href);
+    } else if (command === 'pin') {
+      setPageTab({ path: item?.fullPath || key, closable: false });
+    } else if (command === 'unpin') {
+      setPageTab({ path: item?.fullPath || key, closable: true });
     }
   };
 
@@ -407,11 +431,21 @@
   const handleTabDropdownMenu = (command: string, active: string) => {
     if (command === 'reload') {
       reloadPageTab();
-    } else if (command === 'fullscreen') {
-      updateMaximized(!maximized.value);
+    } else if (command === 'blank') {
+      window.open(location.href);
     } else {
       handleTabContextMenu({ command, key: active, active });
     }
+  };
+
+  /** 页签栏下拉菜单样式调整 */
+  const tabDropdownMenuStyle = {
+    '--ele-dropdown-item-padding': '0 18px',
+    '--ele-dropdown-item-height': '30px',
+    '--ele-dropdown-item-margin': '0px',
+    '--ele-dropdown-divider-margin': '3px 0',
+    '--ele-dropdown-icon-margin': '0 12px 0 -4px',
+    '--ele-dropdown-icon-size': '15px'
   };
 
   /** 菜单标题国际化 */
@@ -426,103 +460,4 @@
     }
     return menu?.meta?.title;
   };
-
-  /** 打开主题设置抽屉 */
-  const openSetting = () => {
-    settingVisible.value = true;
-  };
-
-  /** 暗黑主题切换开关 */
-  const darkSwitchRef = ref<any>(null);
-
-  /** 切换暗黑模式 */
-  const updateDarkMode = (isDark?: any) => {
-    doWithTransition(
-      () => themeStore.setValue('darkMode', isDark),
-      darkSwitchRef.value?.$el?.querySelector?.('.el-switch__action'),
-      !isDark
-    );
-  };
 </script>
-
-<style lang="scss" scoped>
-  @use 'element-plus/theme-chalk/src/mixins/function.scss' as *;
-
-  /* 暗黑主题切换开关 */
-  .dark-switch {
-    padding: 0 6px;
-    position: relative;
-
-    :deep(.el-switch) {
-      height: 22px;
-      line-height: 22px;
-      position: static;
-
-      .el-switch__core {
-        #{getCssVarName('switch', 'off-color')}: getCssVar(
-          'border-color',
-          'extra-light'
-        );
-        #{getCssVarName('switch', 'on-color')}: getCssVar(
-          'border-color',
-          'extra-light'
-        );
-        height: 22px;
-        border-radius: 11px;
-        border: 1px solid getCssVar('border-color');
-
-        .el-switch__action {
-          color: getCssVar('text-color', 'regular');
-          background: getCssVar('bg-color');
-          width: 18px;
-          height: 18px;
-          font-size: 12px;
-          left: 1.35px;
-        }
-      }
-
-      &.is-checked .el-switch__core .el-switch__action {
-        left: calc(100% - 19.35px);
-      }
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-      }
-    }
-  }
-</style>
-
-<style lang="scss">
-  @use 'element-plus/theme-chalk/src/mixins/function.scss' as *;
-
-  /* 暗色和主色顶栏下暗黑主题切换开关 */
-  .ele-admin-header.is-dark .dark-switch .el-switch,
-  .ele-admin-header.is-primary .dark-switch .el-switch {
-    .el-switch__core {
-      border: none;
-      background: rgba(255, 255, 255, 0.38);
-
-      .el-switch__action {
-        left: 2.65px;
-      }
-    }
-
-    &.is-checked .el-switch__core .el-switch__action {
-      left: calc(100% - 20px);
-    }
-  }
-
-  .ele-admin-header.is-dark .dark-switch .el-switch .el-switch__core {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  /* 主色顶栏 logo 增加白色滤镜 */
-  .ele-admin-header.is-primary .ele-admin-logo img {
-    filter: contrast(0%) brightness(1000%);
-  }
-</style>

@@ -46,7 +46,7 @@
     EleCrudProps,
     EleProFormBuilderProps,
     EleProFormProps
-  } from '../../ele-app/plus';
+  } from '../../ele-app/plusx';
   import EleModal from '../../ele-modal/index.vue';
   import EleProFormBuilder from '../../ele-pro-form-builder/index.vue';
   import { defaultHeaderRightTools } from '../../ele-pro-form-builder/util';

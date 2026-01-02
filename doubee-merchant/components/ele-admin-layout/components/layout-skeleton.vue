@@ -1,20 +1,22 @@
 <!-- 骨架 -->
 <template>
-  <div :class="['ele-admin-layout', { 'is-row-direction': !isHeaderLogo }]">
+  <div class="ele-admin-layout" :class="{ 'is-row-direction': !isHeaderLogo }">
     <slot v-if="isHeaderLogo" name="head"></slot>
     <slot v-else name="side"></slot>
     <ReceiverView
-      :class="['ele-admin-main', { 'is-row-direction': isHeaderLogo }]"
-      :wrapPosition="false"
+      class="ele-admin-main"
+      :class="{ 'is-row-direction': isHeaderLogo }"
     >
-      <slot v-if="isHeaderLogo" name="side"></slot>
-      <slot v-else name="head"></slot>
-      <div class="ele-admin-body">
-        <slot name="tabs"></slot>
-        <div class="ele-admin-wrapper">
-          <slot name="body"></slot>
+      <template #default="slotProps">
+        <slot v-if="isHeaderLogo" name="side" :param="slotProps"></slot>
+        <slot v-else name="head" :param="slotProps"></slot>
+        <div class="ele-admin-body">
+          <slot name="tabs" :param="slotProps"></slot>
+          <div class="ele-admin-wrapper">
+            <slot name="body" :param="slotProps"></slot>
+          </div>
         </div>
-      </div>
+      </template>
     </ReceiverView>
     <slot></slot>
   </div>

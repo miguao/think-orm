@@ -2,7 +2,7 @@
 <template>
   <Teleport :to="teleportTo" :disabled="teleportDisabled">
     <ElDrawer
-      v-bind="$attrs"
+      v-bind="{ ...$attrs, ...pick($props, elDrawerPropKeys) }"
       ref="drawerRef"
       :modelValue="modelValue"
       :appendToBody="false"
@@ -49,49 +49,61 @@
           </div>
         </div>
       </template>
-      <ReceiverView
-        :wrapPosition="false"
-        class="ele-drawer-body"
-        :style="bodyStyle"
-      >
-        <slot></slot>
-      </ReceiverView>
       <template v-if="$slots.footer" #footer>
         <div class="ele-drawer-footer" :style="footerStyle">
           <slot name="footer"></slot>
         </div>
       </template>
+      <MainContent
+        class="ele-drawer-body"
+        :class="[{ 'is-form': form }, drawerBodyClass]"
+        :style="bodyStyle"
+      >
+        <slot></slot>
+      </MainContent>
+      <LoadingSpinner
+        v-bind="loadingProps || {}"
+        :loading="compLoading || loading"
+        :plain="true"
+      />
     </ElDrawer>
   </Teleport>
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed, onActivated, onDeactivated } from 'vue';
+  import { ref, computed, watch, onActivated, onDeactivated } from 'vue';
   import { ElDrawer, ElIcon, drawerEmits } from 'element-plus';
   import { CloseOutlined } from '../icons/index';
   import type { ElDrawerInstance } from '../ele-app/el';
-  import ReceiverView from '../ele-config-provider/components/receiver-view';
-  import { useLayoutState } from '../ele-pro-layout/util';
+  import { pick } from '../utils/common';
+  import LoadingSpinner from '../ele-loading/components/loading-spinner.vue';
+  import MainContent from '../ele-loading/components/main-content.vue';
+  import { useLayoutState, useResponsive } from '../ele-pro-layout/util';
   import { getModalContainer } from '../ele-modal/util';
-  import { drawerProps } from './props';
+  import { drawerProps, elDrawerPropKeys } from './props';
 
-  defineOptions({ name: 'EleDrawer' });
+  defineOptions({ name: 'EleDrawer', inheritAttrs: false });
 
   const props = defineProps(drawerProps);
 
   const emit = defineEmits(drawerEmits);
 
   const layoutState = useLayoutState();
+  const isResponsive = useResponsive(props);
 
   /** 抽屉组件 */
   const drawerRef = ref<ElDrawerInstance>(null);
 
   /** 适配组件缓存 */
-  const isActivated = ref<boolean>(true);
+  const isActivated = ref<boolean>(!props.isDeactivated);
 
   /** 抽屉类名 */
   const drawerClass = computed<string>(() => {
     const classes: string[] = ['ele-drawer'];
+    // 开启布局响应
+    if (isResponsive.value) {
+      classes.push('ele-drawer-responsive');
+    }
     // 关闭状态
     if (!props.modelValue) {
       classes.push('ele-drawer-closed');
@@ -103,6 +115,20 @@
     // 限制在内部区域
     if (props.inner) {
       classes.push('ele-drawer-inner');
+    }
+    // 异步内容组件时加载状态
+    if (props.compLoading && !props.loading) {
+      classes.push('ele-drawer-comp-loading');
+    }
+    // 内部表格弹性布局
+    if (props.flexTable === 'auto') {
+      classes.push('ele-drawer-flex-auto-table');
+    } else if (props.flexTable) {
+      classes.push('ele-drawer-flex-table');
+    }
+    // 在内容区添加自定义底栏
+    if (props.customFooter) {
+      classes.push('ele-drawer-custom-footer');
     }
     // 自定义类名
     if (props.modalClass) {
@@ -169,6 +195,14 @@
   const handleDrawerCloseAutoFocus = () => {
     emit('closeAutoFocus');
   };
+
+  /** 同步属性 */
+  watch(
+    () => props.isDeactivated,
+    (deactivated) => {
+      isActivated.value = !deactivated;
+    }
+  );
 
   onActivated(() => {
     isActivated.value = true;

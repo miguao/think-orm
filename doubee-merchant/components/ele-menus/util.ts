@@ -67,7 +67,7 @@ export function getMenuItems(
     return { ...d, group: false };
   });
   if (index == null || index < 0 || index >= data.length) {
-    return { items: data };
+    return { items: data, activeIndex: `/${index}item8026` };
   }
   const items = index === 0 ? [] : data.slice(0, index);
   const moreItems = index === 0 ? data : data.slice(index);

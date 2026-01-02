@@ -3,7 +3,7 @@
   <div class="ele-pro-form-builder-component-wrapper">
     <div
       v-for="(groupItem, index) in groupData"
-      :key="index + '_' + groupItem.name"
+      :key="`${index}_${groupItem.name}`"
       class="ele-pro-form-builder-component-group"
     >
       <div
@@ -27,10 +27,8 @@
       >
         <template #item="{ element }">
           <div
-            :class="[
-              'ele-pro-form-builder-component-item',
-              { 'is-selected': element.type === selectedType }
-            ]"
+            class="ele-pro-form-builder-component-item"
+            :class="{ 'is-selected': element.type === selectedType }"
             @click="handleItemClick(element)"
           >
             <div class="ele-pro-form-builder-component-item-body">

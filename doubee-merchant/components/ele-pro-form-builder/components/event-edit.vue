@@ -28,7 +28,7 @@
           v-if="codeTips"
           class="ele-pro-form-builder-code-edit-icon"
           @mousedown.stop=""
-          @touchstart.stop=""
+          @touchstart.stop.passive=""
         >
           <QuestionCircleOutlined />
           <div class="ele-pro-form-builder-code-edit-tip">

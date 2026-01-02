@@ -34,8 +34,10 @@ export const cardProps = {
   collapse: Boolean,
   /** 折叠按钮样式 */
   collapseIconStyle: Object as PropType<StyleValue>,
+  /** 是否是搜索表单卡片 */
+  searchForm: Boolean,
   /** 内部表格是否弹性布局 */
-  flexTable: Boolean
+  flexTable: [Boolean, String] as PropType<boolean | 'auto'>
 };
 
 export type CardProps = ExtractPropTypes<typeof cardProps>;

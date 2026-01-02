@@ -1,7 +1,7 @@
 <template>
   <div
+    class="ele-icon-color-secondary"
     :class="[
-      'ele-icon-color-secondary',
       { 'ele-icon-border-color-primary': checked },
       { 'ele-icon-border-color-base': !checked },
       { 'ele-icon-bg-white': checked }

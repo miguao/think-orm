@@ -1,7 +1,7 @@
 <template>
   <div
+    class="ele-check-card"
     :class="[
-      'ele-check-card',
       { 'is-bordered': bordered },
       { 'is-checked': checked },
       { 'is-disabled': disabled }

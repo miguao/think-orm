@@ -1,37 +1,42 @@
 <!-- 加载组件 -->
 <template>
+  <LoadingSpinner
+    v-if="plain"
+    v-bind="$attrs"
+    :loading="loading"
+    :text="text"
+    :blur="blur"
+    :size="size"
+    :spinnerStyle="spinnerStyle"
+    :textStyle="textStyle"
+    :plain="true"
+  >
+    <slot v-if="$slots.spinner" name="spinner"></slot>
+  </LoadingSpinner>
   <ReceiverView
+    v-else
+    v-bind="$attrs"
     v-loading="isCircle && loading"
     :element-loading-text="isCircle ? text : void 0"
     :element-loading-background="isCircle ? background : void 0"
     :element-loading-spinner="isCircle ? spinner : void 0"
     :element-loading-svg-view-box="isCircle ? svgViewBox : void 0"
-    :class="['ele-loading', { 'ele-loading-show': loading }]"
+    class="ele-loading"
+    :class="{ 'ele-loading-show': loading }"
   >
     <slot></slot>
-    <div
+    <LoadingSpinner
       v-if="!isCircle"
-      v-show="loading"
-      :style="spinnerStyle"
-      :class="[
-        'ele-loading-spinner',
-        { 'ele-loading-blur': blur },
-        { 'ele-loading-small': size === 'small' },
-        { 'ele-loading-large': size === 'large' }
-      ]"
+      :loading="loading"
+      :text="text"
+      :blur="blur"
+      :size="size"
+      :spinnerStyle="spinnerStyle"
+      :textStyle="textStyle"
+      :plain="false"
     >
-      <slot name="spinner">
-        <div class="ele-loading-dot">
-          <i></i>
-          <i></i>
-          <i></i>
-          <i></i>
-        </div>
-      </slot>
-      <div v-if="text" class="ele-loading-text" :style="textStyle">
-        {{ text }}
-      </div>
-    </div>
+      <slot v-if="$slots.spinner" name="spinner"></slot>
+    </LoadingSpinner>
   </ReceiverView>
 </template>
 
@@ -39,9 +44,10 @@
   import { computed } from 'vue';
   import { vLoading } from 'element-plus';
   import ReceiverView from '../ele-config-provider/components/receiver-view';
+  import LoadingSpinner from './components/loading-spinner.vue';
   import { loadingProps } from './props';
 
-  defineOptions({ name: 'EleLoading' });
+  defineOptions({ name: 'EleLoading', inheritAttrs: false });
 
   const props = defineProps(loadingProps);
 

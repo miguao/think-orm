@@ -1,54 +1,51 @@
 import request from '@/utils/request';
-import { setToken } from '@/utils/token-util';
 import type { ApiResult } from '@/api';
-import type { LoginParam, LoginResult } from './model';
+import type { LoginParam, LoginResult, CaptchaResult } from './model';
 
 /**
  * 账密登录
- * @param data 登录表单
- * @returns
+ * @param data 账密登录参数
+ * @returns Promise<ApiResult<LoginResult>>
  */
 export async function passwordLogin(data: LoginParam) {
   const response = await request.post<ApiResult<LoginResult>>(
-    '/merchant/api/auth/passwordLogin',
+    '/auth/passwordLogin',
     data
   );
   if (response.data.code === 200) {
-    setToken('Bearer ' + response.data.data?.token, true);
-    return response.data.message;
+    return response.data;
   }
 
   return Promise.reject(new Error(response.data.message));
 }
 
 /**
- * 验证码登录
- * @param data 登录表单
- * @returns
+ * 登录
  */
-export async function verificationCodeLogin(data: LoginParam) {
-  const response = await request.post<ApiResult<LoginResult>>(
-    '/merchant/api/auth/verificationCodeLogin',
-    data
-  );
-  if (response.data.code === 200) {
-    setToken('Bearer ' + response.data.data?.token, true);
-    return response.data.message;
+export async function login(data: LoginParam) {
+  const res = await request.post<ApiResult<LoginResult>>('/login', data);
+  if (res.data.code === 0) {
+    return res.data;
   }
-
-  return Promise.reject(new Error(response.data.message));
+  return Promise.reject(new Error(res.data.message));
 }
 
 /**
- * 发送登录验证码
- * @param username 用户名
- * @returns
+ * 获取验证码
  */
-export async function sendLoginVerificationCode(username: string) {
-  const response = await request.post<ApiResult<LoginResult>>(
-    '/merchant/api/auth/sendLoginVerificationCode',
-    { username: username }
-  );
+export async function getCaptcha() {
+  const res = await request.get<ApiResult<CaptchaResult>>('/captcha');
+  if (res.data.code === 0 && res.data.data) {
+    return res.data.data;
+  }
+  return Promise.reject(new Error(res.data.message));
+}
+
+/**
+ * 退出登录
+ */
+export async function logout() {
+  const response = await request.post<ApiResult<unknown>>('/personal/account/logout');
   if (response.data.code === 200) {
     return response.data.message;
   }

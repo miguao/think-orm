@@ -94,7 +94,7 @@
 
   /** 获取列唯一值 */
   const getKey = (column: VirtualColumn, columnIndex: number) => {
-    return props.headerIndex + '-' + String(column.key ?? columnIndex);
+    return `${props.headerIndex}-${String(column.key ?? columnIndex)}`;
   };
 
   /** 获取列筛选值 */

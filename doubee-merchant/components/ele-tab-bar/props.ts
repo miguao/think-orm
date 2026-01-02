@@ -7,7 +7,7 @@ import type { TabBarItem, TabBarType } from './types';
  */
 export const tabBarProps = {
   /** 标签选中 */
-  modelValue: String,
+  modelValue: [String, Number, Boolean, Object],
   /** 标签数据 */
   items: Array as PropType<TabBarItem[]>,
   /** 标签项样式 */
@@ -23,5 +23,7 @@ export type TabBarProps = ExtractPropTypes<typeof tabBarProps>;
  */
 export const tabBarEmits = {
   /** 更新标签选中 */
-  'update:modelValue': (_value?: any) => true
+  'update:modelValue': (_value?: any) => true,
+  /** 选中改变事件 */
+  change: (_active?: any) => true
 };

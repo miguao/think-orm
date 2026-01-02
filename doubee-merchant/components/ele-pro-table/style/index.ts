@@ -7,7 +7,6 @@ import 'element-plus/es/components/select/style/index';
 import 'element-plus/es/components/option/style/index';
 import 'element-plus/es/components/button/style/index';
 import '../../ele-tooltip/style/index';
-import '../../ele-dropdown/style/index';
 import '../../ele-tool/style/index';
 import '../../ele-toolbar/style/index';
 import '../../ele-loading/style/index';

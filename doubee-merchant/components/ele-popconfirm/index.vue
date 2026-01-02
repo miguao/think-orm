@@ -15,9 +15,14 @@
       <slot name="reference"></slot>
     </template>
     <template #body>
-      <div :class="['ele-popover-body', bodyClass]" :style="bodyStyle">
+      <div class="ele-popover-body" :class="bodyClass" :style="bodyStyle">
         <div class="ele-popconfirm-main">
-          <ElIcon v-if="!hideIcon" v-bind="iconOptions">
+          <ElIcon
+            v-if="!hideIcon"
+            v-bind="iconProps || {}"
+            :style="iconColor ? { color: iconColor } : void 0"
+            class="ele-popconfirm-icon"
+          >
             <component v-if="icon" :is="icon" :style="iconStyle" />
             <QuestionCircleFilled v-else :style="iconStyle" />
           </ElIcon>
@@ -79,8 +84,6 @@
 <script lang="ts" setup>
   import { ref, computed } from 'vue';
   import { useLocale, ElIcon, ElButton } from 'element-plus';
-  import type { ElIconProps } from '../ele-app/el';
-  import type { ClassValues } from '../ele-app/types';
   import type { EleTooltipInstance, EleTooltipProps } from '../ele-app/plus';
   import { pick } from '../utils/common';
   import EleTooltip from '../ele-tooltip/index.vue';
@@ -112,26 +115,6 @@
       classes.push(props.popperClass);
     }
     options.popperClass = classes.join(' ');
-    return options;
-  });
-
-  /** 图标属性 */
-  const iconOptions = computed<ElIconProps>(() => {
-    const options: ElIconProps = props.iconProps || {};
-    if (props.iconColor) {
-      options.style = Object.assign({ color: props.iconColor }, options.style);
-    }
-    const classes: ClassValues = ['ele-popconfirm-icon'];
-    if (options.class) {
-      if (Array.isArray(options.class)) {
-        options.class.forEach((c) => {
-          classes.push(c);
-        });
-      } else {
-        classes.push(options.class);
-      }
-    }
-    options.class = classes;
     return options;
   });
 

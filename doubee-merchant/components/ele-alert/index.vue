@@ -3,8 +3,9 @@
   <Transition :name="transitionName">
     <div
       v-if="visible"
+      v-bind="$attrs"
+      class="ele-alert"
       :class="[
-        'ele-alert',
         { 'is-success': type === 'success' },
         { 'is-warning': type === 'warning' },
         { 'is-error': type === 'error' },
@@ -65,7 +66,7 @@
   } from '../icons/index';
   import { alertProps, alertEmits } from './props';
 
-  defineOptions({ name: 'EleAlert' });
+  defineOptions({ name: 'EleAlert', inheritAttrs: false });
 
   const props = defineProps(alertProps);
 

@@ -25,11 +25,8 @@
         <ElIcon
           v-for="item in screenItems"
           :key="item.value"
-          :class="[
-            'ele-pro-form-builder-header-tool',
-            'ele-pro-form-builder-screen-icon',
-            { 'is-active': item.value === previewScreen }
-          ]"
+          class="ele-pro-form-builder-header-tool ele-pro-form-builder-screen-icon"
+          :class="{ 'is-active': item.value === previewScreen }"
           @click="handleUpdatePreviewScreen(item.value)"
         >
           <component :is="item.icon" :style="item.iconStyle" />
@@ -72,7 +69,10 @@
     getFormInitValue
   } from '../../ele-pro-form/util';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleProFormInstance, EleProFormProps } from '../../ele-app/plus';
+  import type {
+    EleProFormInstance,
+    EleProFormProps
+  } from '../../ele-app/plusx';
   import EleProForm from '../../ele-pro-form/index.vue';
   import { screenItems } from '../util';
   import { deepCloneObject } from './build-core';

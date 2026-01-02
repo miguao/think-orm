@@ -63,7 +63,11 @@
     <slot :active="modelValue" :selected="selected"></slot>
     <template #dropdown>
       <slot v-if="!items && $slots.dropdown" name="dropdown"></slot>
-      <ElDropdownMenu v-else :style="menuStyle">
+      <ElDropdownMenu
+        v-else
+        :style="menuStyle"
+        :class="{ 'ele-dropdown-icon-small': iconSize === 'small' }"
+      >
         <template v-if="items">
           <ElDropdownItem
             v-for="item in items"

@@ -1,6 +1,7 @@
-import type { PropType, ExtractPropTypes } from 'vue';
+import type { PropType, ExtractPropTypes, EmitsToProps } from 'vue';
 import { dialogProps, dialogEmits } from 'element-plus';
 import type { StyleValue } from '../ele-app/types';
+import type { EleLoadingProps } from '../ele-app/plus';
 import type { Resizable, MoveOut, Position } from './types';
 
 /**
@@ -16,6 +17,10 @@ export const modalProps = {
     type: Boolean,
     default: true
   },
+  /** 弹窗高度 */
+  height: [String, Number],
+  /** 弹窗最大高度 */
+  maxHeight: [String, Number],
   /** 是否可以拖出边界 */
   moveOut: [Boolean, Array] as PropType<MoveOut>,
   /** 是否可以拉伸 */
@@ -59,11 +64,23 @@ export const modalProps = {
   resizeIconStyle: Object as PropType<StyleValue>,
   /** 主体类名 */
   modalBodyClass: String,
+  /** 是否是失活状态 */
+  isDeactivated: Boolean,
+  /** 异步内容组件时加载状态 */
+  compLoading: Boolean,
+  /** 加载状态 */
+  loading: Boolean,
+  /** 加载组件属性 */
+  loadingProps: Object as PropType<EleLoadingProps>,
   /** 是否开启响应式 */
   responsive: {
     type: Boolean,
     default: null
   },
+  /** 内部表格弹性布局 */
+  flexTable: [Boolean, String] as PropType<boolean | 'auto'>,
+  /** 是否是在内容区添加自定义底栏 */
+  customFooter: Boolean,
   /** 是否是表单弹窗 */
   form: Boolean
 };
@@ -79,9 +96,15 @@ export const modalEmits = {
   'update:fullscreen': (_fullscreen: boolean) => true
 };
 
-export type DialogPropKeys = Array<keyof typeof dialogProps>;
+export type ModalEmitsProps = EmitsToProps<typeof modalEmits>;
+
+export type ModalPropsAndEmits = ModalProps & ModalEmitsProps;
 
 /**
  * 弹窗组件属性名
  */
-export const dialogPropKeys: DialogPropKeys = Object.keys(dialogProps) as any;
+export type DialogPropKeys = (keyof typeof dialogProps)[];
+
+export const dialogPropKeys: DialogPropKeys = Object.keys(dialogProps).filter(
+  (k) => !['top', 'closeIcon'].includes(k)
+) as any;

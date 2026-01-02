@@ -1,25 +1,34 @@
 <template>
   <ElScrollbar class="ele-icon-select-body">
-    <div class="ele-icon-select-grid" :style="gridStyle">
+    <div
+      class="ele-icon-select-grid"
+      :class="{ 'is-loose': tooltip === 'static' }"
+      :style="gridStyle"
+    >
       <div
         v-for="(d, i) in data"
-        :key="i + '-' + d"
-        :class="['ele-icon-select-item', { 'is-active': icon && d === icon }]"
-        :title="tooltip ? void 0 : d"
+        :key="`${i}-${d}`"
+        class="ele-icon-select-item"
+        :class="{ 'is-active': icon && d === icon }"
+        :title="!tooltip || tooltip === 'static' ? d : void 0"
         :style="itemStyle"
         @click="handleItemClick(d)"
         @mouseover="(e: MouseEvent) => handleItemHover(d, e)"
       >
         <slot name="icon" :icon="d" :prefix="false"></slot>
+        <div v-if="tooltip === 'static'" class="ele-icon-select-item-name">
+          {{ d }}
+        </div>
       </div>
     </div>
     <div v-if="!data || !data.length" class="ele-icon-select-empty">
       <ElEmpty :imageSize="60" v-bind="emptyProps || {}" />
     </div>
     <EleTooltip
+      v-if="tooltip === true"
       placement="top"
       :offset="6"
-      :teleported="false"
+      :teleported="popperType !== 'popper'"
       v-bind="tooltipProps || {}"
       :visible="tooltipVisible"
       :content="tooltipContent"
@@ -38,6 +47,8 @@
   import type { StyleValue } from '../../ele-app/types';
   import type { ElEmptyProps } from '../../ele-app/el';
   import type { EleTooltipProps } from '../../ele-app/plus';
+  import type { PopperType } from '../../ele-basic-select/types';
+  import type { ItemTooltip } from '../types';
 
   defineOptions({ name: 'IconGrid' });
 
@@ -52,7 +63,7 @@
     /** 空组件属性 */
     emptyProps: Object as PropType<ElEmptyProps>,
     /** 是否显示提示 */
-    tooltip: Boolean,
+    tooltip: [Boolean, String] as PropType<ItemTooltip>,
     /** 提示属性 */
     tooltipProps: Object as PropType<EleTooltipProps>,
     /** 气泡是否展开 */
@@ -60,7 +71,9 @@
     /** 网格样式 */
     gridStyle: Object as PropType<StyleValue>,
     /** 图标样式 */
-    itemStyle: Object as PropType<StyleValue>
+    itemStyle: Object as PropType<StyleValue>,
+    /** 下拉组件类型 */
+    popperType: String as PropType<PopperType>
   });
 
   const emit = defineEmits({
@@ -88,7 +101,11 @@
 
   /** 打开提示 */
   const handleItemHover = (icon: string, e: MouseEvent) => {
-    if (props.tooltip && props.popperVisible && icon) {
+    if (
+      props.tooltip === true &&
+      (props.popperVisible || props.popperType === 'default') &&
+      icon
+    ) {
       virtualRef.value = e.currentTarget;
       tooltipContent.value = icon;
       tooltipVisible.value = true;

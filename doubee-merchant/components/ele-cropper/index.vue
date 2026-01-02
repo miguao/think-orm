@@ -1,6 +1,6 @@
 <!-- 图片裁剪 -->
 <template>
-  <div :class="['ele-cropper', { 'is-responsive': isResponsive }]">
+  <div class="ele-cropper" :class="{ 'is-responsive': isResponsive }">
     <div class="ele-cropper-main">
       <!-- 裁剪区域 -->
       <div class="ele-cropper-image" :style="{ height }">
@@ -40,16 +40,14 @@
 </template>
 
 <script lang="ts" setup>
-  import type { Ref } from 'vue';
   import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
   import Cropper from 'cropperjs';
+  import type { EleCropperPreviewInstance } from '../ele-app/plusx';
   import { useResponsive } from '../ele-pro-layout/util';
   import CropperPreview from './components/cropper-preview.vue';
   import CropperTools from './components/cropper-tools.vue';
   import type { CurrentState, CropperOptions } from './types';
   import { cropperProps, cropperEmits } from './props';
-  import type PreviewType from './components/cropper-preview.vue';
-  export type PreviewInstance = InstanceType<typeof PreviewType> | null;
 
   defineOptions({ name: 'EleCropper' });
 
@@ -64,7 +62,7 @@
   const imageRef = ref<HTMLImageElement | null>(null);
 
   /** 预览组件 */
-  const previewRef: Ref<PreviewInstance> = ref<PreviewInstance>(null);
+  const previewRef = ref<EleCropperPreviewInstance>(null);
 
   /** 当前实例数据 */
   const state: CurrentState = {

@@ -1,18 +1,21 @@
 <!-- 卡片 -->
 <template>
   <div
+    class="ele-card"
     :class="[
-      'ele-card',
       { 'is-border': bordered },
       { 'is-shadow': shadow === 'always' },
       { 'is-hover-shadow': shadow === 'hover' },
       { 'is-collapse': isCollapse },
-      { 'is-flex-table': flexTable }
+      { 'is-flex-table': flexTable && flexTable !== 'auto' },
+      { 'is-flex-auto-table': flexTable === 'auto' },
+      { 'is-search-form': searchForm }
     ]"
   >
     <div
       v-if="header || $slots.header || $slots.extra"
-      :class="['ele-card-header', headerClass]"
+      class="ele-card-header"
+      :class="headerClass"
       :style="headerStyle"
       @click="handleHeaderClick"
     >
@@ -44,7 +47,8 @@
     >
       <div
         v-show="!isCollapse"
-        :class="['ele-card-body', bodyClass]"
+        class="ele-card-body"
+        :class="bodyClass"
         :style="bodyStyle"
       >
         <slot></slot>
@@ -52,7 +56,8 @@
     </Transition>
     <div
       v-if="footer || $slots.footer"
-      :class="['ele-card-footer', footerClass]"
+      class="ele-card-footer"
+      :class="footerClass"
       :style="footerStyle"
     >
       <slot name="footer">{{ footer }}</slot>

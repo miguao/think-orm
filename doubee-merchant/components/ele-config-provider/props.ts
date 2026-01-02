@@ -1,4 +1,4 @@
-import type { PropType, ExtractPropTypes, InjectionKey } from 'vue';
+import type { PropType, ExtractPropTypes } from 'vue';
 import type { EleMessageBoxOptions } from '../ele-app/plus';
 import type {
   TableGlobalConfig,
@@ -25,8 +25,3 @@ export const configProviderProps = {
 };
 
 export type ConfigProviderProps = ExtractPropTypes<typeof configProviderProps>;
-
-/**
- * 全局配置键名
- */
-export const CONFIG_KEY = Symbol('config') as InjectionKey<ConfigProviderProps>;

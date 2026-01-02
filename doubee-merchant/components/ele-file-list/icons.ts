@@ -85,7 +85,16 @@ export const localSmallIcons: IconItem[] = [
   },
   {
     icon: '/ele-file-list/ic_file_picture_sm.png',
-    suffixes: ['.png', '.jpg', '.jpeg', '.gif', '.bmp']
+    suffixes: [
+      '.png',
+      '.jpg',
+      '.jpeg',
+      '.gif',
+      '.bmp',
+      '.svg',
+      '.webp',
+      '.tiff'
+    ]
   },
   {
     icon: '/ele-file-list/ic_file_fonts_sm.png',

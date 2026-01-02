@@ -69,10 +69,10 @@
 
 <script lang="ts" setup>
   import { computed, watch } from 'vue';
-  import { EleMessage } from 'ele-admin-plus';
-  import { storeToRefs } from 'pinia';
-  import { useUserStore } from '@/store/modules/user';
-  import { listDictionaryData } from '@/api/system/dictionary-data';
+  import { useDictStore } from '@/store/modules/dict';
+  import { useGetDictData } from '@/utils/use-dict-data';
+  const codeField = 'dictDataCode';
+  const nameField = 'dictDataName';
 
   defineOptions({ name: 'DictData' });
 
@@ -114,9 +114,9 @@
     type: [String, Number, Boolean, Array]
   });
 
-  /** 已缓存的字典 */
-  const userStore = useUserStore();
-  const { dicts } = storeToRefs(userStore);
+  /** 已缓存的字典数据 */
+  const dictStore = useDictStore();
+  const { getDictData } = useGetDictData();
 
   interface DataItem extends Record<string, any> {
     key: string;
@@ -127,19 +127,22 @@
   /** 字典的数据 */
   const data = computed<DataItem[]>(() => {
     const code = props.code;
-    const list = (code ? dicts.value[code] : void 0) || [];
-    return list.map((item) => ({
-      ...item,
-      key: item.dictDataCode,
-      value: (item.dictDataCode == null
-        ? null
-        : props.valueType === 'number'
-          ? Number(item.dictDataCode)
-          : props.valueType === 'boolean'
-            ? Boolean(item.dictDataCode)
-            : item.dictDataCode) as any,
-      label: item.dictDataName
-    }));
+    const list = (code ? dictStore.getDicts(code) : void 0) || [];
+    return list.map((item) => {
+      const code = item[codeField];
+      return {
+        ...item,
+        key: code,
+        value: (code == null
+          ? null
+          : props.valueType === 'number'
+            ? Number(code)
+            : props.valueType === 'boolean'
+              ? Boolean(code)
+              : code) as any,
+        label: item[nameField]
+      };
+    });
   });
 
   /** 绑定值对应的数据 */
@@ -165,17 +168,9 @@
   watch(
     () => props.code,
     (code) => {
-      if (!code || dicts.value[code] != null) {
-        return;
+      if (code) {
+        getDictData(code);
       }
-      userStore.setDicts([], code);
-      listDictionaryData({ dictCode: code })
-        .then((list) => {
-          userStore.setDicts(list, code);
-        })
-        .catch((e) => {
-          EleMessage.error({ message: e.message, plain: true });
-        });
     },
     { immediate: true }
   );

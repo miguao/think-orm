@@ -30,7 +30,7 @@
   import { ref, watch } from 'vue';
   import { ElButton } from 'element-plus';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleCrudProps } from '../../ele-app/plus';
+  import type { EleCrudProps } from '../../ele-app/plusx';
   import EleModal from '../../ele-modal/index.vue';
   import { deepCloneObject } from '../../ele-pro-form-builder/components/build-core';
   import CodeEditer from '../../ele-pro-form-builder/components/code-editer.vue';

@@ -1,12 +1,13 @@
 <!-- 标签栏 -->
 <template>
-  <div :class="['ele-tab-bar', { 'is-plain': type === 'plain' }]">
+  <div class="ele-tab-bar" :class="{ 'is-plain': type === 'plain' }">
     <div class="ele-tab-nav">
       <div
         v-for="item in items"
         :key="item.value"
         :style="itemStyle"
-        :class="['ele-tab-item', { 'is-active': item.value === modelValue }]"
+        class="ele-tab-item"
+        :class="{ 'is-active': item.value === modelValue }"
         @click="handleItemClick(item)"
       >
         <slot name="label" :label="item.label" :item="item">
@@ -32,6 +33,7 @@
   const handleItemClick = (item: TabBarItem) => {
     if (props.modelValue !== item.value) {
       emit('update:modelValue', item.value);
+      emit('change', item.value);
     }
   };
 </script>

@@ -1,15 +1,13 @@
 <!-- 树表格行 -->
 <template>
-  <div :class="['ele-tree-table-row', { 'is-collapse': isCollapse }]">
+  <div class="ele-tree-table-row" :class="{ 'is-collapse': isCollapse }">
     <div
       :style="{
         width: `${indexColWidth}px`,
         left: `${(level - 1) * indexColWidth}px`
       }"
-      :class="[
-        'ele-tree-table-cell is-tree-index is-fixed-left',
-        { 'is-fixed-left-last': depth === level }
-      ]"
+      class="ele-tree-table-cell is-tree-index is-fixed-left"
+      :class="{ 'is-fixed-left-last': depth === level }"
     >
       {{ rowIndex + 1 }}
     </div>
@@ -23,14 +21,13 @@
             left: `${(level - 1 + num) * indexColWidth}px`,
             textAlign: hasChildren && num === 1 ? 'left' : void 0
           }"
-          :class="[
-            'ele-tree-table-cell is-tree-index is-placeholder is-fixed-left',
-            { 'is-fixed-left-last': num === depth - level }
-          ]"
+          class="ele-tree-table-cell is-tree-index is-placeholder is-fixed-left"
+          :class="{ 'is-fixed-left-last': num === depth - level }"
         >
           <div
             v-if="hasChildren && num === 1"
-            :class="['ele-tree-table-expand', { 'is-collapse': isCollapse }]"
+            class="ele-tree-table-expand"
+            :class="{ 'is-collapse': isCollapse }"
             @click="handleExpandClick"
           >
             <ElIcon>

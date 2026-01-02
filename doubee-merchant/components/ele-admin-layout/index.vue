@@ -19,8 +19,8 @@
     <template #head>
       <div
         v-if="!isSideLayout"
+        class="ele-admin-header"
         :class="[
-          'ele-admin-header',
           { 'is-dark': isDarkHeader },
           { 'is-primary': isPrimaryHeader },
           { 'is-ghost': isGhostHeader },
@@ -142,8 +142,8 @@
     <template #side>
       <div
         v-if="!isTopLayout"
+        class="ele-admin-side"
         :class="[
-          'ele-admin-side',
           { 'is-fixed': isFixedSidebar },
           { 'show-placeholder': isFixedSidebar && isHeaderLogo },
           { 'is-collapse': !isMobile && !isBoxSidebar && isCollapseSidebar },
@@ -159,8 +159,8 @@
         <!-- 双侧栏一级 -->
         <div
           v-if="isMixSidebar"
+          class="ele-admin-sidebox"
           :class="[
-            'ele-admin-sidebox',
             { 'is-dark': isDarkSidebar },
             { 'is-ghost': isGhostSidebar },
             { 'show-divider': !isCollapseSidebar && !isBoxSidebar },
@@ -224,8 +224,8 @@
         <!-- 侧栏 -->
         <div
           v-if="!isBoxSidebar"
+          class="ele-admin-sidebar"
           :class="[
-            'ele-admin-sidebar',
             { 'is-dark': isMixSidebar ? isDarkMixSidebar : isDarkSidebar },
             { 'is-ghost': isGhostSidebar },
             { 'is-mix': isMixSidebar },
@@ -314,7 +314,7 @@
       </div>
     </template>
     <!-- 页签栏 -->
-    <template #tabs>
+    <template #tabs="{ param }">
       <LayoutTabs
         v-if="tabBar && !showHeaderTabs"
         :tabs="tabs"
@@ -333,7 +333,7 @@
         ]"
         :style="tabsCustomStyle"
         @tabClick="handleTabClick"
-        @tabRemove="handleTabRemove"
+        @tabRemove="(name) => handleTabRemove(name, !!param?.label)"
         @tabContextMenu="handleTabContextMenu"
         @tabSortChange="handleTabSortChange"
       >
@@ -348,7 +348,7 @@
       </LayoutTabs>
     </template>
     <!-- 内容区域 -->
-    <template #body>
+    <template #body="{ param }">
       <div
         ref="contentRef"
         class="ele-admin-content"
@@ -365,7 +365,7 @@
         v-bind="backTop === true ? {} : backTop"
       />
       <!-- 模态框容器 -->
-      <div ref="modalsRef" class="ele-admin-modals"></div>
+      <div ref="modalsRef" class="ele-admin-modals" :data-id="param?.key"></div>
     </template>
     <!-- 移动端风格遮罩层 -->
     <div class="ele-admin-mask" @click="updateCollapse()"></div>
@@ -385,7 +385,7 @@
   import { ElScrollbar } from 'element-plus';
   import { useTimer } from '../utils/hook';
   import type { EleMenusInstance } from '../ele-app/plus';
-  import type { MenuItem } from '../ele-menus/types';
+  import type { MenuItem, MenuItemClickType } from '../ele-menus/types';
   import type { TabPaneItem, TabEventOption } from '../ele-tabs/types';
   import EleMenus from '../ele-menus/index.vue';
   import EleBreadcrumb from '../ele-breadcrumb/index.vue';
@@ -557,6 +557,7 @@
   const sidebarScrollToActive = () => {
     stopSidebarMenuTimer();
     if (
+      !(props.fixedBody || props.fixedSidebar) ||
       !props.menuScrollToActive ||
       sidebarMenuRef.value == null ||
       isCollapseMobile.value ||
@@ -573,6 +574,7 @@
   const sideboxScrollToActive = () => {
     stopSideboxMenuTimer();
     if (
+      !(props.fixedBody || props.fixedSidebar) ||
       !props.menuScrollToActive ||
       sideboxMenuRef.value == null ||
       isCollapseMobile.value
@@ -608,8 +610,12 @@
   };
 
   /** 顶栏子菜单项点击事件 */
-  const handleHeadMenuItemClick = (item: MenuItem, e: MouseEvent) => {
-    emit('headMenuItemClick', item, e);
+  const handleHeadMenuItemClick = (
+    item: MenuItem,
+    e: MouseEvent,
+    type?: MenuItemClickType
+  ) => {
+    emit('headMenuItemClick', item, e, type);
   };
 
   /** 顶栏子菜单项鼠标进入事件 */
@@ -642,8 +648,12 @@
   };
 
   /** 双侧栏一级子菜单项点击事件 */
-  const handleBoxMenuItemClick = (item: MenuItem, e: MouseEvent) => {
-    emit('boxMenuItemClick', item, e);
+  const handleBoxMenuItemClick = (
+    item: MenuItem,
+    e: MouseEvent,
+    type?: MenuItemClickType
+  ) => {
+    emit('boxMenuItemClick', item, e, type);
   };
 
   /** 双侧栏一级子菜单项鼠标进入事件 */
@@ -677,8 +687,12 @@
   };
 
   /** 侧栏子菜单项点击事件件 */
-  const handleSideMenuItemClick = (item: MenuItem, e: MouseEvent) => {
-    emit('sideMenuItemClick', item, e);
+  const handleSideMenuItemClick = (
+    item: MenuItem,
+    e: MouseEvent,
+    type?: MenuItemClickType
+  ) => {
+    emit('sideMenuItemClick', item, e, type);
   };
 
   /** 侧栏鼠标进入事件 */
@@ -697,8 +711,10 @@
   };
 
   /** 页签移除事件 */
-  const handleTabRemove = (name: string) => {
-    emit('tabRemove', name);
+  const handleTabRemove = (name: string, closeable?: boolean) => {
+    if (closeable == null || closeable) {
+      emit('tabRemove', name);
+    }
   };
 
   /** 页签右键菜单点击事件 */

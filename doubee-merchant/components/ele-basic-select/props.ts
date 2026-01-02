@@ -2,7 +2,12 @@ import type { PropType, ExtractPropTypes } from 'vue';
 import type { StyleValue } from '../ele-app/types';
 import type { ElInputProps, ElTagProps } from '../ele-app/el';
 import type { EleTooltipProps } from '../ele-app/plus';
-import type { SelectValue, SelectedItem } from './types';
+import type {
+  SelectValue,
+  SelectedItem,
+  PopperType,
+  PopperProps
+} from './types';
 
 /**
  * 属性
@@ -15,6 +20,12 @@ export const basicSelectProps = {
       return null;
     }
   },
+  /** 单选选中展示文本 */
+  selectedLabel: String,
+  /** 多选选中数据 */
+  selected: Array as PropType<SelectedItem[]>,
+  /** 下拉组件是否显示 */
+  visible: Boolean,
   /** 是否多选 */
   multiple: Boolean,
   /** 是否禁用 */
@@ -25,28 +36,56 @@ export const basicSelectProps = {
   clearable: Boolean,
   /** 无选中时提示文本 */
   placeholder: String,
-  /** 单选选中展示文本 */
-  selectedLabel: String,
-  /** 多选选中数据 */
-  selected: Array as PropType<SelectedItem[]>,
   /** 多选标签最大显示数量 */
   maxTagCount: Number,
   /** 多选标签最大显示文本长度 */
   maxTagTextLength: Number,
   /** 多选标签类型 */
-  tagType: String as PropType<ElTagProps['type']>,
+  tagType: {
+    type: String as PropType<ElTagProps['type']>,
+    default: 'info'
+  },
   /** 是否在输入框获得焦点后自动弹出选项菜单 */
   automaticDropdown: Boolean,
   /** 是否可以筛选 */
   filterable: Boolean,
-  /** 下拉框是否显示 */
-  visible: Boolean,
-  /** 是否将下拉框插入 body */
-  teleported: Boolean,
-  /** 始终渲染下拉框 */
-  persistent: Boolean,
+  /** 自定义类名 */
+  selectClass: String,
+  /** 自定义样式 */
+  selectStyle: [Object, String] as PropType<StyleValue | string>,
+  /** 自定义输入框样式 */
+  inputStyle: Object as PropType<StyleValue>,
+  /** 自定义多选标签容器样式 */
+  selectTagsStyle: Object as PropType<StyleValue>,
+  /** 下拉组件类名 */
+  popperClass: String,
+  /** 下拉组件宽度 */
+  popperWidth: [Number, String],
+  /** 下拉组件高度 */
+  popperHeight: [Number, String],
+  /** 下拉组件类型 */
+  popperType: String as PropType<PopperType>,
+  /** 下拉组件属性 */
+  popperProps: Object as PropType<PopperProps>,
+  /** 下拉组件插槽对应名称 */
+  popperSlots: Object as PropType<Record<string, string>>,
+  /** 下拉组件标题 */
+  popperTitle: String,
+  /** 是否将下拉组件插入 body */
+  teleported: {
+    type: Boolean,
+    default: true
+  },
+  /** 始终渲染下拉组件 */
+  persistent: {
+    type: Boolean,
+    default: true
+  },
   /** 下拉框位置 */
-  placement: String as PropType<EleTooltipProps['placement']>,
+  placement: {
+    type: String as PropType<EleTooltipProps['placement']>,
+    default: 'bottom-start'
+  },
   /** 下拉框渐变动画 */
   transition: {
     type: String,
@@ -54,18 +93,11 @@ export const basicSelectProps = {
   },
   /** popper.js 参数 */
   popperOptions: Object as PropType<EleTooltipProps['popperOptions']>,
-  /** 下拉框类名 */
-  popperClass: String,
-  /** 下拉框宽度 */
-  popperWidth: [Number, String],
-  /** 自定义类名 */
-  selectClass: String,
-  /** 自定义样式 */
-  selectStyle: Object as PropType<StyleValue>,
-  /** 自定义输入框样式 */
-  inputStyle: Object as PropType<StyleValue>,
-  /** 自定义多选标签容器样式 */
-  selectTagsStyle: Object as PropType<StyleValue>
+  /** 是否开启响应式 */
+  responsive: {
+    type: Boolean,
+    default: null
+  }
 };
 
 export type BasicSelectProps = ExtractPropTypes<typeof basicSelectProps>;

@@ -1,6 +1,3 @@
-import 'element-plus/es/components/button/style/index';
-import 'element-plus/es/components/link/style/index';
-import 'element-plus/es/components/divider/style/index';
 import 'element-plus/es/components/input/style/index';
 import 'element-plus/es/components/tree/style/index';
 import 'element-plus/es/components/empty/style/index';
@@ -10,8 +7,8 @@ import '../../ele-card/style/index';
 import '../../ele-pro-table/style/index';
 import '../../ele-pro-form/style/index';
 import '../../ele-modal/style/index';
-import '../../ele-loading/style/index';
 import '../../ele-split-panel/style/index';
-import '../../ele-popconfirm/style/index';
+import '../../ele-loading/style/index';
+import '../../ele-buttons/style/index';
 import '../../ele-app/style/message/index';
 import './index.scss';

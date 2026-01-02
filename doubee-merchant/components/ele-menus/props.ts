@@ -7,7 +7,8 @@ import type {
   PopupMenuTheme,
   PopupColorful,
   EllipsisProps,
-  TextEllipsisTooltip
+  TextEllipsisTooltip,
+  MenuItemClickType
 } from './types';
 
 /**
@@ -60,7 +61,8 @@ export const menuPropKeys: MenuPropKeys = Object.keys(menuProps) as any;
 export const menusEmits = {
   ...menuEmits,
   /** 子菜单项点击事件 */
-  itemClick: (_item: MenuItem, _e: MouseEvent) => true,
+  itemClick: (_item: MenuItem, _e: MouseEvent, _type?: MenuItemClickType) =>
+    true,
   /** 子菜单项鼠标进入事件 */
   itemMouseenter: (_item: MenuItem, _e: MouseEvent) => true,
   /** 子菜单项鼠标离开事件 */

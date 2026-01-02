@@ -5,6 +5,7 @@
     :form="true"
     :title="title"
     :destroyOnClose="true"
+    :loading="loading"
     v-bind="editConfig?.modalProps || {}"
     :modelValue="modelValue"
     @update:modelValue="handleUpdateVisible"
@@ -22,56 +23,28 @@
       @reset="handleResetEditForm()"
     >
       <template
-        v-for="[slotName, name] in getSlotsMap(
+        v-for="(slotName, compSlotName) in getSlotsMap(
           $slots,
           editConfig?.formSlots,
           [],
           [],
           true
         )"
-        #[name]="slotProps"
+        #[compSlotName]="slotProps"
       >
         <slot :name="slotName" v-bind="slotProps || {}"></slot>
       </template>
     </component>
-    <template
-      v-if="
-        editConfig?.cancelBtnProps !== false ||
-        editConfig?.saveBtnProps !== false
-      "
-      #footer
-    >
-      <ElButton
-        v-if="editConfig?.cancelBtnProps !== false"
-        v-bind="
-          (editConfig?.cancelBtnProps === true
-            ? void 0
-            : editConfig?.cancelBtnProps) || {}
-        "
-        @click="handleCancel"
-      >
-        {{ lang.cancel }}
-      </ElButton>
-      <ElButton
-        v-if="editConfig?.saveBtnProps !== false"
-        type="primary"
-        :loading="loading"
-        v-bind="
-          (editConfig?.saveBtnProps === true
-            ? void 0
-            : editConfig?.saveBtnProps) || {}
-        "
-        @click="handleSave"
-      >
-        {{ lang.save }}
-      </ElButton>
+    <template v-if="btnItems.length" #footer>
+      <EleButtons :items="btnItems" />
     </template>
     <template
-      v-for="[slotName, name] in getSlotsMap($slots, editConfig?.modalSlots, [
-        'default',
-        'footer'
-      ])"
-      #[name]="slotProps"
+      v-for="(slotName, compSlotName) in getSlotsMap(
+        $slots,
+        editConfig?.modalSlots,
+        ['default', 'footer']
+      )"
+      #[compSlotName]="slotProps"
     >
       <slot :name="slotName" v-bind="slotProps || {}"></slot>
     </template>
@@ -81,10 +54,12 @@
 <script lang="ts" setup>
   import type { PropType } from 'vue';
   import { ref, reactive, computed, watch } from 'vue';
-  import { ElButton } from 'element-plus';
   import { getSlotsMap } from '../../utils/common';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleProFormInstance, EleProFormProps } from '../../ele-app/plus';
+  import type {
+    EleProFormInstance,
+    EleProFormProps
+  } from '../../ele-app/plusx';
   import type { DataItem } from '../../ele-data-table/types';
   import EleModal from '../../ele-modal/index.vue';
   import EleProForm from '../../ele-pro-form/index.vue';
@@ -97,14 +72,15 @@
     ProFormItemTypeData,
     ScreenSize
   } from '../../ele-pro-form/types';
+  import EleButtons from '../../ele-buttons/index.vue';
+  import type { ButtonItem } from '../../ele-buttons/types';
   import { codeStringPrefix } from '../util';
   import type {
     EditConfig,
     CrudField,
     EditApi,
     GetFieldsFormItemsFunction,
-    GetAndCacheCodeFunction,
-    CrudLocale
+    GetAndCacheCodeFunction
   } from '../types';
 
   defineOptions({ name: 'EditModal' });
@@ -136,12 +112,7 @@
     /** 远程数据源请求工具 */
     httpRequest: [Object, Function],
     /** 屏幕尺寸 */
-    screenSize: String as PropType<ScreenSize>,
-    /** 国际化 */
-    lang: {
-      type: Object as PropType<Partial<CrudLocale>>,
-      required: true
-    }
+    screenSize: String as PropType<ScreenSize>
   });
 
   const emit = defineEmits({
@@ -239,6 +210,34 @@
         emit('editError', e);
       });
   };
+
+  /** 操作按钮 */
+  const btnItems = computed<ButtonItem[]>(() => {
+    const items: ButtonItem[] = [];
+    if (props.editConfig?.cancelBtnProps !== false) {
+      items.push({
+        preset: 'cancel',
+        props:
+          props.editConfig?.cancelBtnProps === true
+            ? void 0
+            : props.editConfig?.cancelBtnProps,
+        onClick: handleCancel
+      });
+    }
+    if (props.editConfig?.saveBtnProps !== false) {
+      items.push({
+        preset: 'save',
+        props: {
+          loading: loading.value,
+          ...((props.editConfig?.saveBtnProps === true
+            ? void 0
+            : props.editConfig?.saveBtnProps) || {})
+        },
+        onClick: handleSave
+      });
+    }
+    return items;
+  });
 
   /** 监听弹窗打开 */
   watch(

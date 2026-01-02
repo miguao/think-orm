@@ -6,8 +6,8 @@
     :ellipsis="false"
     :mode="isCompact ? 'vertical' : (mode as any)"
     :collapse="isCompact ? true : collapse"
+    class="ele-menu"
     :class="[
-      'ele-menu',
       { 'ele-menu-dark': theme === 'dark' },
       { 'is-night': theme === 'dark' },
       { 'ele-menu-colorful': colorful },
@@ -249,8 +249,12 @@
   };
 
   /** 子菜单项点击事件 */
-  const handleItemClick: MenuItemEvent = (item, e) => {
-    emit('itemClick', item, e);
+  const handleItemClick: MenuItemEvent = (
+    item,
+    e,
+    type?: 'parent' | 'group'
+  ) => {
+    emit('itemClick', item, e, type);
   };
 
   /** 子菜单项鼠标进入事件 */

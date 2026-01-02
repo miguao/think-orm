@@ -9,7 +9,10 @@ import {
   h,
   onBeforeUnmount
 } from 'vue';
-import type { EleProFormProps, EleProTableInstance } from '../ele-app/plus';
+import { ElInput } from 'element-plus';
+import { SearchOutlined } from '../icons/index';
+import type { EleProTableInstance, ElePopconfirmProps } from '../ele-app/plus';
+import type { EleProFormProps } from '../ele-app/plusx';
 import { useLocale } from '../ele-config-provider/receiver';
 import { omit, mapTree, getMappedSlots } from '../utils/common';
 import { useMobile } from '../utils/hook';
@@ -30,8 +33,8 @@ import EleSplitPanel from '../ele-split-panel/index.vue';
 import { getValue as getRowValue } from '../ele-data-table/util';
 import type { DataItem, Columns, Column } from '../ele-data-table/types';
 import type { DatasourceFunction } from '../ele-pro-table/types';
-import TableToolbar from './components/table-toolbar.vue';
-import TableAction from './components/table-action.vue';
+import type { ButtonItem } from '../ele-buttons/types';
+import EleButtons from '../ele-buttons/index.vue';
 import TableExtra from './components/table-extra.vue';
 import PageSide from './components/page-side.vue';
 import {
@@ -44,10 +47,8 @@ import {
 import type {
   BtnClickAction,
   CrudField,
-  DeletePopOption,
   DeleteApi,
-  TreeListApi,
-  CrudLocale
+  TreeListApi
 } from './types';
 import { crudProps, crudEmits } from './props';
 
@@ -56,7 +57,7 @@ export default defineComponent({
   props: crudProps,
   emits: crudEmits,
   setup(props, { emit, slots, expose }) {
-    const { lang } = useLocale<CrudLocale>('crud', props);
+    const { lang } = useLocale('crud', props);
     const message = useMessage({ plain: true });
     const messageBox = useMessageBox();
     const defaultSearchFormProps = getDefaultSearchFormProps();
@@ -79,8 +80,132 @@ export default defineComponent({
     /** 修改弹窗数据 */
     const editData = ref<DataItem>();
 
-    /** 删除气泡配置 */
-    const deletePopOption = ref<DeletePopOption>();
+    /** 表头操作按钮 */
+    const toolbarBtnItems = computed<ButtonItem[]>(() => {
+      const listConfig = props.listConfig || {};
+      const addBtnProps = listConfig.addBtnProps;
+      const delBtnProps = listConfig.delBtnProps;
+      const items: ButtonItem[] = [];
+      if (addBtnProps !== false) {
+        items.push({
+          preset: 'add',
+          props: addBtnProps === true ? void 0 : addBtnProps,
+          onClick: () => handleBtnClick('add')
+        });
+      }
+      if (delBtnProps !== false) {
+        items.push({
+          preset: 'delBatch',
+          props: delBtnProps === true ? void 0 : delBtnProps,
+          onClick: () => handleBtnClick('delSelections')
+        });
+      }
+      return items;
+    });
+
+    /** 表格操作列操作按钮 */
+    const actionBtnItems = computed<ButtonItem[]>(() => {
+      const listConfig = props.listConfig || {};
+      const editLinkProps = listConfig.editLinkProps;
+      const delLinkProps = listConfig.delLinkProps;
+      const delPopConfirmProps = listConfig.delPopConfirmProps;
+      const items: ButtonItem[] = [];
+      if (editLinkProps !== false) {
+        items.push({
+          preset: 'edit',
+          props: editLinkProps === true ? void 0 : editLinkProps,
+          command: 'edit'
+        });
+      }
+      if (delLinkProps !== false) {
+        const item: ButtonItem = {
+          preset: 'del',
+          props: delLinkProps === true ? void 0 : delLinkProps,
+          command: 'del'
+        };
+        if (
+          delPopConfirmProps != null &&
+          typeof delPopConfirmProps === 'object' &&
+          delPopConfirmProps.isPopConfirm
+        ) {
+          item.popconfirmProps = {
+            content: lang.value.deleteConfirm,
+            popperOptions: {
+              strategy: 'fixed',
+              modifiers: [{ name: 'offset', options: { offset: [12, 6] } }]
+            },
+            ...(omit(delPopConfirmProps, [
+              'isPopConfirm'
+            ]) as ElePopconfirmProps)
+          };
+          item.command = 'delConfirm';
+        }
+        items.push(item);
+      }
+      return items;
+    });
+
+    /** 表格列配置 */
+    const tableColumns = computed<Columns>(() => {
+      const listConfig = props.listConfig || {};
+      const userColumns = listConfig.tableProps?.columns;
+      if (userColumns?.length) {
+        return userColumns;
+      }
+      const fields = props.fields;
+      const { selectionColumnProps, indexColumnProps, actionColumnProps } =
+        listConfig;
+      const columns: Columns = [];
+      if (selectionColumnProps !== false) {
+        columns.push({
+          type: 'selection',
+          columnKey: 'selection',
+          width: 50,
+          align: 'center',
+          fixed: 'left',
+          ...((selectionColumnProps === true ? void 0 : selectionColumnProps) ||
+            {})
+        });
+      }
+      if (indexColumnProps !== false) {
+        columns.push({
+          type: 'index',
+          columnKey: 'index',
+          width: 50,
+          align: 'center',
+          fixed: 'left',
+          ...((indexColumnProps === true ? void 0 : indexColumnProps) || {})
+        });
+      }
+      mapTree<CrudField, Column>(fields || [], (field) => {
+        if (field.hideInList === 'flat') {
+          return 'flatChildren';
+        } else if (!field.hideInList) {
+          return {
+            columnKey: field.key,
+            prop: field.prop,
+            label: field.label,
+            ...(field.columnProps || {})
+          };
+        }
+      }).forEach((column) => {
+        columns.push(column);
+      });
+      if (actionColumnProps !== false) {
+        columns.push({
+          columnKey: 'action',
+          label: lang.value.action,
+          width: 156,
+          align: 'center',
+          fixed: 'right',
+          slot: 'action',
+          hideInPrint: true,
+          hideInExport: true,
+          ...((actionColumnProps === true ? void 0 : actionColumnProps) || {})
+        });
+      }
+      return columns;
+    });
 
     /** 搜索栏配置 */
     const searchFormProps = computed<EleProFormProps>(() => {
@@ -118,6 +243,9 @@ export default defineComponent({
 
     /** 侧栏树加载错误信息 */
     const treeErrorMessage = ref<string>();
+
+    /** 侧栏树搜索关键字 */
+    const treeSearchkeywords = ref('');
 
     /** 分割面板折叠状态 */
     const splitPanelCollapse = ref<boolean | undefined>(false);
@@ -214,21 +342,16 @@ export default defineComponent({
     };
 
     /** 按钮点击事件 */
-    const handleBtnClick = (
-      action: BtnClickAction,
-      e: MouseEvent,
-      item?: DataItem
-    ) => {
+    const handleBtnClick = (action: BtnClickAction, item?: DataItem) => {
       if (action === 'delConfirm') {
+        // 气泡删除确认
         handleDelete(item ? [item] : void 0);
       } else if (action === 'del') {
+        // 删除单个
         const delPopConfirmProps = props.listConfig?.delPopConfirmProps;
         if (delPopConfirmProps === false) {
           handleDelete(item ? [item] : void 0);
-        } else if (
-          delPopConfirmProps === true ||
-          !delPopConfirmProps?.isPopConfirm
-        ) {
+        } else {
           messageBox
             .confirm(lang.value.deleteConfirm, lang.value.deleteConfirmTitle, {
               type: 'warning',
@@ -242,17 +365,13 @@ export default defineComponent({
               handleDelete(item ? [item] : void 0);
             })
             .catch(() => {});
-        } else {
-          deletePopOption.value = {
-            item,
-            triggerEl: e.currentTarget,
-            confirmProps: delPopConfirmProps
-          };
         }
       } else if (action === 'edit') {
+        // 修改
         editData.value = item;
         editVisible.value = true;
       } else if (action === 'add') {
+        // 添加
         const filterField = props.pageConfig?.tableFilterField;
         if (
           props.pageConfig?.splitPanelProps &&
@@ -267,6 +386,7 @@ export default defineComponent({
         }
         addVisible.value = true;
       } else if (action === 'delSelections') {
+        // 删除选中
         const data = selections.value;
         if (!data.length) {
           message.error({
@@ -460,6 +580,11 @@ export default defineComponent({
         });
     };
 
+    /** 更新侧栏树搜索关键字 */
+    const handleUpdateTreeSearchKeywords = (value: string) => {
+      treeSearchkeywords.value = value;
+    };
+
     /** 更新分割面板折叠状态 */
     const handleUpdateSplitPanelCollapse = (collapse?: boolean) => {
       splitPanelCollapse.value = collapse;
@@ -470,71 +595,8 @@ export default defineComponent({
       codeCache.clear();
     };
 
-    onBeforeUnmount(() => {
-      clearCodeCache();
-    });
-
-    /** 获取表格的默认列配置 */
-    const getDefaultTableColumns = (
-      fields?: CrudField[],
-      selectionColumnProps?: boolean | Column,
-      indexColumnProps?: boolean | Column,
-      actionColumnProps?: boolean | Column
-    ) => {
-      const columns: Columns = [];
-      if (selectionColumnProps !== false) {
-        columns.push({
-          type: 'selection',
-          columnKey: 'selection',
-          width: 50,
-          align: 'center',
-          fixed: 'left',
-          ...((selectionColumnProps === true ? void 0 : selectionColumnProps) ||
-            {})
-        });
-      }
-      if (indexColumnProps !== false) {
-        columns.push({
-          type: 'index',
-          columnKey: 'index',
-          width: 50,
-          align: 'center',
-          fixed: 'left',
-          ...((indexColumnProps === true ? void 0 : indexColumnProps) || {})
-        });
-      }
-      mapTree<CrudField, Column>(fields || [], (field) => {
-        if (field.hideInList === 'flat') {
-          return 'flatChildren';
-        } else if (!field.hideInList) {
-          return {
-            columnKey: field.key,
-            prop: field.prop,
-            label: field.label,
-            ...(field.columnProps || {})
-          };
-        }
-      }).forEach((column) => {
-        columns.push(column);
-      });
-      if (actionColumnProps !== false) {
-        columns.push({
-          columnKey: 'action',
-          label: lang.value.action,
-          width: 120,
-          align: 'center',
-          fixed: 'right',
-          slot: 'action',
-          hideInPrint: true,
-          hideInExport: true,
-          ...((actionColumnProps === true ? void 0 : actionColumnProps) || {})
-        });
-      }
-      return columns;
-    };
-
     /** 渲染搜索栏 */
-    const renderSearch = () => {
+    const renderSearch = (): VNode | VNode[] | undefined => {
       if (props.searchConfig === false) {
         return;
       }
@@ -542,12 +604,11 @@ export default defineComponent({
         (props.searchConfig === true ? void 0 : props.searchConfig) || {};
       const cardProps = searchConfig.cardProps;
 
-      const renderForm = () => {
+      const renderForm = (): VNode => {
         return h(
           props.proFormComponent || EleProForm,
           {
             ...defaultSearchFormProps,
-            submitText: lang.value.search,
             itemTypeData: props.itemTypeData,
             httpRequest: props.httpRequest,
             screenSize: props.screenSize,
@@ -558,14 +619,35 @@ export default defineComponent({
             onSubmit: handleSubmitSearchForm,
             onReset: handleResetSearchForm
           },
-          getMappedSlots(slots, searchConfig.formSlots, [], [], true)
+          {
+            footer: ({ submitForm, resetForm }) => (
+              <EleButtons
+                items={[
+                  {
+                    preset: 'search',
+                    props: searchFormProps.value.submitButtonProps,
+                    onClick: () => submitForm()
+                  },
+                  {
+                    preset: 'reset',
+                    props: searchFormProps.value.resetButtonProps,
+                    onClick: () => resetForm()
+                  }
+                ]}
+              />
+            ),
+            ...getMappedSlots(slots, searchConfig.formSlots, [], [], true)
+          }
         );
       };
       if (!cardProps) {
         return renderForm();
       }
       return (
-        <EleCard {...((cardProps === true ? void 0 : cardProps) || {})}>
+        <EleCard
+          searchForm={true}
+          {...((cardProps === true ? void 0 : cardProps) || {})}
+        >
           {{
             ...getMappedSlots(slots, searchConfig.cardSlots),
             default: renderForm
@@ -575,23 +657,11 @@ export default defineComponent({
     };
 
     /** 渲染表格 */
-    const renderTable = () => {
+    const renderTable = (): VNode | VNode[] | undefined => {
       const listConfig = props.listConfig || {};
       const cardProps = listConfig.cardProps;
       const tableProps = listConfig.tableProps || {};
-      const columns = tableProps.columns?.length
-        ? tableProps.columns
-        : getDefaultTableColumns(
-            props.fields,
-            listConfig.selectionColumnProps,
-            listConfig.indexColumnProps,
-            listConfig.actionColumnProps
-          );
-      const addBtnProps = listConfig.addBtnProps;
-      const delBtnProps = listConfig.delBtnProps;
-      const editLinkProps = listConfig.editLinkProps;
-      const delLinkProps = listConfig.delLinkProps;
-      const renderTable = () => {
+      const renderTb = (): VNode => {
         const tSlots = getMappedSlots(
           slots,
           listConfig.tableSlots,
@@ -600,36 +670,31 @@ export default defineComponent({
           true
         );
         const toolbarSlot = tSlots.toolbar;
-        tSlots.toolbar = () => (
-          <TableToolbar
-            addBtnProps={addBtnProps}
-            delBtnProps={delBtnProps}
-            lang={lang.value}
-            onBtnClick={handleBtnClick}
-          >
-            {{ default: toolbarSlot }}
-          </TableToolbar>
+        tSlots.toolbar = (slotProps?: Record<string, any>) => (
+          <EleButtons items={toolbarBtnItems.value}>
+            {{ default: toolbarSlot ? toolbarSlot(slotProps) : void 0 }}
+          </EleButtons>
         );
         const actionSlot = tSlots.action;
-        tSlots.action = ({ row }: any) => (
-          <TableAction
-            editLinkProps={editLinkProps}
-            delLinkProps={delLinkProps}
-            item={row}
-            lang={lang.value}
-            onBtnClick={handleBtnClick}
+        tSlots.action = (slotProps?: Record<string, any>) => (
+          <EleButtons
+            type="link"
+            divider={true}
+            items={actionBtnItems.value}
+            onItemClick={(command: any) =>
+              handleBtnClick(command, slotProps?.row)
+            }
           >
-            {{ default: actionSlot }}
-          </TableAction>
+            {{ default: actionSlot ? actionSlot(slotProps) : void 0 }}
+          </EleButtons>
         );
         const bottomExtraSlot = tSlots.bottomExtra;
-        tSlots.bottomExtra = () => (
+        tSlots.bottomExtra = (slotProps?: Record<string, any>) => (
           <TableExtra
             addVisible={addVisible.value}
             addData={addData.value}
             editVisible={editVisible.value}
             editData={editData.value}
-            deletePopOption={deletePopOption.value}
             addConfig={props.addConfig}
             editConfig={props.editConfig}
             fields={props.fields}
@@ -649,7 +714,10 @@ export default defineComponent({
             onUpdate:addVisible={handleUpdateAddVisible}
             onUpdate:editVisible={handleUpdateEditVisible}
           >
-            {{ ...omit(slots, ['default']), default: bottomExtraSlot }}
+            {{
+              ...omit(slots, ['default']),
+              default: bottomExtraSlot ? bottomExtraSlot(slotProps) : void 0
+            }}
           </TableExtra>
         );
         const arrayDatasource =
@@ -664,7 +732,7 @@ export default defineComponent({
           <EleProTable
             {...tableProps}
             ref={tableRef}
-            columns={columns}
+            columns={tableColumns.value}
             datasource={arrayDatasource || tableDatasource}
             selections={selections.value}
             onUpdate:selections={handleUpdateSelections}
@@ -674,52 +742,54 @@ export default defineComponent({
         );
       };
       if (!cardProps) {
-        return renderTable();
+        return renderTb();
       }
       return (
         <EleCard {...((cardProps === true ? void 0 : cardProps) || {})}>
           {{
             ...getMappedSlots(slots, listConfig.cardSlots),
-            default: renderTable
+            default: renderTb
           }}
         </EleCard>
       );
     };
 
-    /** 渲染主体内容 */
-    const renderBodyContent = () => {
+    /** 渲染内容 */
+    const renderContent = (): VNode | VNode[] | undefined => {
       const nodes: VNode[] = [];
       const sNodes = renderSearch();
-      if (sNodes) {
-        (Array.isArray(sNodes) ? sNodes : [sNodes]).forEach((node) => {
-          nodes.push(node);
-        });
-      }
       const tbNodes = renderTable();
-      if (tbNodes) {
-        (Array.isArray(tbNodes) ? tbNodes : [tbNodes]).forEach((node) => {
-          nodes.push(node);
-        });
-      }
-      return nodes;
-    };
-
-    /** 渲染内容 */
-    const renderContent = () => {
-      const nodes: VNode[] = [];
-      const bodyNodes = renderBodyContent();
       const pageConfig = props.pageConfig || {};
       const splitPanelProps = pageConfig.splitPanelProps;
       if (!splitPanelProps) {
-        bodyNodes.forEach((node) => {
-          nodes.push(node);
-        });
+        if (sNodes) {
+          (Array.isArray(sNodes) ? sNodes : [sNodes]).forEach((node) => {
+            nodes.push(node);
+          });
+        }
+        if (tbNodes) {
+          (Array.isArray(tbNodes) ? tbNodes : [tbNodes]).forEach((node) => {
+            nodes.push(node);
+          });
+        }
       } else {
+        const bodyNodes: VNode[] = [];
+        if (!pageConfig.splitSearchForm && sNodes) {
+          (Array.isArray(sNodes) ? sNodes : [sNodes]).forEach((node) => {
+            bodyNodes.push(node);
+          });
+        }
+        if (tbNodes) {
+          (Array.isArray(tbNodes) ? tbNodes : [tbNodes]).forEach((node) => {
+            bodyNodes.push(node);
+          });
+        }
         nodes.push(
           <EleSplitPanel
-            size="256px"
-            space="0px"
+            size={258}
+            space={0}
             allowCollapse={true}
+            collapseBtnOffset={2}
             collapse={splitPanelCollapse.value}
             class="ele-crud-split-panel"
             onUpdate:collapse={handleUpdateSplitPanelCollapse}
@@ -734,11 +804,34 @@ export default defineComponent({
                   loading={treeLoading.value}
                   selectedValue={treeSelectedValue.value}
                   errorMessage={treeErrorMessage.value}
+                  keywords={treeSearchkeywords.value}
+                  lang={lang.value}
                   onTreeNodeClick={handleTreeNodeClick}
                 >
                   {{ ...slots }}
                 </PageSide>
               ),
+              sideHeader:
+                pageConfig.sideConfig?.searchProps !== false
+                  ? () => (
+                      <ElInput
+                        placeholder={lang.value.searchPlaceholder}
+                        clearable={true}
+                        prefixIcon={SearchOutlined}
+                        modelValue={treeSearchkeywords.value}
+                        onUpdate:modelValue={handleUpdateTreeSearchKeywords}
+                        class="ele-crud-tree-search"
+                        {...(pageConfig.sideConfig?.searchInputProps || {})}
+                      >
+                        {getMappedSlots(
+                          slots,
+                          pageConfig.sideConfig?.searchInputSlots
+                        )}
+                      </ElInput>
+                    )
+                  : void 0,
+              bodyHeader:
+                pageConfig.splitSearchForm && sNodes ? () => sNodes : void 0,
               body: () => bodyNodes
             }}
           </EleSplitPanel>
@@ -775,6 +868,11 @@ export default defineComponent({
       },
       { deep: true, immediate: true }
     );
+
+    /** 卸载时清空代码解析结果缓存 */
+    onBeforeUnmount(() => {
+      clearCodeCache();
+    });
 
     /** 实例方法 */
     const exposeValue = { tableRef, getTableSelections, reloadTree };

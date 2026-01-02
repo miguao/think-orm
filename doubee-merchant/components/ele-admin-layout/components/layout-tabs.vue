@@ -8,8 +8,8 @@
       :tabName="homePath"
     >
       <slot name="tabHome" :active="active">
-        <ElIcon class="ele-tab-icon" style="vertical-align: -3px">
-          <HomeOutlined style="transform: scale(1.08)" />
+        <ElIcon class="ele-tab-icon" :style="{ verticalAlign: '-2.4px' }">
+          <HomeOutlined :style="{ transform: 'scale(1.08)' }" />
         </ElIcon>
       </slot>
     </EleTabTool>

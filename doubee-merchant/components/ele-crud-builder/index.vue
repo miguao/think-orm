@@ -1,9 +1,10 @@
 <!-- 增删改查构建器 -->
 <template>
   <EleSplitPanel
-    space="0px"
-    size="240px"
+    :space="0"
+    :size="240"
     :allowCollapse="true"
+    :collapseBtnOffset="2"
     v-bind="splitPanelProps || {}"
     v-model:collapse="leftSideCollapse"
     class="ele-crud-builder-wrapper"
@@ -91,8 +92,8 @@
           </template>
         </BodyHeader>
         <div
+          class="ele-crud-builder-body"
           :class="[
-            'ele-crud-builder-body',
             { 'is-pc': currentScreen === 'pc' },
             { 'is-pad': currentScreen === 'pad' },
             { 'is-phone': currentScreen === 'phone' },
@@ -141,7 +142,8 @@
 
 <script lang="ts" setup>
   import { ref, useModel, onBeforeUnmount } from 'vue';
-  import type { EleCrudProps, EleProFormProps } from '../ele-app/plus';
+  import { ElEmpty } from 'element-plus';
+  import type { EleCrudProps, EleProFormProps } from '../ele-app/plusx';
   import { useMobile } from '../utils/hook';
   import { eachTree, findTree, omit } from '../utils/common';
   import EleSplitPanel from '../ele-split-panel/index.vue';
@@ -411,7 +413,7 @@
     } else if (type === 'add') {
       handleUpdateConfigField('addConfig.formProps', data, false);
     } else if (type === 'edit') {
-      handleUpdateConfigField('editConfig..formProps', data, false);
+      handleUpdateConfigField('editConfig.formProps', data, false);
     }
   };
 

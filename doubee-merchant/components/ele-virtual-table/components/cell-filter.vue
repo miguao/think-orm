@@ -47,10 +47,8 @@
         </template>
         <div v-else class="ele-table-filter-list">
           <div
-            :class="[
-              'ele-table-filter-item',
-              { 'is-active': filteredValue == null }
-            ]"
+            class="ele-table-filter-item"
+            :class="{ 'is-active': filteredValue == null }"
             @click="handleItemClick()"
           >
             {{ clearFilterText }}
@@ -58,10 +56,8 @@
           <div
             v-for="d in filters"
             :key="d.value"
-            :class="[
-              'ele-table-filter-item',
-              { 'is-active': filteredValue === d.value }
-            ]"
+            class="ele-table-filter-item"
+            :class="{ 'is-active': filteredValue === d.value }"
             @click="handleItemClick(d.value)"
           >
             {{ d.text }}

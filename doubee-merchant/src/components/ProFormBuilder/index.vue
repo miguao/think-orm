@@ -1,7 +1,7 @@
 <!-- 表单构建器 -->
 <template>
   <EleProFormBuilder
-    v-bind="$props"
+    v-bind="{ ...emitProps, ...$props }"
     :componentData="componentData || defaultComponentData"
     :templateData="templateData || defaultTemplateData"
     :configFormItems="configFormItems || defaultConfigFormItems"
@@ -13,8 +13,6 @@
     :codeViewerComponent="codeViewerComponent || CodeViewer"
     :headerTools="headerTools ?? defaultHeaderRightTools"
     :proFormInitialProps="{ footer: true }"
-    @update:modelValue="handleUpdateModelValue"
-    @previewFormSubmit="handlePreviewFormSubmit"
   >
     <template
       v-if="!$slots.proFormBuilderIconInput"
@@ -33,29 +31,32 @@
 </template>
 
 <script lang="ts" setup>
-  import type { EleProFormProps } from 'ele-admin-plus/es/ele-app/plus';
+  import { useComponentEvents } from 'ele-admin-plus/es/utils/hook';
   import type { HeaderRightToolName } from 'ele-admin-plus/es/ele-pro-form-builder/types';
-  import { proFormBuilderProps } from 'ele-admin-plus/es/ele-pro-form-builder/props';
+  import {
+    proFormBuilderProps,
+    proFormBuilderEmits
+  } from 'ele-admin-plus/es/ele-pro-form-builder/props';
   import {
     defaultConfigFormItems,
     defaultConfigFormPresetProps as formPresetProps
   } from 'ele-admin-plus/es/ele-pro-form-builder/util';
   import ProForm from '@/components/ProForm/index.vue';
+  import CodeViewer from '@/components/CodeViewer/index.vue';
   import { defaultComponentData } from './components/component-data';
   import { defaultTemplateData } from './components/template-data';
   import CodeEditer from './components/code-editer.vue';
   import JsonEditer from './components/json-editer.vue';
   import HtmlEditer from './components/html-editer.vue';
-  import CodeViewer from './components/code-viewer.vue';
   import IconEditer from './components/icon-editer.vue';
 
   defineOptions({ name: 'ProFormBuilder' });
 
   defineProps(proFormBuilderProps);
 
-  const emit = defineEmits<{
-    (e: 'update:modelValue', config: EleProFormProps): void;
-  }>();
+  const emit = defineEmits(proFormBuilderEmits);
+
+  const { emitProps } = useComponentEvents(proFormBuilderEmits, emit);
 
   /** 顶栏右侧按钮布局 */
   const defaultHeaderRightTools: HeaderRightToolName[] = [
@@ -65,14 +66,4 @@
     'preview',
     'code'
   ];
-
-  /** 更新绑定值 */
-  const handleUpdateModelValue = (config: EleProFormProps) => {
-    emit('update:modelValue', config);
-  };
-
-  /** 预览表单提交事件 */
-  const handlePreviewFormSubmit = (data: Record<string, any>) => {
-    console.log(data);
-  };
 </script>

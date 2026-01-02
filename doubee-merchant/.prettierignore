@@ -1,9 +1,13 @@
-/dist/*
+/public/**
+/src/assets/**
+/node_modules/**
+/dist/**
+/es/**
+/lib/**
+/typings/**
+
 .local
 .output.js
-/node_modules/**
 
 **/*.svg
 **/*.sh
-
-/public/*

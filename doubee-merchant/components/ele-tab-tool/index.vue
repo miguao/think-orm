@@ -1,6 +1,9 @@
 <!-- 标签页自定义按钮 -->
 <template>
-  <div :class="['ele-tab-tool', { 'is-tab': tab }, { 'is-active': active }]">
+  <div
+    class="ele-tab-tool"
+    :class="[{ 'is-tab': tab }, { 'is-active': active }]"
+  >
     <template v-if="tab">
       <div
         class="ele-tab-title"
@@ -9,22 +12,15 @@
       >
         <slot></slot>
       </div>
-      <ElIcon class="ele-tab-corner-left">
-        <CornerLeftFilled />
-      </ElIcon>
-      <ElIcon class="ele-tab-corner-right">
-        <CornerRightFilled />
-      </ElIcon>
+      <div class="ele-tab-corner-left"></div>
+      <div class="ele-tab-corner-right"></div>
     </template>
-
     <slot v-else></slot>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { inject } from 'vue';
-  import { ElIcon } from 'element-plus';
-  import { CornerLeftFilled, CornerRightFilled } from '../icons/index';
   import { TAB_WRAP_KEY } from '../ele-tabs/props';
   import { tabToolProps } from './props';
 

@@ -1,4 +1,4 @@
-import type { PropType, ExtractPropTypes } from 'vue';
+import type { PropType, ExtractPropTypes, EmitsToProps } from 'vue';
 import type { StyleValue } from '../ele-app/types';
 import type {
   ElPopconfirmProps,
@@ -66,3 +66,7 @@ export const popconfirmEmits = {
   confirm: (_e: MouseEvent) => true,
   cancel: (_e: MouseEvent) => true
 };
+
+export type PopconfirmEmitsProps = EmitsToProps<typeof popconfirmEmits>;
+
+export type PopconfirmPropsAndEmits = PopconfirmProps & PopconfirmEmitsProps;

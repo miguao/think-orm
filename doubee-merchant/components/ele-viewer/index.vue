@@ -1,6 +1,6 @@
 <!-- 内容预览 -->
 <template>
-  <div ref="viewerRef" :class="['ele-viewer']">
+  <div ref="viewerRef" class="ele-viewer">
     <div
       ref="bodyRef"
       class="ele-viewer-body"
@@ -14,10 +14,11 @@
       >
         <div
           ref="contentRef"
-          :class="['ele-viewer-content', { 'is-moving': viewerMoving }]"
+          class="ele-viewer-content"
+          :class="{ 'is-moving': viewerMoving }"
           :style="[contentStyle || {}, { transform: imageTransform }]"
           @mousedown="handleMousedown"
-          @touchstart="handleTouchstart"
+          @touchstart.passive="handleTouchstart"
           @click="handleClick"
           @contextmenu="handleContextmenu"
         >
@@ -59,7 +60,7 @@
 <script lang="ts" setup>
   import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
   import { useMousewheel, useMoveEvent } from '../utils/hook';
-  import { getRotatedBounds } from './util';
+  import { getRotatedBounds, useContentRatio } from './util';
   import { viewerProps, viewerEmits } from './props';
 
   defineOptions({ name: 'EleViewer' });
@@ -267,7 +268,8 @@
         startX == null ||
         startY == null ||
         distanceX == null ||
-        distanceY == null
+        distanceY == null ||
+        !contentStyle.show.value
       ) {
         return;
       }
@@ -296,6 +298,7 @@
       zoomOut();
     }
   );
+  const contentStyle = useContentRatio();
 
   onMounted(() => {
     viewerRef.value && bindMousewheel(viewerRef.value);

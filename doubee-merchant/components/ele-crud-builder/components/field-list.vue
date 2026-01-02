@@ -13,15 +13,13 @@
   >
     <template #item="{ element }">
       <div
-        :class="[
-          'ele-crud-builder-field-item',
-          {
-            'is-collapse':
-              element.key != null &&
-              collapseItemIds &&
-              collapseItemIds.includes(element.key)
-          }
-        ]"
+        class="ele-crud-builder-field-item"
+        :class="{
+          'is-collapse':
+            element.key != null &&
+            collapseItemIds &&
+            collapseItemIds.includes(element.key)
+        }"
       >
         <FieldList
           :items="element.children || []"
@@ -36,7 +34,7 @@
         />
         <div
           class="ele-crud-builder-field-item-body"
-          :title="(element.prop ?? '') + ' ' + (element.label ?? '')"
+          :title="`${element.prop ?? ''} ${element.label ?? ''}`"
         >
           <ElIcon
             v-if="element.children && element.children.length"
@@ -68,7 +66,7 @@
             title="复制"
             @click.stop="handleCopyItem(element.key)"
           >
-            <CopyOutlined style="transform: scale(0.96)" />
+            <CopyOutlined :style="{ transform: 'scale(0.96)' }" />
           </ElIcon>
           <ElIcon
             class="ele-crud-builder-field-item-tool"
@@ -82,14 +80,14 @@
             title="添加子级"
             @click.stop="handleAddChildren(element.key)"
           >
-            <PlusOutlined style="transform: scale(1.1)" />
+            <PlusOutlined :style="{ transform: 'scale(1.1)' }" />
           </ElIcon>
           <ElIcon
             title=""
             class="ele-crud-builder-field-item-handle"
             @click.stop=""
           >
-            <DragOutlined style="transform: scale(1.1)" />
+            <DragOutlined :style="{ transform: 'scale(1.1)' }" />
           </ElIcon>
         </div>
         <div class="ele-crud-builder-field-item-border"></div>

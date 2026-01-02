@@ -19,7 +19,7 @@
           :hidden="!unreadNum"
           style="line-height: 1; padding: 4px 0"
         >
-          <el-icon style="transform: scale(1.17) translateY(1px)">
+          <el-icon style="transform: scale(1.17)">
             <BellOutlined />
           </el-icon>
         </el-badge>
@@ -38,19 +38,19 @@
     >
       <template #label="{ item, label }">
         <span>{{ label }}</span>
-        <span v-if="item.name === 'notice' && notice.length">
-          ({{ notice.length }})
+        <span v-if="item.name === 'notice' && notices.length">
+          ({{ notices.length }})
         </span>
-        <span v-if="item.name === 'letter' && letter.length">
-          ({{ letter.length }})
+        <span v-if="item.name === 'letter' && letters.length">
+          ({{ letters.length }})
         </span>
-        <span v-if="item.name === 'todo' && todo.length">
-          ({{ todo.length }})
+        <span v-if="item.name === 'todo' && todos.length">
+          ({{ todos.length }})
         </span>
       </template>
       <template #notice>
         <div class="list-wrapper">
-          <div v-for="item in notice" :key="item.id" class="list-item">
+          <div v-for="item in notices" :key="item.id" class="list-item">
             <div class="list-item-icon" :style="{ background: item.color }">
               <el-icon>
                 <Comment
@@ -71,7 +71,7 @@
             </div>
           </div>
         </div>
-        <div v-if="notice.length" class="bottom-tools">
+        <div v-if="notices.length" class="bottom-tools">
           <div class="bottom-tool" @click="clearNotice">清空通知</div>
           <el-divider direction="vertical" style="margin: 0; width: 0" />
           <router-link to="/user/message?type=notice" class="bottom-tool">
@@ -82,7 +82,7 @@
       </template>
       <template #letter>
         <div class="list-wrapper">
-          <div v-for="item in letter" :key="item.id" class="list-item">
+          <div v-for="item in letters" :key="item.id" class="list-item">
             <el-avatar :size="32" :src="item.avatar" />
             <div class="list-item-body">
               <ele-ellipsis>{{ item.title }}</ele-ellipsis>
@@ -95,7 +95,7 @@
             </div>
           </div>
         </div>
-        <div v-if="letter.length" class="bottom-tools">
+        <div v-if="letters.length" class="bottom-tools">
           <div class="bottom-tool" @click="clearLetter">清空私信</div>
           <el-divider direction="vertical" style="margin: 0; width: 0" />
           <router-link to="/user/message?type=letter" class="bottom-tool">
@@ -106,7 +106,7 @@
       </template>
       <template #todo>
         <div class="list-wrapper">
-          <div v-for="item in todo" :key="item.id" class="list-item">
+          <div v-for="item in todos" :key="item.id" class="list-item">
             <div class="list-item-body">
               <ele-ellipsis>{{ item.title }}</ele-ellipsis>
               <ele-ellipsis type="placeholder" class="list-item-text">
@@ -138,7 +138,7 @@
             </el-tag>
           </div>
         </div>
-        <div v-if="todo.length" class="bottom-tools">
+        <div v-if="todos.length" class="bottom-tools">
           <div class="bottom-tool" @click="clearTodo">清空待办</div>
           <el-divider direction="vertical" style="margin: 0; width: 0" />
           <router-link to="/user/message?type=todo" class="bottom-tool">
@@ -152,8 +152,8 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed, nextTick } from 'vue';
-  import { EleMessage } from 'ele-admin-plus';
+  import { ref, nextTick } from 'vue';
+  import { storeToRefs } from 'pinia';
   import type { EleTabs } from 'ele-admin-plus';
   import {
     Comment,
@@ -163,72 +163,46 @@
     BellFilled
   } from '@element-plus/icons-vue';
   import { BellOutlined } from '@/components/icons';
-  import { getUnreadNotice } from '@/api/example';
-  import type {
-    NoticeModel,
-    LetterModel,
-    TodoModel
-  } from '@/api/example/model';
+  import { useNoticeStore } from '@/store/modules/notice';
 
-  /** 标签页 */
+  const noticeStore = useNoticeStore();
+  const { notices, letters, todos, unreadNum } = storeToRefs(noticeStore);
+
+  /** 选项卡 */
   const tabRef = ref<InstanceType<typeof EleTabs> | null>(null);
 
   /** 选项卡选中 */
   const active = ref<string>('notice');
 
-  /** 通知数据 */
-  const notice = ref<NoticeModel[]>([]);
-
-  /** 私信数据 */
-  const letter = ref<LetterModel[]>([]);
-
-  /** 待办数据 */
-  const todo = ref<TodoModel[]>([]);
-
-  /** 未读数量 */
-  const unreadNum = computed(() => {
-    return notice.value.length + letter.value.length + todo.value.length;
-  });
-
-  /** 查询数据 */
-  const query = () => {
-    getUnreadNotice()
-      .then((result) => {
-        notice.value = result.notice;
-        letter.value = result.letter;
-        todo.value = result.todo;
-      })
-      .catch((e) => {
-        EleMessage.error({ message: e.message, plain: true });
-      });
-  };
-
-  /** 清空通知 */
-  const clearNotice = () => {
-    notice.value = [];
-    updateActiveBar();
-  };
-
-  /** 清空私信 */
-  const clearLetter = () => {
-    letter.value = [];
-    updateActiveBar();
-  };
-
-  /** 清空待办 */
-  const clearTodo = () => {
-    todo.value = [];
-    updateActiveBar();
-  };
-
-  /** 更新标签页指示线 */
+  /** 更新选项卡指示线 */
   const updateActiveBar = () => {
     nextTick(() => {
       tabRef.value?.updateActiveBar?.();
     });
   };
 
-  query();
+  /** 清空通知 */
+  const clearNotice = () => {
+    noticeStore.clearNotice();
+    updateActiveBar();
+  };
+
+  /** 清空私信 */
+  const clearLetter = () => {
+    noticeStore.clearLetter();
+    updateActiveBar();
+  };
+
+  /** 清空待办 */
+  const clearTodo = () => {
+    noticeStore.clearTodo();
+    updateActiveBar();
+  };
+
+  /** 添加模拟数据 */
+  noticeStore.setNotices([]);
+  noticeStore.setLetters([]);
+  noticeStore.setTodos([]);
 </script>
 
 <style lang="scss" scoped>

@@ -1,4 +1,4 @@
-import type { EleProFormProps } from '../ele-app/plus';
+import type { EleProFormProps } from '../ele-app/plusx';
 import { mapTree } from '../utils/common';
 import type { ProFormItemProps } from '../ele-pro-form/types';
 import type { CrudField, SideConfig } from './types';
@@ -14,8 +14,9 @@ export const codeStringPrefix = '/*__PRO_CRUD__*/';
 export function getDefaultSearchFormProps() {
   const config: EleProFormProps = {
     grid: { lg: 6, md: 8, sm: 12, xs: 24 },
+    rowProps: { gutter: 16 },
     footer: true,
-    footerProps: { labelWidth: 16 },
+    footerProps: { labelWidth: 0 },
     autoFooterCol: true
   };
   return config;

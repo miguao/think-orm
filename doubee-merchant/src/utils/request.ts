@@ -1,15 +1,15 @@
 /**
- * axios实例
+ * 请求工具
  */
 import axios from 'axios';
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { unref } from 'vue';
-import { API_BASE_URL, LAYOUT_PATH } from '@/config/setting';
+import { LOGIN_PATH, LAYOUT_PATH, TOKEN_HEADER_NAME } from '@/config/setting';
 import type { ApiResult } from '@/api';
 import router from '@/router';
 import { isWhiteList } from '@/router/routes';
 import { getToken, setToken } from './token-util';
-import { logout, showLogoutConfirm, toURLSearch } from './common';
+import { goLogin, showExpiredLogout, toURLSearch } from './common';
 
 /**
  * 请求拦截处理
@@ -18,13 +18,16 @@ export function requestInterceptor(config: InternalAxiosRequestConfig<any>) {
   // 添加token到header
   const token = getToken();
   if (token && config.headers) {
-    config.headers['Authorization'] = token;
+    config.headers[TOKEN_HEADER_NAME] = `Bearer ${token}`;
   }
+
   // get请求处理数组和对象类型参数
   if (config.method === 'get' && config.params) {
     config.url = toURLSearch(config.params, config.url);
     config.params = {};
   }
+
+  return config;
 }
 
 /**
@@ -33,12 +36,13 @@ export function requestInterceptor(config: InternalAxiosRequestConfig<any>) {
 export function responseInterceptor(res: AxiosResponse<ApiResult<unknown>>) {
   // 登录过期处理
   if (res.data?.code === 401 || (res.data?.code === 403 && !getToken())) {
-    const { path, fullPath } = unref(router.currentRoute);
-    if (!(isWhiteList(path) || isWhiteList(location.pathname))) {
-      if (path == LAYOUT_PATH) {
-        logout(true, void 0, router.push);
-      } else if (path !== '/login') {
-        showLogoutConfirm(fullPath);
+    const toRoute = (res.config as any).toRoute;
+    const { path, fullPath } = toRoute || unref(router.currentRoute);
+    if (!isWhiteList(path)) {
+      if (path == LAYOUT_PATH || toRoute) {
+        goLogin(path == LAYOUT_PATH ? void 0 : fullPath, true);
+      } else if (path !== LOGIN_PATH) {
+        showExpiredLogout(fullPath);
       }
     }
     return res.data.message;
@@ -50,9 +54,25 @@ export function responseInterceptor(res: AxiosResponse<ApiResult<unknown>>) {
   }
 }
 
+/**
+ * 错误信息处理
+ */
+export function getErrorMessage(message) {
+  if (message == 'Network Error') {
+    return '后端接口连接异常';
+  }
+  if (message.includes('timeout')) {
+    return '系统接口请求超时';
+  }
+  if (message.includes('Request failed with status code')) {
+    return `系统接口${message.substr(message.length - 3)}异常`;
+  }
+  return message;
+}
+
 /** 创建axios实例 */
 const service = axios.create({
-  baseURL: API_BASE_URL
+  baseURL: import.meta.env.VITE_API_URL
 });
 
 /**
@@ -68,7 +88,7 @@ service.interceptors.response.use(
   },
   (error) => {
     console.error(error);
-    return Promise.reject(new Error('网络错误'));
+    return Promise.reject(new Error(getErrorMessage(error.message)));
   }
 );
 
@@ -77,12 +97,11 @@ service.interceptors.response.use(
  */
 service.interceptors.request.use(
   (config) => {
-    requestInterceptor(config);
-    return config;
+    return requestInterceptor(config);
   },
   (error) => {
     console.error(error);
-    return Promise.reject(new Error('网络错误'));
+    return Promise.reject(new Error(getErrorMessage(error.message)));
   }
 );
 

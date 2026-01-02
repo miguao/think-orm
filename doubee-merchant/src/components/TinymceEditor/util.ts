@@ -4,7 +4,7 @@ import type {
   RawEditorSettings
 } from 'tinymce';
 const BASE_URL = import.meta.env.BASE_URL;
-//const BASE_URL = location.protocol + '//' + location.host + import.meta.env.BASE_URL;
+//const BASE_URL = `${location.protocol}//${location.host}${import.meta.env.BASE_URL}`;
 
 /** 默认加载插件 */
 const PLUGINS: string = [
@@ -179,7 +179,7 @@ export function uuid(prefix: string): string {
   const time = Date.now();
   const random = Math.floor(Math.random() * 1000000000);
   unique++;
-  return prefix + '_' + random + unique + String(time);
+  return `${prefix}_${random}${unique}${String(time)}`;
 }
 
 /**

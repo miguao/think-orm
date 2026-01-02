@@ -20,7 +20,6 @@
         :href="item.path"
         :target="item.pathTarget || '_blank'"
         class="ele-menu-link"
-        @click.stop=""
       ></a>
       <RouterLink
         v-else-if="item.path"
@@ -40,7 +39,7 @@
 
   defineOptions({ name: 'ItemTitle' });
 
-  defineProps({
+  const props = defineProps({
     /** 菜单项数据 */
     item: {
       type: Object as PropType<MenuItem>,
@@ -63,6 +62,12 @@
 
   /** 菜单项点击事件 */
   const handleItemClick: MenuItemEvent = (item, e) => {
+    if (
+      props.showLink &&
+      (isExternalLink(item.path) || (item.path && item.pathTarget === '_blank'))
+    ) {
+      e.stopPropagation();
+    }
     emit('itemClick', item, e);
   };
 

@@ -4,13 +4,14 @@
     <div
       v-for="row in lineRows"
       :key="row.key"
-      :class="['ele-time-line-row', { 'is-even-row': row.isEvenRow }]"
+      class="ele-time-line-row"
+      :class="{ 'is-even-row': row.isEvenRow }"
     >
       <div
         v-for="col in row.items"
         :key="col.key"
+        class="ele-time-line-item"
         :class="[
-          'ele-time-line-item',
           { 'is-first': col.isFirst },
           { 'is-last': col.isLast },
           { 'is-primary': col.data && col.data.type === 'primary' },
@@ -22,8 +23,8 @@
         <template v-if="col.data">
           <div class="ele-time-line-item-icon">
             <div
+              class="ele-time-line-item-line is-start"
               :class="[
-                'ele-time-line-item-line is-start',
                 { 'is-primary-line': col.data.type === 'primary' },
                 { 'is-danger-line': col.data.type === 'danger' }
               ]"
@@ -46,8 +47,8 @@
               </slot>
             </ElIcon>
             <div
+              class="ele-time-line-item-line is-end"
               :class="[
-                'ele-time-line-item-line is-end',
                 { 'is-primary-line': col.nextDataType === 'primary' },
                 { 'is-danger-line': col.nextDataType === 'danger' }
               ]"
@@ -55,8 +56,8 @@
           </div>
           <div
             v-if="!col.isLast"
+            class="ele-time-line-item-line-turn"
             :class="[
-              'ele-time-line-item-line-turn',
               { 'is-primary-line': col.nextDataType === 'primary' },
               { 'is-danger-line': col.nextDataType === 'danger' }
             ]"
@@ -121,7 +122,7 @@
           isLast: itemData && index === data.length - 1
         });
       }
-      const key = i + '_' + cells.map((d) => d?.key ?? '').join();
+      const key = `${i}_${cells.map((d) => d?.key ?? '').join()}`;
       rows.push({
         key,
         items: cells,
@@ -140,8 +141,10 @@
 
   /** 容器尺寸改变监听器 */
   const observer = new ResizeObserver(() => {
-    const listEl = listRef.value;
-    listWidth.value = listEl?.clientWidth || 0;
+    requestAnimationFrame(() => {
+      const listEl = listRef.value;
+      listWidth.value = listEl?.clientWidth || 0;
+    });
   });
 
   onMounted(() => {

@@ -1,35 +1,36 @@
 <template>
-  <div :style="{ height: '100%', display: 'flex', flexDirection: 'column' }">
+  <div :style="{ padding: '6px', boxSizing: 'border-box', display: 'flex' }">
     <div
-      class="setting-layout-cover-bg-light"
-      :style="{
-        height: '14px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        paddingRight: '4px'
-      }"
+      class="ele-setting-layout-cover-bg-light"
+      :style="{ width: '32px', borderRadius: '3px', marginRight: '6px' }"
     >
-      <IconSkeleton :style="{ width: '8px', height: '8px' }" />
-    </div>
-    <div :style="{ flex: 1, display: 'flex', padding: '6px' }">
       <div
-        class="setting-layout-cover-bg-light"
-        :style="{ width: '32px', borderRadius: '4px' }"
+        class="ele-setting-layout-cover-border-lighter"
+        :style="{
+          width: '12px',
+          height: '100%',
+          borderRightStyle: 'solid',
+          borderRightWidth: '1px'
+        }"
+      ></div>
+    </div>
+    <div :style="{ flex: 1, display: 'flex', flexDirection: 'column' }">
+      <div
+        class="ele-setting-layout-cover-bg-light"
+        :style="{
+          height: '12px',
+          borderRadius: '3px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          paddingRight: '4px'
+        }"
       >
-        <div
-          class="setting-layout-cover-border-lighter"
-          :style="{
-            width: '12px',
-            height: '100%',
-            borderRightStyle: 'solid',
-            borderRightWidth: '1px'
-          }"
-        ></div>
+        <IconSkeleton :style="{ width: '6px', height: '6px' }" />
       </div>
       <div
-        class="setting-layout-cover-bg-light"
-        :style="{ flex: 1, marginLeft: '6px', borderRadius: '4px' }"
+        class="ele-setting-layout-cover-bg-light"
+        :style="{ flex: 1, marginTop: '4px', borderRadius: '3px' }"
       ></div>
     </div>
   </div>

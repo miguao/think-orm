@@ -1,8 +1,8 @@
 <!-- 状态点 -->
 <template>
   <span
+    class="ele-dot"
     :class="[
-      'ele-dot',
       { 'is-success': 'success' === type },
       { 'is-warning': 'warning' === type },
       { 'is-danger': 'danger' === type },

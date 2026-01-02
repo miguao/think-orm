@@ -1,3 +1,4 @@
+<!-- 图片上传 -->
 <template>
   <CommonUpload
     v-model="images"
@@ -20,6 +21,7 @@
     :beforeUploadClick="beforeUploadClick"
     :beforeItemEdit="beforeItemEdit"
     :locale="locale"
+    :componentLang="componentLang"
   />
 </template>
 
@@ -38,7 +40,8 @@
     BeforeItemEdit,
     UploadLocale
   } from 'ele-admin-plus/es/ele-upload-list/types';
-  import CommonUpload from '../CommonUpload/index.vue';
+  import type { CommonUploadLocale } from '@/components/CommonUpload/config';
+  import CommonUpload from '@/components/CommonUpload/index.vue';
 
   defineOptions({ name: 'ImageUpload' });
 
@@ -84,6 +87,8 @@
       beforeItemEdit?: BeforeItemEdit;
       /** 国际化 */
       locale?: Partial<UploadLocale>;
+      /** 自定义文案 */
+      componentLang?: CommonUploadLocale;
     }>(),
     {
       fileLimit: 100,

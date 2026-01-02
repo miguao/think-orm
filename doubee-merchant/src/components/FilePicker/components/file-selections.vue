@@ -1,22 +1,22 @@
 <template>
-  <div class="file-picker-right">
-    <div class="file-picker-right-header">
-      <div class="file-picker-right-title">
-        <span>已选择 </span>
+  <div class="ele-file-picker-right">
+    <div class="ele-file-picker-right-header">
+      <div class="ele-file-picker-right-title">
+        <span>{{ lang.selected }}</span>
         <span>{{ fileSelections.length }}</span>
         <template v-if="limit">
           <span> / </span>
           <span>{{ limit }}</span>
         </template>
-        <span v-else> 个</span>
+        <span v-else>{{ lang.selectedUnit }}</span>
       </div>
       <ElLink
         type="danger"
         underline="never"
-        class="file-picker-right-clear"
+        class="ele-file-picker-right-clear"
         @click="clearSelections"
       >
-        清空
+        {{ lang.clear }}
       </ElLink>
     </div>
     <EleUploadList
@@ -42,6 +42,7 @@
   import { valueIsChanged } from 'ele-admin-plus/es/ele-basic-select/util';
   import type { FileItem } from 'ele-admin-plus/es/ele-file-list/types';
   import type { UploadItem } from 'ele-admin-plus/es/ele-upload-list/types';
+  import type { FilePickerLocale } from '../types';
 
   const props = defineProps<{
     /** 选中的文件数据 */
@@ -52,6 +53,8 @@
     selectionListProps?: EleUploadListProps;
     /** 统一设置层级 */
     baseIndex?: number;
+    /** 组件文案 */
+    lang: FilePickerLocale;
   }>();
 
   const emit = defineEmits<{

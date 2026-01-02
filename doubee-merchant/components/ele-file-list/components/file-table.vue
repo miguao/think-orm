@@ -1,6 +1,6 @@
 <!-- 表格布局 -->
 <template>
-  <ReceiverView class="ele-file-list-table">
+  <MainContent class="ele-file-list-table">
     <!-- 表头 -->
     <div class="ele-file-list-header">
       <div class="ele-file-list-item">
@@ -12,8 +12,8 @@
           >
             <i
               v-if="selectionType === 'checkbox'"
+              class="ele-file-list-checkbox"
               :class="[
-                'ele-file-list-checkbox',
                 { 'is-checked': isCheckAll },
                 { 'is-indeterminate': isIndeterminate }
               ]"
@@ -22,7 +22,8 @@
           </div>
           <!-- 文件名 -->
           <div
-            :class="['ele-file-list-item-name', { 'is-sortable': sortable }]"
+            class="ele-file-list-item-name"
+            :class="{ 'is-sortable': sortable }"
             @click="handleSortChange('name')"
           >
             <span>{{ nameText }}</span>
@@ -33,10 +34,8 @@
             v-for="col in tableCols"
             :key="col.prop"
             :style="col.headerStyle || col.style"
-            :class="[
-              'ele-file-list-item-cell',
-              { 'is-sortable': col.sortable }
-            ]"
+            class="ele-file-list-item-cell"
+            :class="{ 'is-sortable': col.sortable }"
             @click="handleSortChange(col.prop, col)"
           >
             <span>
@@ -86,13 +85,13 @@
         </template>
       </FileTableItem>
     </div>
-  </ReceiverView>
+  </MainContent>
 </template>
 
 <script lang="ts" setup>
   import type { PropType } from 'vue';
   import { computed } from 'vue';
-  import ReceiverView from '../../ele-config-provider/components/receiver-view';
+  import MainContent from '../../ele-loading/components/main-content.vue';
   import FileTableItem from './file-table-item.vue';
   import FileSort from './file-sort.vue';
   import type {

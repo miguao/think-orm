@@ -1,4 +1,4 @@
-<!-- markdown编辑器 -->
+<!-- markdown 编辑器 -->
 <template>
   <div ref="rootRef" class="ele-bytemd-wrap"></div>
 </template>
@@ -97,6 +97,8 @@
 </script>
 
 <style lang="scss">
+  @use 'element-plus/theme-chalk/src/mixins/function.scss' as *;
+
   .ele-bytemd-wrap {
     width: 100%;
     line-height: initial;
@@ -104,15 +106,16 @@
     /* 修改编辑器高度 */
     .bytemd {
       height: v-bind(height);
-      background: none;
+      /* background: none; */
 
-      .CodeMirror {
+      /* .CodeMirror {
         background: none;
-      }
+      } */
 
       /* 修改全屏的zIndex */
       &.bytemd-fullscreen {
         z-index: v-bind(fullIndex);
+        /* background: getCssVar('bg-color'); */
       }
 
       /* 去掉默认的最大宽度限制 */
@@ -137,7 +140,7 @@
     }
   }
 
-  body .markdown-body {
+  /* body .markdown-body {
     background: none;
-  }
+  } */
 </style>

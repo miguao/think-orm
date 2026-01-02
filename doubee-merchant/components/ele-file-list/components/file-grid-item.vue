@@ -1,8 +1,8 @@
 <!-- 网格布局条目 -->
 <template>
   <div
+    class="ele-file-list-item"
     :class="[
-      'ele-file-list-item',
       { 'is-checked': selected },
       { 'is-active': ctxMenuDropdownVisible }
     ]"

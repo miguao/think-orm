@@ -3,8 +3,7 @@
     <ele-config-provider
       :locale="eleLocale"
       :table="tableConfig"
-      :map-key="MAP_KEY"
-      :license="LICENSE_CODE"
+      :map-key="mapKey"
     >
       <ele-app>
         <router-view />
@@ -14,10 +13,10 @@
 </template>
 
 <script lang="ts" setup>
-  import { MAP_KEY, LICENSE_CODE } from '@/config/setting';
   import { useGlobalConfig } from '@/config/use-global-config';
   import { useThemeStore } from '@/store/modules/theme';
   import { useLocale } from '@/i18n/use-locale';
+  const mapKey = import.meta.env.VITE_MAP_KEY;
 
   /** 组件全局配置 */
   const { tableConfig } = useGlobalConfig();

@@ -132,7 +132,7 @@ function doPrintOnFrame(opt: PrintOption, printId: number, timeout?: number) {
       ${timeout != null ? 'setTimeout(() => {' : ''}
         window.print(${printOption});
         window.parent.postMessage('elePrintDone_${printId}', '*');
-      ${timeout != null ? '}, ' + timeout + ');' : ''}
+      ${timeout != null ? ['}, ', timeout, ');'].join('') : ''}
     };
   </script>
   `;
@@ -141,7 +141,7 @@ function doPrintOnFrame(opt: PrintOption, printId: number, timeout?: number) {
     .replace(/<script/g, '<textarea style="display:none;" ')
     .replace(/<\/script>/g, '</textarea>')
     .replace(/<\/html>/, optHtml + '</html>');
-  pDoc.write('<!DOCTYPE html>' + content);
+  pDoc.write(`<!DOCTYPE html>${content}`);
   pDoc.close();
   return pWin;
 }

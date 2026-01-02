@@ -1,23 +1,6 @@
 import request from '@/utils/request';
 import type { ApiResult, PageResult } from '@/api';
-import type {
-  NoticeResult,
-  Message,
-  UserItem,
-  UserScore,
-  Piece,
-  PieceParam
-} from './model';
-
-/**
- * 查询未读通知
- */
-export async function getUnreadNotice(): Promise<NoticeResult> {
-  const res = await request.get(
-    'https://cdn.eleadmin.com/20200610/message.json'
-  );
-  return res.data;
-}
+import type { Message, UserItem, UserScore, Piece, PieceParam } from './model';
 
 /**
  * 分页查询通知

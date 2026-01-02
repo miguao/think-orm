@@ -2,16 +2,17 @@
   <EleModal
     :form="true"
     :width="460"
-    title="添加分组"
+    :title="lang.groupAddTitle"
     :zIndex="baseIndex"
     :appendToBody="false"
+    :loading="loading"
     v-bind="modalProps || {}"
     v-model="visible"
     @open="handleOpen"
     @closed="handleClosed"
   >
     <ElForm ref="formRef" :model="form" labelWidth="82px" @submit.prevent="">
-      <ElFormItem label="上级分组" prop="parentId">
+      <ElFormItem :label="lang.groupParent" prop="parentId">
         <ElTreeSelect
           v-model="form.parentId"
           :data="groupData.filter((d) => d.id !== 0 && d.id !== -1)"
@@ -20,7 +21,7 @@
           :clearable="true"
           :checkStrictly="true"
           :defaultExpandAll="true"
-          placeholder="请选择上级分组"
+          :placeholder="lang.groupParentPlaceholder"
           :popperOptions="{ strategy: 'fixed' }"
           :teleported="false"
           class="ele-fluid"
@@ -28,43 +29,45 @@
           <template #default="{ data }">
             <img
               src="/ele-file-list/ic_file_folder.png"
-              class="file-picker-tree-icon"
+              class="ele-file-picker-tree-icon"
             />
             <span>{{ data.name }}</span>
           </template>
           <template v-if="form.parentId" #prefix>
             <img
               src="/ele-file-list/ic_file_folder.png"
-              class="file-picker-tree-icon"
+              class="ele-file-picker-tree-icon"
             />
           </template>
         </ElTreeSelect>
       </ElFormItem>
       <ElFormItem
-        label="分组名称"
+        :label="lang.groupName"
         prop="name"
         :rules="[
           {
             required: true,
-            message: '请输入分组名称',
+            message: lang.groupNamePlaceholder,
             type: 'string',
             trigger: 'blur'
           }
         ]"
       >
         <ElInput
-          :maxlength="20"
+          :maxlength="200"
           :clearable="true"
           v-model="form.name"
-          placeholder="请输入分组名称"
+          :placeholder="lang.groupNamePlaceholder"
         />
       </ElFormItem>
     </ElForm>
     <template #footer>
-      <ElButton @click="handleCancel">取消</ElButton>
-      <ElButton type="primary" :loading="loading" @click="save">
-        保存
-      </ElButton>
+      <BtnItems
+        :items="[
+          { preset: 'cancel', onClick: () => handleCancel() },
+          { preset: 'save', onClick: () => save() }
+        ]"
+      />
     </template>
   </EleModal>
 </template>
@@ -74,8 +77,9 @@
   import type { FormInstance } from 'element-plus';
   import type { EleModalProps } from 'ele-admin-plus/es/ele-app/plus';
   import { useFormData } from '@/utils/use-form-data';
-  import { addUserFile } from '@/api/system/user-file';
-  import type { UserFile } from '@/api/system/user-file/model';
+  import BtnItems from '@/components/BtnItems/index.vue';
+  import type { FilePickerLocale, UserFile } from '../types';
+  import { addGroupApi } from '../config';
 
   const props = defineProps<{
     /** 上级分组 */
@@ -88,6 +92,8 @@
     baseIndex?: number;
     /** 消息提示组件 */
     messageIns?: any;
+    /** 组件文案 */
+    lang: FilePickerLocale;
   }>();
 
   const emit = defineEmits<{
@@ -121,7 +127,7 @@
         return;
       }
       loading.value = true;
-      addUserFile({ ...form, isDirectory: 1 })
+      addGroupApi({ ...form, isDirectory: 1 })
         .then((msg) => {
           loading.value = false;
           props.messageIns?.success?.(msg);

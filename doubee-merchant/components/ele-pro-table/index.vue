@@ -1,18 +1,31 @@
 <!-- 高级表格 -->
 <template>
-  <EleLoading v-bind="loadingProps">
+  <EleLoading
+    v-bind="props.loadingProps || {}"
+    :loading="tableLoading"
+    class="ele-pro-table"
+    :class="[
+      { 'is-maximized': tableMaximized },
+      { 'is-border': tableProps.border },
+      {
+        'is-default-toolbar':
+          tableToolbarProps && tableToolbarProps.theme === 'default'
+      }
+    ]"
+    :style="
+      tableMaximized
+        ? { zIndex: maximizedIndex ?? globalProps.maximizedIndex }
+        : void 0
+    "
+  >
     <slot name="topExtra"></slot>
     <!-- 工具栏 -->
-    <EleToolbar
-      v-if="tableToolbarProps"
-      v-bind="tableToolbarProps === true ? {} : tableToolbarProps"
-    >
+    <EleToolbar v-if="tableToolbarProps" v-bind="tableToolbarProps">
       <slot name="toolbar"></slot>
       <template #tools>
         <slot name="tools"></slot>
         <TableTools
           v-if="toolNames && toolNames.length"
-          ref="tableToolsRef"
           :tools="toolNames"
           :size="tableSize"
           :columns="columns"
@@ -20,28 +33,13 @@
           :columnFixed="columnFixed"
           :maximized="tableMaximized"
           :cacheKey="cacheKey"
-          :locale="locale"
-          :selections="selections"
-          :pageData="tableData"
-          :spanMethod="spanMethod"
-          :tableHeader="showHeader"
-          :showSummary="showSummary"
-          :sumText="sumText"
-          :summaryMethod="summaryMethod"
-          :tableStyle="tableStyle"
-          :cellStyle="cellStyle"
-          :cellClassName="cellClassName"
-          :headerCellStyle="headerCellStyle"
-          :headerCellClassName="headerCellClassName"
-          :pageIndex="tableIndex"
-          :treeProps="treeProps"
-          :fetch="fetch"
-          :exportConfig="toolExportConfig"
-          :printConfig="toolPrintConfig"
+          :lang="lang"
           @reload="handleRefresh"
           @update:size="handleSizeChange"
           @update:columns="handleColumnsChange"
           @update:maximized="handleMaximizedChange"
+          @openExportModal="openExportModal"
+          @openPrintModal="openPrintModal"
         >
           <template
             v-for="name in Object.keys($slots).filter(
@@ -100,22 +98,86 @@
       </ElePagination>
     </div>
     <slot name="bottomExtra"></slot>
+    <ToolExport
+      ref="toolExportRef"
+      :locale="lang"
+      :cacheKey="cacheKey"
+      :modalProps="toolExportConfig.modalProps"
+      :columns="toolExportConfig.columns || columns"
+      :selections="selections"
+      :pageData="tableData"
+      :datasource="toolExportConfig.datasource"
+      :spanMethod="spanMethod"
+      :tableHeader="toolExportConfig.showHeader ?? showHeader"
+      :showSummary="showSummary"
+      :sumText="sumText"
+      :summaryMethod="summaryMethod"
+      :pageIndex="tableIndex"
+      :treeProps="treeProps"
+      :fetch="fetch"
+      :defaultFileName="toolExportConfig.fileName"
+      :defaultDataType="toolExportConfig.dataType"
+      :defaultShowFooter="toolExportConfig.showFooter"
+      :defaultShowTreeIndex="toolExportConfig.showTreeIndex"
+      :beforeExport="toolExportConfig.beforeExport"
+      :exportPlugin="toolExportConfig.exportPlugin"
+      :getDatasourceResult="getDatasourceResult"
+    />
+    <ToolPrint
+      ref="toolPrintRef"
+      :locale="lang"
+      :cacheKey="cacheKey"
+      :modalProps="toolPrintConfig.modalProps"
+      :printerProps="toolPrintConfig.printerProps"
+      :tableProps="toolPrintConfig.tableProps"
+      :columns="toolPrintConfig.columns || columns"
+      :selections="selections"
+      :pageData="tableData"
+      :datasource="toolPrintConfig.datasource"
+      :spanMethod="spanMethod"
+      :tableHeader="toolPrintConfig.showHeader ?? showHeader"
+      :showSummary="showSummary"
+      :sumText="sumText"
+      :summaryMethod="summaryMethod"
+      :tableStyle="tableStyle"
+      :cellStyle="cellStyle"
+      :cellClassName="cellClassName"
+      :headerCellStyle="headerCellStyle"
+      :headerCellClassName="headerCellClassName"
+      :pageIndex="tableIndex"
+      :treeProps="treeProps"
+      :fetch="fetch"
+      :defaultDataType="toolPrintConfig.dataType"
+      :defaultShowFooter="toolPrintConfig.showFooter"
+      :defaultShowTreeIndex="toolPrintConfig.showTreeIndex"
+      :beforePrint="toolPrintConfig.beforePrint"
+      :printPlugin="toolPrintConfig.printPlugin"
+      :getDatasourceResult="getDatasourceResult"
+    >
+      <template
+        v-for="name in Object.keys($slots).filter(
+          (k) => !toolsSlotExcludes.includes(k)
+        )"
+        #[name]="slotProps"
+      >
+        <slot :name="name" v-bind="slotProps || {}"></slot>
+      </template>
+    </ToolPrint>
   </EleLoading>
 </template>
 
 <script lang="ts" setup>
   import type { Ref } from 'vue';
   import { ref, shallowRef, computed, watch, onMounted, nextTick } from 'vue';
-  import { pick, getValue } from '../utils/common';
+  import { pick, getValue, uuid } from '../utils/common';
   import type { ElEmptyProps, ElTableInstance } from '../ele-app/el';
   import type {
-    EleLoadingProps,
     ElePaginationProps,
     EleDataTableProps,
     EleToolbarProps
   } from '../ele-app/plus';
   import type { TableGlobalConfig } from '../ele-config-provider/types';
-  import { useGlobalProps } from '../ele-config-provider/receiver';
+  import { useLocale, useGlobalProps } from '../ele-config-provider/receiver';
   import EleLoading from '../ele-loading/index.vue';
   import ElePagination from '../ele-pagination/index.vue';
   import type { PaginationTotal } from '../ele-pagination/types';
@@ -141,7 +203,10 @@
   import EleVirtualTable from '../ele-virtual-table/index.vue';
   import EleToolbar from '../ele-toolbar/index.vue';
   import TableTools from './components/table-tools.vue';
+  import ToolExport from './components/tool-export.vue';
+  import ToolPrint from './components/tool-print.vue';
   import type {
+    DatasourceParams,
     DatasourceFunction,
     DatasourceResult,
     ReloadFunction,
@@ -153,7 +218,8 @@
     TableViewInstance,
     ExportConfig,
     PrintConfig,
-    TableExportParams
+    TableExportParams,
+    GetDatasourceResultFunction
   } from './types';
   import {
     getTablePage,
@@ -175,7 +241,7 @@
     getRowKey
   } from './util';
   import { proTableProps, proTableEmits } from './props';
-  import type { TableToolsInstance } from './props';
+  import type { ToolExportInstance, ToolPrintInstance } from './props';
   const ownSlots = [
     'default',
     'toolbar',
@@ -194,9 +260,33 @@
 
   const emit = defineEmits(proTableEmits);
 
+  defineSlots<any>();
+
+  /** 表格当前的排序筛选搜索参数 */
+  const tableState: TableState = {
+    sorter: props.defaultSort ?? {},
+    filter: getDefaultFilter(props.columns),
+    where: props.where ?? {},
+    reloadId: null
+  };
+
+  /** 全局配置 */
+  const globalProps = useGlobalProps<TableGlobalConfig>('table');
+  const { lang } = useLocale('table', props);
+
+  /** 表格组件 */
+  const tableViewRef = ref<TableViewInstance>(null);
+
+  /** 获取表格组件引用 */
+  const getTableRef = (): TableViewInstance | undefined => {
+    return tableViewRef.value;
+  };
+
+  /** 表格组件原本的事件和实例方法 */
   const events = useEmits(emit);
   const methods = useMethods(() => getTableRef() as ElTableInstance);
-  const globalProps = useGlobalProps<TableGlobalConfig>('table');
+
+  /** 虚拟表格原本的事件 */
   const virtualTableEvents = {
     onEndEeached: (params: any) => {
       emit('endEeached', params);
@@ -209,18 +299,11 @@
     }
   };
 
-  /** 表格当前的排序筛选搜索参数 */
-  const tableState: TableState = {
-    sorter: props.defaultSort ?? {},
-    filter: getDefaultFilter(props.columns),
-    where: props.where ?? {}
-  };
+  /** 导出组件 */
+  const toolExportRef = ref<ToolExportInstance>(null);
 
-  /** 表头工具组件 */
-  const tableToolsRef = ref<TableToolsInstance>(null);
-
-  /** 表格组件 */
-  const tableViewRef = ref<TableViewInstance>(null);
+  /** 打印组件 */
+  const toolPrintRef = ref<ToolPrintInstance>(null);
 
   /** 当前页数据 */
   const tableData = ref<DataItem[]>([]);
@@ -250,7 +333,7 @@
   );
 
   /** 是否最大化 */
-  const tableMaximized = ref<boolean>(false);
+  const tableMaximized = ref<boolean>(props.maximized);
 
   /** 错误信息 */
   const errorText = ref<string>('');
@@ -340,11 +423,12 @@
   });
 
   /** 表头工具栏属性 */
-  const tableToolbarProps = computed<boolean | EleToolbarProps>(() => {
-    return mergeProps<EleToolbarProps>(
+  const tableToolbarProps = computed<false | EleToolbarProps>(() => {
+    const result = mergeProps<EleToolbarProps>(
       props.toolbar,
       globalProps.value.toolbar
     );
+    return result === true ? {} : result;
   });
 
   /** 表格导出配置 */
@@ -383,20 +467,45 @@
     };
   });
 
-  /** 根节点属性 */
-  const loadingProps = computed<EleLoadingProps>(() => {
-    const zIndex = props.maximizedIndex ?? globalProps.value.maximizedIndex;
+  /** 获取数据源请求参数 */
+  const getRequestParams = (parent?: DataItem): DatasourceParams => {
+    const { sorter, filter } = tableState;
+    const orders = getRequestOrders(
+      sorter,
+      props.request,
+      globalProps.value.request
+    );
     return {
-      ...(props.loadingProps || {}),
-      loading: tableLoading.value,
-      class: [
-        'ele-pro-table',
-        { 'is-maximized': tableMaximized.value },
-        { 'is-border': tableProps.value.border }
-      ],
-      style: tableMaximized.value ? { zIndex } : void 0
+      page: tablePage.value,
+      limit: tableLimit.value,
+      pages: getRequestPages(
+        tablePage.value,
+        tableLimit.value,
+        props.request,
+        globalProps.value.request
+      ),
+      where: Object.assign({}, tableState.where),
+      orders,
+      filters: getRequestFilters(filter),
+      sorter,
+      filter,
+      parent,
+      columns: tableCols.value
     };
-  });
+  };
+
+  /** 获取数据源返回结果 */
+  const getDatasourceResult: GetDatasourceResultFunction = (response) => {
+    const parseData = props.parseData ?? globalProps.value.parseData;
+    const result = parseData ? parseData(response) : response;
+    return getResponseResult(
+      result,
+      props.response,
+      globalProps.value.response,
+      props.lazy,
+      props.treeProps
+    );
+  };
 
   /** 加载数据 */
   const reload: ReloadFunction = (option, parent, resolve) => {
@@ -435,44 +544,24 @@
       return;
     }
     // 自定义请求方法
+    const tempId = uuid(8);
+    tableState.reloadId = tempId;
     if (!parent) {
       tableLoading.value = true;
     }
-    const filter = tableState.filter;
-    const orders = getRequestOrders(
-      sorter,
-      props.request,
-      globalProps.value.request
-    );
-    (props.datasource as DatasourceFunction)({
-      page: tablePage.value,
-      limit: tableLimit.value,
-      pages: getRequestPages(
-        tablePage.value,
-        tableLimit.value,
-        props.request,
-        globalProps.value.request
-      ),
-      where: Object.assign({}, tableState.where),
-      orders,
-      filters: getRequestFilters(filter),
-      sorter,
-      filter,
-      parent
-    })
+    const params = getRequestParams(parent);
+    (props.datasource as DatasourceFunction)(params)
       .then((response) => {
-        const parseData = props.parseData ?? globalProps.value.parseData;
-        const result = parseData ? parseData(response) : response;
-        const { data, total } = getResponseResult(
-          result,
-          props.response,
-          globalProps.value.response,
-          props.lazy,
-          props.treeProps
-        );
+        if (tableState.reloadId !== tempId) {
+          return;
+        }
+        const { data, total, result } = getDatasourceResult(response);
         requestCallback(data, total, parent, result, resolve);
       })
       .catch((e?: Error) => {
+        if (tableState.reloadId !== tempId) {
+          return;
+        }
         const errorMsg = e?.message;
         requestCallback(
           errorMsg == null ? errorMsg : String(errorMsg),
@@ -573,6 +662,9 @@
           getRowKeys(props.selections, tableRowKey.value)
         );
       }
+      if (getTableRef()) {
+        methods.setScrollTop(0);
+      }
     });
     emit('done', result, parent);
   };
@@ -605,6 +697,9 @@
   /** 全屏切换事件 */
   const handleMaximizedChange = (maximized: boolean) => {
     tableMaximized.value = maximized;
+    if (props.maximized !== maximized) {
+      emit('update:maximized', maximized);
+    }
     emit('maximizedChange', maximized);
   };
 
@@ -700,11 +795,6 @@
     methods.doLayout();
   };
 
-  /** 获取表格实例 */
-  const getTableRef = (): TableViewInstance | undefined => {
-    return tableViewRef.value;
-  };
-
   /** 获取当前页数据 */
   const getData = (): DataItem[] => {
     return tableData.value;
@@ -736,54 +826,34 @@
 
   /** 获取请求参数 */
   const fetch: FetchFunction = (callback) => {
-    const { sorter, filter } = tableState;
-    const orders = getRequestOrders(
-      sorter,
-      props.request,
-      globalProps.value.request
-    );
-    callback({
-      page: tablePage.value,
-      limit: tableLimit.value,
-      pages: getRequestPages(
-        tablePage.value,
-        tableLimit.value,
-        props.request,
-        globalProps.value.request
-      ),
-      where: Object.assign({}, tableState.where),
-      orders,
-      filters: getRequestFilters(filter),
-      sorter,
-      filter
-    });
+    callback(getRequestParams());
   };
 
   /** 打开打印弹窗 */
   const openPrintModal = () => {
-    if (tableToolsRef.value) {
-      tableToolsRef.value.openPrintModal();
+    if (toolPrintRef.value) {
+      toolPrintRef.value.openModal();
     }
   };
 
   /** 直接打印数据 */
   const printData = (params?: TableExportParams) => {
-    if (tableToolsRef.value) {
-      tableToolsRef.value.printData(params);
+    if (toolPrintRef.value) {
+      toolPrintRef.value.printData(params);
     }
   };
 
   /** 打开导出弹窗 */
   const openExportModal = () => {
-    if (tableToolsRef.value) {
-      tableToolsRef.value.openExportModal();
+    if (toolExportRef.value) {
+      toolExportRef.value.openModal();
     }
   };
 
   /** 直接导出数据 */
   const exportData = (params?: TableExportParams) => {
-    if (tableToolsRef.value) {
-      tableToolsRef.value.exportData(params);
+    if (toolExportRef.value) {
+      toolExportRef.value.exportData(params);
     }
   };
 
@@ -854,7 +924,24 @@
     { deep: true }
   );
 
+  watch(
+    () => props.maximized,
+    (maximized) => {
+      if (tableMaximized.value !== maximized) {
+        handleMaximizedChange(maximized);
+      }
+    }
+  );
+
   onMounted(() => {
+    if (props.current != null) {
+      methods.setCurrentRowKey(getValue(props.current, tableRowKey.value));
+    }
+    if (props.selections?.length) {
+      methods.setSelectedRowKeys(
+        getRowKeys(props.selections, tableRowKey.value)
+      );
+    }
     if (props.loadOnCreated) {
       reload();
     }
@@ -862,21 +949,21 @@
 
   defineExpose({
     ...methods,
-    tableToolsRef,
     tableViewRef,
-    tableData,
-    tableLoading,
-    tableProps,
     reload,
-    reloadTable,
-    getTableRef,
     getData,
     setData,
-    goPageByRowKey,
     fetch,
     openPrintModal,
     printData,
     openExportModal,
-    exportData
+    exportData,
+    getTableRef,
+    // 兼容旧版导出
+    tableData,
+    tableLoading,
+    tableProps,
+    reloadTable,
+    goPageByRowKey
   });
 </script>

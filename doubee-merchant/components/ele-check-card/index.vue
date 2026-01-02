@@ -4,7 +4,7 @@
     <ElRow v-if="row" v-bind="row === true ? {} : row">
       <ElCol
         v-for="(item, index) in optionData"
-        :key="index + '-' + item.value"
+        :key="`${index}-${item.value}`"
         v-bind="item.col || {}"
       >
         <CardItem
@@ -29,7 +29,7 @@
     <template v-else>
       <CardItem
         v-for="(item, index) in optionData"
-        :key="item.key ?? index + '-' + item.value"
+        :key="item.key ?? `${index}-${item.value}`"
         :item="item"
         :checked="isChecked(item)"
         :disabled="disabled || item.disabled"

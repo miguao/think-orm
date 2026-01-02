@@ -6,7 +6,7 @@
     </ElButton>
   </div>
   <FieldList
-    v-if="fields"
+    v-if="fields && fields.length"
     :items="fields"
     :collapseItemIds="collapseItemIds"
     @toggleItemCollapse="handleToggleItemCollapse"
@@ -16,11 +16,7 @@
     @addChildren="handleAddChildren"
     @updateItemChildren="handleUpdateItemChildren"
   />
-  <ElEmpty
-    v-if="!fields || !fields.length"
-    :imageSize="58"
-    class="ele-crud-builder-form-empty"
-  />
+  <ElEmpty v-else :imageSize="58" class="ele-crud-builder-form-empty" />
   <!-- 添加和修改表单 -->
   <Transition name="anim">
     <div

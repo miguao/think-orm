@@ -1,39 +1,44 @@
 import type EleAdminLayout from '../ele-admin-layout/index.vue';
 import type { BacktopProps } from '../ele-backtop/props';
 import type EleBasicSelect from '../ele-basic-select/index.vue';
+import type EleBasicSelectView from '../ele-basic-select/components/select-view.vue';
 import type { BreadcrumbProps } from '../ele-breadcrumb/props';
-import type { CropperProps } from '../ele-cropper/props';
 import type { CardProps } from '../ele-card/props';
-import type EleCrud from '../ele-crud/index';
-import type { CrudProps } from '../ele-crud/props';
-import type EleCrudBuilder from '../ele-crud-builder/index.vue';
+import type EleCronPanel from '../ele-cron-panel/index.vue';
 import type EleDataTable from '../ele-data-table/index';
 import type { DataTableProps } from '../ele-data-table/props';
+import type EleDrawer from '../ele-drawer/index.vue';
+import type { DrawerProps, DrawerPropsAndEmits } from '../ele-drawer/props';
 import type EleDropdown from '../ele-dropdown/index.vue';
-import type { DropdownProps } from '../ele-dropdown/props';
+import type {
+  DropdownProps,
+  DropdownPropsAndEmits
+} from '../ele-dropdown/props';
 import type { FileListProps } from '../ele-file-list/props';
 import type { ImageViewerProps } from '../ele-image-viewer/props';
 import type { LoadingProps } from '../ele-loading/props';
 import type EleMenus from '../ele-menus/index.vue';
 import type { MenusProps } from '../ele-menus/props';
 import type { MenuItem } from '../ele-menus/types';
-import type { ModalProps } from '../ele-modal/props';
+import type EleModal from '../ele-modal/index.vue';
+import type { ModalProps, ModalPropsAndEmits } from '../ele-modal/props';
+import type ElePage from '../ele-page/index.vue';
 import type { PageProps } from '../ele-page/props';
 import type { PaginationProps } from '../ele-pagination/props';
 import type ElePopconfirm from '../ele-popconfirm/index.vue';
-import type { PopconfirmProps } from '../ele-popconfirm/props';
+import type {
+  PopconfirmProps,
+  PopconfirmPropsAndEmits
+} from '../ele-popconfirm/props';
 import type ElePopover from '../ele-popover/index.vue';
 import type { PopoverProps } from '../ele-popover/props';
 import type { PrinterProps } from '../ele-printer/props';
-import type EleProForm from '../ele-pro-form/index.vue';
-import type { ProFormProps } from '../ele-pro-form/props';
-import type EleProFormBuilder from '../ele-pro-form-builder/index.vue';
-import type { ProFormBuilderProps } from '../ele-pro-form-builder/props';
 import type EleProTable from '../ele-pro-table/index.vue';
 import type { ProTableProps } from '../ele-pro-table/props';
 import type EleSplitPanel from '../ele-split-panel/index.vue';
 import type { SplitPanelProps } from '../ele-split-panel/props';
 import type { TableProps } from '../ele-table/props';
+import type EleTableSelect from '../ele-table-select/index.vue';
 import type EleTabs from '../ele-tabs/index.vue';
 import type EleText from '../ele-text/index.vue';
 import type { TextProps } from '../ele-text/props';
@@ -42,10 +47,10 @@ import type { ToolProps } from '../ele-tool/props';
 import type { ToolbarProps } from '../ele-toolbar/props';
 import type EleTooltip from '../ele-tooltip/index.vue';
 import type { TooltipProps } from '../ele-tooltip/props';
+import type EleTreeSelect from '../ele-tree-select/index.vue';
 import type EleUploadList from '../ele-upload-list/index.vue';
 import type { UploadListProps } from '../ele-upload-list/props';
 import type EleVirtualTable from '../ele-virtual-table/index.vue';
-import type ReceiverView from '../ele-config-provider/components/receiver-view';
 import type { MessageOptions } from '../utils/message';
 import type { MessageBoxOptions } from '../utils/message-box';
 import type { ComponentProps } from './types';
@@ -65,6 +70,10 @@ export type EleBacktopProps = ComponentProps<BacktopProps>;
  */
 export type EleBasicSelectInstance = InstanceType<typeof EleBasicSelect> | null;
 
+export type EleBasicSelectViewInstance = InstanceType<
+  typeof EleBasicSelectView
+> | null;
+
 /**
  * EleBreadcrumb
  */
@@ -76,26 +85,9 @@ export type EleBreadcrumbProps = ComponentProps<BreadcrumbProps>;
 export type EleCardProps = ComponentProps<CardProps>;
 
 /**
- * EleConfigProvider
+ * EleCronPanel
  */
-export type ReceiverViewInstance = InstanceType<typeof ReceiverView> | null;
-
-/**
- * EleCropper
- */
-export type EleCropperProps = ComponentProps<CropperProps>;
-
-/**
- * EleCrud
- */
-export type EleCrudInstance = InstanceType<typeof EleCrud> | null;
-
-export type EleCrudProps = ComponentProps<CrudProps>;
-
-/**
- * EleCrud
- */
-export type EleCrudBuilderInstance = InstanceType<typeof EleCrudBuilder> | null;
+export type EleCronPanelInstance = InstanceType<typeof EleCronPanel> | null;
 
 /**
  * EleDataTable
@@ -105,11 +97,22 @@ export type EleDataTableInstance = InstanceType<typeof EleDataTable> | null;
 export type EleDataTableProps = ComponentProps<DataTableProps>;
 
 /**
+ * EleDrawer
+ */
+export type EleDrawerInstance = InstanceType<typeof EleDrawer> | null;
+
+export type EleDrawerProps = ComponentProps<DrawerProps>;
+
+export type EleDrawerPropsAndEmits = ComponentProps<DrawerPropsAndEmits>;
+
+/**
  * EleDropdown
  */
 export type EleDropdownInstance = InstanceType<typeof EleDropdown> | null;
 
 export type EleDropdownProps = ComponentProps<DropdownProps>;
+
+export type EleDropdownPropsAndEmits = ComponentProps<DropdownPropsAndEmits>;
 
 /**
  * EleFileList
@@ -138,11 +141,17 @@ export type EleMenuItemProps = Partial<MenuItem>;
 /**
  * EleModal
  */
+export type EleModalInstance = InstanceType<typeof EleModal> | null;
+
 export type EleModalProps = ComponentProps<ModalProps>;
+
+export type EleModalPropsAndEmits = ComponentProps<ModalPropsAndEmits>;
 
 /**
  * ElePage
  */
+export type ElePageInstance = InstanceType<typeof ElePage> | null;
+
 export type ElePageProps = ComponentProps<PageProps>;
 
 /**
@@ -157,6 +166,8 @@ export type ElePopconfirmInstance = InstanceType<typeof ElePopconfirm> | null;
 
 export type ElePopconfirmProps = Partial<PopconfirmProps>;
 
+export type ElePopconfirmPropsAndEmits = Partial<PopconfirmPropsAndEmits>;
+
 /**
  * ElePopover
  */
@@ -168,22 +179,6 @@ export type ElePopoverProps = Partial<PopoverProps>;
  * ElePrinter
  */
 export type ElePrinterProps = ComponentProps<PrinterProps>;
-
-/**
- * EleProForm
- */
-export type EleProFormInstance = InstanceType<typeof EleProForm> | null;
-
-export type EleProFormProps = ComponentProps<ProFormProps>;
-
-/**
- * EleProFormBuilder
- */
-export type EleProFormBuilderInstance = InstanceType<
-  typeof EleProFormBuilder
-> | null;
-
-export type EleProFormBuilderProps = ComponentProps<ProFormBuilderProps>;
 
 /**
  * EleProTable
@@ -203,6 +198,11 @@ export type EleSplitPanelProps = ComponentProps<SplitPanelProps>;
  * EleTable
  */
 export type EleTableProps = ComponentProps<TableProps>;
+
+/**
+ * EleTableSelect
+ */
+export type EleTableSelectInstance = InstanceType<typeof EleTableSelect> | null;
 
 /**
  * EleTabs
@@ -234,6 +234,11 @@ export type EleToolbarProps = ComponentProps<ToolbarProps>;
 export type EleTooltipInstance = InstanceType<typeof EleTooltip> | null;
 
 export type EleTooltipProps = Partial<TooltipProps>;
+
+/**
+ * EleTreeSelect
+ */
+export type EleTreeSelectInstance = InstanceType<typeof EleTreeSelect> | null;
 
 /**
  * EleUploadList

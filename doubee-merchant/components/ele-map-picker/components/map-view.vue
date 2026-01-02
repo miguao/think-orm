@@ -1,11 +1,12 @@
 <template>
   <EleLoading
     :loading="loading"
-    :class="['ele-map-view', { 'is-poi-mode': poiMode }]"
+    class="ele-map-view"
+    :class="{ 'is-poi-mode': poiMode }"
     :style="{ height }"
   >
     <div class="ele-map-view-body">
-      <div ref="mapRef" style="height: 100%"></div>
+      <div ref="mapRef" :style="{ height: '100%' }"></div>
       <template v-if="poiMode">
         <ElIcon class="ele-map-view-icon-plus">
           <PlusOutlined />
@@ -79,17 +80,28 @@
         <div
           v-for="item in data"
           :key="item.key"
-          :class="['ele-map-view-item', { 'is-active': item === current }]"
+          class="ele-map-view-item"
+          :class="{ 'is-active': item === current }"
           @click="handleItemClick(item)"
         >
           <ElIcon class="ele-map-view-item-icon">
             <EnvironmentOutlined />
           </ElIcon>
           <div class="ele-map-view-item-body">
-            <div class="ele-map-view-item-title">{{ item.name }}</div>
-            <div v-if="item.address" class="ele-map-view-item-text">
-              {{ item.address }}
+            <div
+              v-if="!item.name && !item.address"
+              class="ele-map-view-item-title"
+            >
+              <span>{{ item.lng }}</span>
+              <span>,</span>
+              <span>{{ item.lat }}</span>
             </div>
+            <template v-else>
+              <div class="ele-map-view-item-title">{{ item.name }}</div>
+              <div v-if="item.address" class="ele-map-view-item-text">
+                {{ item.address }}
+              </div>
+            </template>
           </div>
           <ElIcon class="ele-map-view-item-radio">
             <CheckCircleOutlined />
@@ -122,10 +134,11 @@
   import {
     ref,
     computed,
-    watch,
-    nextTick,
     onMounted,
-    onBeforeUnmount
+    onBeforeUnmount,
+    nextTick,
+    inject,
+    watch
   } from 'vue';
   import AMapLoader from '@amap/amap-jsapi-loader';
   import {
@@ -141,8 +154,9 @@
     CheckCircleOutlined,
     SearchOutlined
   } from '../../icons/index';
-  import EleLoading from '../../ele-loading/index.vue';
   import type { ElAutocompleteInstance } from '../../ele-app/el';
+  import { modalItemContextKey } from '../../utils/hook';
+  import EleLoading from '../../ele-loading/index.vue';
   import type { PoiItem, City, MapState } from '../types';
   import { mapProps } from '../props';
   const ICON_CLASS = 'ele-map-view-body-icon';
@@ -157,7 +171,7 @@
     done: (_result: PoiItem) => true
   });
 
-  const state: MapState = {};
+  const state: MapState = { context: inject(modalItemContextKey, null) };
 
   /** 地图节点 */
   const mapRef = ref<HTMLDivElement | null>(null);
@@ -300,7 +314,7 @@
       }
       state.autoCompleteIns.search(keyword, (status: any, result: any) => {
         if (status === 'error') {
-          const msg = status + ' ' + (result ? JSON.stringify(result) : '');
+          const msg = `${status} ${result ? JSON.stringify(result) : ''}`;
           reject(new Error(msg));
           return;
         }
@@ -335,7 +349,7 @@
             resolve([]);
             return;
           }
-          const msg = status + ' ' + (result ? JSON.stringify(result) : '');
+          const msg = `${status} ${result ? JSON.stringify(result) : ''}`;
           reject(new Error(msg));
         }
       );
@@ -671,6 +685,9 @@
 
   /** 确定按钮点击事件 */
   const handleConfirm = () => {
+    if (!state.context?.label) {
+      return;
+    }
     // 未选择使用地图中心点
     if (!current.value) {
       confirmLoading.value = true;

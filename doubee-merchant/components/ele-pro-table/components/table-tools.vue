@@ -1,61 +1,5 @@
 <!-- 默认工具按钮 -->
 <template>
-  <ToolExport
-    ref="toolExportRef"
-    :locale="lang"
-    :cacheKey="cacheKey"
-    :modalProps="exportConfig.modalProps"
-    :columns="exportConfig.columns || columns"
-    :selections="selections"
-    :pageData="pageData"
-    :datasource="exportConfig.datasource"
-    :spanMethod="spanMethod"
-    :tableHeader="exportConfig.showHeader ?? tableHeader"
-    :showSummary="showSummary"
-    :sumText="sumText"
-    :summaryMethod="summaryMethod"
-    :pageIndex="pageIndex"
-    :treeProps="treeProps"
-    :fetch="fetch"
-    :defaultFileName="exportConfig.fileName"
-    :defaultDataType="exportConfig.dataType"
-    :defaultShowFooter="exportConfig.showFooter"
-    :defaultShowTreeIndex="exportConfig.showTreeIndex"
-    :beforeExport="exportConfig.beforeExport"
-  />
-  <ToolPrint
-    ref="toolPrintRef"
-    :locale="lang"
-    :cacheKey="cacheKey"
-    :modalProps="printConfig.modalProps"
-    :printerProps="printConfig.printerProps"
-    :tableProps="printConfig.tableProps"
-    :columns="printConfig.columns || columns"
-    :selections="selections"
-    :pageData="pageData"
-    :datasource="printConfig.datasource"
-    :spanMethod="spanMethod"
-    :tableHeader="printConfig.showHeader ?? tableHeader"
-    :showSummary="showSummary"
-    :sumText="sumText"
-    :summaryMethod="summaryMethod"
-    :tableStyle="tableStyle"
-    :cellStyle="cellStyle"
-    :cellClassName="cellClassName"
-    :headerCellStyle="headerCellStyle"
-    :headerCellClassName="headerCellClassName"
-    :pageIndex="pageIndex"
-    :treeProps="treeProps"
-    :fetch="fetch"
-    :defaultDataType="printConfig.dataType"
-    :defaultShowFooter="printConfig.showFooter"
-    :defaultShowTreeIndex="printConfig.showTreeIndex"
-    :beforePrint="printConfig.beforePrint"
-  >
-    <template v-for="name in Object.keys($slots)" #[name]="slotProps">
-      <slot :name="name" v-bind="slotProps || {}"></slot>
-    </template>
-  </ToolPrint>
   <template v-for="(tool, index) in tools">
     <!-- 刷新 -->
     <EleTool
@@ -78,7 +22,7 @@
       :clickHideTooltip="true"
       @click="openExportModal"
     >
-      <ElIcon style="transform: scale(1.1); transform-origin: bottom">
+      <ElIcon :style="{ transform: 'scale(1.1)', transformOrigin: 'bottom' }">
         <DownloadOutlined />
       </ElIcon>
     </EleTool>
@@ -147,14 +91,14 @@
     </EleTool>
     <!-- 自定义 -->
     <template v-else-if="tool && !ownSlots.includes(tool) && $slots[tool]">
-      <slot :name="tool" :pageIndex="pageIndex" :fetch="fetch"></slot>
+      <slot :name="tool"></slot>
     </template>
   </template>
 </template>
 
 <script lang="ts" setup>
   import type { PropType } from 'vue';
-  import { ref, computed } from 'vue';
+  import { computed } from 'vue';
   import { ElIcon } from 'element-plus';
   import {
     ReloadOutlined,
@@ -167,36 +111,13 @@
     FullscreenOutlined,
     FullscreenExitOutlined
   } from '../../icons/index';
-  import type { StyleValue } from '../../ele-app/types';
   import EleDropdown from '../../ele-dropdown/index.vue';
-  import { useLocale } from '../../ele-config-provider/receiver';
   import type { DropdownItem } from '../../ele-dropdown/types';
-  import type {
-    Columns,
-    TableSize,
-    DataItem,
-    SpanMethod,
-    SummaryMethod,
-    CellStyle,
-    CellClass,
-    HeaderCellStyle,
-    HeaderCellClass,
-    TreeProps
-  } from '../../ele-data-table/types';
+  import type { Columns, TableSize } from '../../ele-data-table/types';
   import { getSizeCacheKey } from '../util';
-  import type {
-    TableTool,
-    TableLocale,
-    FetchFunction,
-    ExportConfig,
-    PrintConfig,
-    TableExportParams
-  } from '../types';
-  import type { ToolExportInstance, ToolPrintInstance } from '../props';
+  import type { TableTool, TableLocale } from '../types';
   import EleTool from '../../ele-tool/index.vue';
   import ToolColumn from './tool-column.vue';
-  import ToolExport from './tool-export.vue';
-  import ToolPrint from './tool-print.vue';
   import { markRaw } from 'vue';
   const ownSlots = ['default', 'printTop', 'printBottom'];
 
@@ -219,45 +140,8 @@
     /** 本地缓存的名称 */
     cacheKey: String,
     /** 国际化 */
-    locale: Object as PropType<Partial<TableLocale>>,
-    /** 表格选中数据 */
-    selections: Array as PropType<DataItem[]>,
-    /** 表格当前页数据 */
-    pageData: Array as PropType<DataItem[]>,
-    /** 单元格合并行列方法 */
-    spanMethod: Function as PropType<SpanMethod>,
-    /** 表格是否有表头 */
-    tableHeader: Boolean,
-    /** 是否显示合计行 */
-    showSummary: Boolean,
-    /** 合计行文本 */
-    sumText: String,
-    /** 合计行自定义方法 */
-    summaryMethod: Function as PropType<SummaryMethod>,
-    /** 自定义表格样式 */
-    tableStyle: Object as PropType<StyleValue>,
-    /** 单元格样式 */
-    cellStyle: [Object, Function] as PropType<CellStyle>,
-    /** 单元格类名自定义 */
-    cellClassName: [String, Function] as PropType<CellClass>,
-    /** 单元格样式 */
-    headerCellStyle: [Object, Function] as PropType<HeaderCellStyle>,
-    /** 单元格类名自定义 */
-    headerCellClassName: [String, Function] as PropType<HeaderCellClass>,
-    /** 序号列起始索引 */
-    pageIndex: Number,
-    /** 树表字段名 */
-    treeProps: Object as PropType<TreeProps>,
-    /** 表格请求数据方法 */
-    fetch: Function as PropType<FetchFunction>,
-    /** 导出配置 */
-    exportConfig: {
-      type: Object as PropType<ExportConfig>,
-      required: true
-    },
-    /** 打印配置 */
-    printConfig: {
-      type: Object as PropType<PrintConfig>,
+    lang: {
+      type: Object as PropType<TableLocale>,
       required: true
     }
   });
@@ -270,16 +154,10 @@
       _tableColumns: Columns,
       _isReset: boolean
     ) => true,
-    'update:maximized': (_maximized: boolean) => true
+    'update:maximized': (_maximized: boolean) => true,
+    openExportModal: () => true,
+    openPrintModal: () => true
   });
-
-  const { lang } = useLocale<TableLocale>('table', props);
-
-  /** 导出组件 */
-  const toolExportRef = ref<ToolExportInstance>(null);
-
-  /** 打印组件 */
-  const toolPrintRef = ref<ToolPrintInstance>(null);
 
   /** 提示方向 */
   const placement = computed(() => (props.maximized ? 'bottom' : 'top'));
@@ -288,17 +166,17 @@
   const sizeDropdownItems = computed<DropdownItem[]>(() => {
     return [
       {
-        title: lang.value.sizeLarge,
+        title: props.lang.sizeLarge,
         command: 'large',
         icon: markRaw(SizeSlackOutlined)
       },
       {
-        title: lang.value.sizeDefault,
+        title: props.lang.sizeDefault,
         command: 'default',
         icon: markRaw(SizeMiddleOutlined)
       },
       {
-        title: lang.value.sizeSmall,
+        title: props.lang.sizeSmall,
         command: 'small',
         icon: markRaw(SizeCompactOutlined)
       }
@@ -334,36 +212,11 @@
 
   /** 打开导出弹窗 */
   const openExportModal = () => {
-    if (toolExportRef.value) {
-      toolExportRef.value.openModal();
-    }
+    emit('openExportModal');
   };
 
   /** 打开打印弹窗 */
   const openPrintModal = () => {
-    if (toolPrintRef.value) {
-      toolPrintRef.value.openModal();
-    }
+    emit('openPrintModal');
   };
-
-  /** 直接打印数据 */
-  const printData = (params?: TableExportParams) => {
-    if (toolPrintRef.value) {
-      toolPrintRef.value.printData(params);
-    }
-  };
-
-  /** 直接导出数据 */
-  const exportData = (params?: TableExportParams) => {
-    if (toolExportRef.value) {
-      toolExportRef.value.exportData(params);
-    }
-  };
-
-  defineExpose({
-    openPrintModal,
-    printData,
-    openExportModal,
-    exportData
-  });
 </script>

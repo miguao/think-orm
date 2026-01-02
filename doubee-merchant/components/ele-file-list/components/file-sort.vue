@@ -1,8 +1,8 @@
 <!-- 排序图标 -->
 <template>
   <i
+    class="ele-file-list-item-sort"
     :class="[
-      'ele-file-list-item-sort',
       { 'is-asc': name === sort && 'asc' === order },
       { 'is-desc': name === sort && 'desc' === order }
     ]"

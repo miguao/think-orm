@@ -24,11 +24,8 @@
       </ElIcon>
       <template #body>
         <div
-          :class="[
-            'ele-popover-body',
-            'ele-tool-column',
-            { 'is-sortable': sortable }
-          ]"
+          class="ele-popover-body ele-tool-column"
+          :class="{ 'is-sortable': sortable }"
         >
           <div class="ele-tool-column-header">
             <div class="ele-tool-column-label">

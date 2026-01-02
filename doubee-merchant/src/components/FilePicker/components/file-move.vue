@@ -1,27 +1,27 @@
 <template>
   <EleModal
     :width="460"
-    title="移动到"
+    :title="lang.moveTitle"
     :zIndex="baseIndex"
     :appendToBody="false"
     v-bind="modalProps || {}"
     v-model="visible"
     @open="handleOpen"
   >
-    <div class="file-picker-move-wrapper">
+    <div class="ele-file-picker-move-wrapper">
       <ElTree
         :data="groupData.filter((d) => d.id !== -1)"
         nodeKey="id"
         :props="{ label: 'name' }"
         :expandOnClickNode="false"
         :defaultExpandAll="true"
-        class="file-picker-move-tree"
+        class="ele-file-picker-move-tree"
         @node-click="handleGroupSelect"
       >
         <template #default="scope">
           <img
             src="/ele-file-list/ic_file_folder.png"
-            class="file-picker-tree-icon"
+            class="ele-file-picker-tree-icon"
           />
           <span
             :class="[
@@ -36,10 +36,12 @@
       </ElTree>
     </div>
     <template #footer>
-      <ElButton @click="handleCancel">取消</ElButton>
-      <ElButton type="primary" :loading="loading" @click="save">
-        保存
-      </ElButton>
+      <BtnItems
+        :items="[
+          { preset: 'cancel', onClick: () => handleCancel() },
+          { preset: 'save', onClick: () => save() }
+        ]"
+      />
     </template>
   </EleModal>
 </template>
@@ -47,8 +49,9 @@
 <script lang="ts" setup>
   import { ref } from 'vue';
   import type { EleModalProps } from 'ele-admin-plus/es/ele-app/plus';
-  import { updateUserFile } from '@/api/system/user-file';
-  import type { UserFile } from '@/api/system/user-file/model';
+  import BtnItems from '@/components/BtnItems/index.vue';
+  import type { FilePickerLocale, UserFile } from '../types';
+  import { moveFileApi } from '../config';
 
   const props = defineProps<{
     /** 文件数据 */
@@ -61,6 +64,8 @@
     baseIndex?: number;
     /** 消息提示组件 */
     messageIns?: any;
+    /** 组件文案 */
+    lang: FilePickerLocale;
   }>();
 
   const emit = defineEmits<{
@@ -94,7 +99,7 @@
       return;
     }
     loading.value = true;
-    updateUserFile({ id: props.data?.id, parentId })
+    moveFileApi({ id: props.data?.id, parentId })
       .then((msg) => {
         loading.value = false;
         props.messageIns?.success?.(msg);

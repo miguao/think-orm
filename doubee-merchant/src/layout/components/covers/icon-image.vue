@@ -1,6 +1,6 @@
 <template>
   <div
-    class="setting-layout-cover-bg-fill"
+    class="ele-setting-layout-cover-bg-fill"
     :style="{
       width: '46px',
       height: '34px',
@@ -10,7 +10,7 @@
     }"
   >
     <div
-      class="setting-layout-cover-bg-fill-dark"
+      class="ele-setting-layout-cover-bg-fill-dark"
       :style="{
         width: '12px',
         height: '12px',
@@ -21,7 +21,7 @@
       }"
     ></div>
     <div
-      class="setting-layout-cover-bg-fill-dark"
+      class="ele-setting-layout-cover-bg-fill-dark"
       :style="{
         width: '40px',
         height: '40px',

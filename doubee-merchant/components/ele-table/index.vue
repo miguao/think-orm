@@ -1,8 +1,8 @@
 <!-- 静态表格 -->
 <template>
   <table
+    class="ele-table"
     :class="[
-      'ele-table',
       { 'has-header': hasHeader },
       { 'has-footer': hasFooter },
       { 'is-stripe': stripe },

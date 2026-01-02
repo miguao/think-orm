@@ -835,7 +835,7 @@ export const defaultPageConfigFormItems: ProFormItemProps[] = [
     children: [
       {
         label: '添加表单设计',
-        prop: 'searchFormBuilder',
+        prop: 'addFormBuilder',
         type: 'crudBuilderFormDesign',
         itemType: 'view',
         props: { type: 'add' }
@@ -927,7 +927,7 @@ export const defaultPageConfigFormItems: ProFormItemProps[] = [
     children: [
       {
         label: '修改表单设计',
-        prop: 'searchFormBuilder',
+        prop: 'editFormBuilder',
         type: 'crudBuilderFormDesign',
         itemType: 'view',
         props: { type: 'edit' }

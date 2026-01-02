@@ -1,6 +1,6 @@
 <template>
   <div
-    class="setting-layout-cover-bg-fill-light"
+    :class="bgClass || 'ele-setting-layout-cover-bg-fill-light'"
     :style="{
       flexShrink: 0,
       height: { md: '10px', xs: '4px' }[size || 'md'],
@@ -14,5 +14,6 @@
 <script lang="ts" setup>
   defineProps<{
     size?: 'xs' | 'md';
+    bgClass?: string;
   }>();
 </script>

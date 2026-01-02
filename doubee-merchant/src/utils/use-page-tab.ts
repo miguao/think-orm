@@ -4,18 +4,24 @@ import type {
   TabItem,
   TabItemEventOption
 } from 'ele-admin-plus/es/ele-pro-layout/types';
-import { useThemeStore } from '@/store/modules/theme';
-import type { TabRemoveResult } from '@/store/modules/theme';
+import { useTabStore } from '@/store/modules/tab';
+import type { TabRemoveResult } from '@/store/modules/tab';
 import { HOME_PATH, LAYOUT_PATH, REDIRECT_PATH } from '@/config/setting';
 
 /**
  * 页签操作hook
  */
 export function usePageTab() {
-  const HOME_ROUTE = HOME_PATH || LAYOUT_PATH;
   const route = useRoute();
   const { push, replace } = useRouter();
-  const themeStore = useThemeStore();
+  const tabStore = useTabStore();
+
+  /**
+   * 获取主页路由地址
+   */
+  const getHomeRoutePath = () => {
+    return HOME_PATH || LAYOUT_PATH;
+  };
 
   /**
    * 获取当前路由对应的页签key
@@ -58,70 +64,80 @@ export function usePageTab() {
   /**
    * 关闭指定页签
    */
-  const removePageTab = (option: TabItemEventOption) => {
-    themeStore
+  const removePageTab = (option: TabItemEventOption, tip?: boolean) => {
+    tabStore
       .tabRemove(option)
       .then((result) => {
         handleRemoveDone(result);
       })
       .catch(() => {
-        EleMessage.error({ message: '当前页签不可关闭', plain: true });
+        if (tip !== false) {
+          EleMessage.error({ message: '当前页签不可关闭', plain: true });
+        }
       });
   };
 
   /**
    * 关闭左侧页签
    */
-  const removeLeftPageTab = (option: TabItemEventOption) => {
-    themeStore
+  const removeLeftPageTab = (option: TabItemEventOption, tip?: boolean) => {
+    tabStore
       .tabRemoveLeft(option)
       .then((result) => {
         handleRemoveDone(result);
       })
       .catch(() => {
-        EleMessage.error({ message: '左侧没有可关闭的页签', plain: true });
+        if (tip !== false) {
+          EleMessage.error({ message: '左侧没有可关闭的页签', plain: true });
+        }
       });
   };
 
   /**
    * 关闭右侧页签
    */
-  const removeRightPageTab = (option: TabItemEventOption) => {
-    themeStore
+  const removeRightPageTab = (option: TabItemEventOption, tip?: boolean) => {
+    tabStore
       .tabRemoveRight(option)
       .then((result) => {
         handleRemoveDone(result);
       })
       .catch(() => {
-        EleMessage.error({ message: '右侧没有可关闭的页签', plain: true });
+        if (tip !== false) {
+          EleMessage.error({ message: '右侧没有可关闭的页签', plain: true });
+        }
       });
   };
 
   /**
    * 关闭其它页签
    */
-  const removeOtherPageTab = (option: TabItemEventOption) => {
-    themeStore
+  const removeOtherPageTab = (option: TabItemEventOption, tip?: boolean) => {
+    tabStore
       .tabRemoveOther(option)
       .then((result) => {
         handleRemoveDone(result);
       })
       .catch(() => {
-        EleMessage.error({ message: '没有可关闭的页签', plain: true });
+        if (tip !== false) {
+          EleMessage.error({ message: '没有可关闭的页签', plain: true });
+        }
       });
   };
 
   /**
    * 关闭全部页签
    */
-  const removeAllPageTab = (option: TabItemEventOption) => {
-    themeStore
+  const removeAllPageTab = (option: TabItemEventOption, tip?: boolean) => {
+    tabStore
       .tabRemoveAll(option)
       .then((result) => {
         handleRemoveDone(result);
       })
       .catch(() => {
-        EleMessage.error({ message: '没有可关闭的页签', plain: true });
+        if (tip !== false) {
+          EleMessage.error({ message: '没有可关闭的页签', plain: true });
+        }
       });
   };
 
@@ -130,9 +146,11 @@ export function usePageTab() {
    */
   const handleRemoveDone = ({ path, home }: TabRemoveResult) => {
     if (path) {
-      push(path);
+      if (route.fullPath !== path) {
+        push(path);
+      }
     } else if (home) {
-      push(HOME_ROUTE);
+      push(getHomeRoutePath());
     }
   };
 
@@ -141,7 +159,7 @@ export function usePageTab() {
    * @param data 页签数据
    */
   const setPageTabs = (data: TabItem[]) => {
-    themeStore.setValue('tabs', data).catch((e) => console.error(e));
+    tabStore.setValue('tabs', data);
   };
 
   /**
@@ -156,7 +174,7 @@ export function usePageTab() {
    * @param data 页签数据
    */
   const addPageTab = (data: TabItem) => {
-    themeStore.tabAdd(data);
+    tabStore.tabAdd(data);
   };
 
   /**
@@ -164,7 +182,7 @@ export function usePageTab() {
    * @param data 页签数据
    */
   const setPageTab = (data: TabItem) => {
-    themeStore.tabSetItem(data);
+    tabStore.tabSetItem(data);
   };
 
   /**
@@ -177,10 +195,10 @@ export function usePageTab() {
 
   /**
    * 登录成功后跳转首页
-   * @param from 登录前的地址
+   * @param from 登录前的地址, 有则跳转到此地址, 没有则跳转到默认首页
    */
-  const goHomeRoute = (from?: string) => {
-    replace(from ? decodeURIComponent(from) : HOME_ROUTE);
+  const goHomeRoute = (from?: string | null) => {
+    replace(from ? decodeURIComponent(from) : getHomeRoutePath());
   };
 
   return {
@@ -197,6 +215,7 @@ export function usePageTab() {
     setPageTab,
     setPageTabTitle,
     getRouteTabKey,
+    getHomeRoutePath,
     goHomeRoute,
     routeTabKey
   };

@@ -5,7 +5,8 @@
     :title="lang.title"
     v-bind="modalProps || {}"
     :modelValue="modelValue"
-    :class="['ele-map-picker', { 'is-responsive': isResponsive }]"
+    class="ele-map-picker"
+    :class="{ 'is-responsive': isResponsive }"
     @update:modelValue="updateModelValue"
   >
     <MapView
@@ -30,17 +31,16 @@
 </template>
 
 <script lang="ts" setup>
-  import type { Ref } from 'vue';
   import { ref, computed, watch } from 'vue';
   import { pick } from '../utils/common';
+  import type { EleMapPickerViewInstance } from '../ele-app/plusx';
   import { useLocale } from '../ele-config-provider/receiver';
   import { useResponsive } from '../ele-pro-layout/util';
   import EleModal from '../ele-modal/index.vue';
   import MapView from './components/map-view.vue';
-  import type { PoiItem, MapLocale } from './types';
+  import type { PoiItem } from './types';
   import { mapPickerProps, mapPickerEmits, mapPropKeys } from './props';
   import type { MapProps } from './props';
-  type MapViewInstance = InstanceType<typeof MapView> | null;
 
   defineOptions({ name: 'EleMapPicker' });
 
@@ -48,13 +48,13 @@
 
   const emit = defineEmits(mapPickerEmits);
 
-  const { lang, globalConfig } = useLocale<MapLocale>('map', props);
+  const { lang, globalConfig } = useLocale('map', props);
 
   /** 是否开启布局响应 */
   const isResponsive = useResponsive(props);
 
   /** 地图组件 */
-  const mapRef: Ref<MapViewInstance> = ref<MapViewInstance>(null);
+  const mapRef = ref<EleMapPickerViewInstance>(null);
 
   /** 地图密钥 */
   const aMapKey = computed(() => props.mapKey || globalConfig.mapKey);

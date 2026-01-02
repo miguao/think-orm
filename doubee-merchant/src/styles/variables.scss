@@ -1,5 +1,5 @@
 /** ElementPlus样式变量修改(影响所有scss) */
-@use 'element-plus/theme-chalk/src/mixins/function.scss' as *;
+@use 'ele-admin-plus/es/style/util.scss' as *;
 
 @forward 'element-plus/theme-chalk/src/common/var.scss' with (
   $colors: (
@@ -84,12 +84,12 @@
     'header': (
       'primary-bg': linear-gradient(
           12deg,
-          getCssVar('color-primary'),
-          getCssVar('color-primary', 'light-3') 28%,
-          getCssVar('color-primary', 'light-5') 46%,
-          getCssVar('color-primary', 'light-3') 72%,
-          getCssVar('color-primary') 92%,
-          getCssVar('color-primary', 'dark-2')
+          elVar('color-primary'),
+          elVar('color-primary', 'light-3') 28%,
+          elVar('color-primary', 'light-5') 46%,
+          elVar('color-primary', 'light-3') 72%,
+          elVar('color-primary') 92%,
+          elVar('color-primary', 'dark-2')
         ),
       'primary-shadow': 'none'
     )

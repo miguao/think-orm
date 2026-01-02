@@ -3,92 +3,70 @@
     <div class="login-main">
       <ele-card shadow="always" class="login-card">
         <div class="login-cover">
-          <h1 class="login-title">{{ APP_NAME }}</h1>
+          <h1 class="login-title">{{ PROJECT_NAME }}</h1>
           <h4 class="login-subtitle">畅享高效、便捷的支付服务，从登录开始</h4>
         </div>
-
         <div class="login-body">
           <ele-text type="heading" style="font-size: 24px">
             轻松收款，从登录开始
           </ele-text>
 
-          <div style="margin-bottom: 10px; font-size: 14px; color: #888"
-            >没有账号？<router-link to="/register" class="router-link"
-              >立即注册</router-link
-            >，快速开启商户助手服务。
+          <div style="margin-bottom: 12px; font-size: 14px; color: #888">
+            没有账号？
+            <router-link to="/register" class="router-link">
+              立即注册
+            </router-link>
+            ，快速开启商户助手服务。
           </div>
-
           <ele-segmented
             v-model="tabActive"
             :items="[
-              { label: '账密登录', value: 1 },
-              { label: '验证码登录', value: 2 }
+              { label: '账密登录', value: 'passwordLogin' },
+              { label: '验证码登录', value: 'verificationCodeLogin' }
             ]"
             style="margin-bottom: 18px"
+            @change="handleTabChange"
           />
-
           <el-form
+            v-if="tabActive === 'passwordLogin'"
             ref="formRef"
             size="large"
             :model="form"
             :rules="rules"
-            @keyup.enter="onSubmit"
+            @keyup.enter="submit"
             @submit.prevent=""
           >
             <el-form-item prop="username">
               <el-input
                 clearable
                 v-model="form.username"
-                placeholder="请输入手机号或邮箱账号"
+                placeholder="手机号码 / 邮箱号码"
                 :prefix-icon="UserOutlined"
               />
             </el-form-item>
-
-            <el-form-item prop="password" v-if="tabActive == 1">
+            <el-form-item prop="password">
               <el-input
                 show-password
                 v-model="form.password"
-                placeholder="请输入密码"
+                placeholder="登录密码"
                 :prefix-icon="LockOutlined"
               />
             </el-form-item>
 
-            <el-form-item prop="verification_code" v-if="tabActive == 2">
-              <el-row :gutter="10" style="width: 100%">
-                <el-col :span="16">
-                  <el-input
-                    clearable
-                    v-model="form.verification_code"
-                    placeholder="请输入验证码"
-                    :prefix-icon="LockOutlined"
-                  />
-                </el-col>
-                <el-col :span="8">
-                  <el-button
-                    size="large"
-                    type="primary"
-                    :disabled="
-                      codeCountdown > 0 || !isValidUsername(form.username)
-                    "
-                    @click="onSendVerificationCode"
-                    style="width: 100%"
-                  >
-                    {{
-                      codeCountdown > 0
-                        ? `${codeCountdown}s后重试`
-                        : '获取验证码'
-                    }}
-                  </el-button>
-                </el-col>
-              </el-row>
+            <el-form-item prop="captcha">
+              <GeetestCaptcha
+                ref="captchaRef"
+                :captcha-id="captchaId"
+                product="popup"
+                @success="handleCaptchaSuccess"
+              />
             </el-form-item>
-
             <el-form-item>
               <div class="form-item-extra">
                 <el-checkbox v-model="form.remember"> 记住密码 </el-checkbox>
-                <router-link to="/forget" class="router-link"
-                  >忘记密码？</router-link
-                >
+                <router-link to="/forget" class="router-link">
+                  忘记密码？
+                </router-link>
               </div>
             </el-form-item>
             <el-form-item>
@@ -97,7 +75,7 @@
                 type="primary"
                 :loading="loading"
                 style="width: 100%"
-                @click="onSubmit"
+                @click="submit"
               >
                 立即登录
               </el-button>
@@ -106,143 +84,101 @@
         </div>
       </ele-card>
     </div>
-
     <PageFooter style="padding-top: 0" />
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, unref } from 'vue';
+  import { ref, reactive, computed } from 'vue';
   import type { FormInstance, FormRules } from 'element-plus';
+  import { EleMessage } from 'ele-admin-plus';
   import { UserOutlined, LockOutlined } from '@/components/icons';
   import PageFooter from '@/layout/components/page-footer.vue';
-  import {
-    passwordLogin,
-    verificationCodeLogin,
-    sendLoginVerificationCode
-  } from '@/api/login';
-  import { usePageTab } from '@/utils/use-page-tab';
-  import { useRouter } from 'vue-router';
-  import { EleMessage } from 'ele-admin-plus/es';
+  import { useLogin } from '@/utils/use-login';
+  import GeetestCaptcha from '@/components/GeetestCaptcha/index.vue';
+  import type { GeetestResult } from '@/components/GeetestCaptcha/index.vue';
 
-  /**
-   * 应用名称
-   */
-  const APP_NAME = import.meta.env.VITE_APP_NAME;
+  const PROJECT_NAME = import.meta.env.VITE_APP_NAME;
 
-  /**
-   * 页签选中(默认：账密登录)
-   */
-  const tabActive = ref(1);
+  const { login, checkLogin } = useLogin();
 
-  /**
-   * 表单数据
-   */
+  // 极验验证码ID（从环境变量或配置文件获取）
+  const captchaId =
+    import.meta.env.VITE_GEETEST_CAPTCHA_ID ||
+    '54088bb07d2df3c46b79f80300b0abbe';
+
+  // 极验组件引用
+  const captchaRef = ref<InstanceType<typeof GeetestCaptcha> | null>(null);
+
+  /** 页签选中 */
+  const tabActive = ref<'passwordLogin' | 'verificationCodeLogin'>(
+    'passwordLogin'
+  );
+
+  /** 表单 */
+  const formRef = ref<FormInstance | null>(null);
+
+  /** 加载状态 */
+  const loading = ref(false);
+
+  /** 表单数据 */
   const form = reactive({
     username: '',
     password: '',
-    verification_code: '',
-    remember: true
+    remember: true,
+    lot_number: '',
+    captcha_output: '',
+    pass_token: '',
+    gen_time: ''
   });
 
-  /**
-   * 表单实例
-   */
-  const formRef = ref<FormInstance | null>(null);
-
-  /**
-   * 验证规则
-   */
-  const rules = reactive<FormRules>({
-    username: [
-      {
-        required: true,
-        message: '请输入手机号或者邮箱账号',
-        type: 'string',
-        trigger: 'blur'
-      },
-      {
-        validator: (_rule, value, callback) => {
-          if (!value) {
-            callback(new Error('请输入手机号或者邮箱账号'));
-          } else if (!isValidUsername(value)) {
-            callback(new Error('请输入正确的手机号或邮箱格式'));
-          } else {
-            callback();
-          }
-        },
-        trigger: 'blur'
-      }
-    ],
-    password: [
-      {
-        required: true,
-        message: '请输入登录密码',
-        type: 'string',
-        trigger: 'blur'
-      }
-    ],
-    verification_code: [
-      {
-        required: true,
-        message: '请输入验证码',
-        type: 'string',
-        trigger: 'blur'
-      }
-    ]
+  /** 表单验证规则 */
+  const rules = computed<FormRules>(() => {
+    return {
+      username: [
+        {
+          required: true,
+          message: '请输入用户名',
+          type: 'string',
+          trigger: 'blur'
+        }
+      ],
+      password: [
+        {
+          required: true,
+          message: '请输入登录密码',
+          type: 'string',
+          trigger: 'blur'
+        }
+      ],
+      captcha: [
+        {
+          validator: (_rule: any, _value: any, callback: any) => {
+            if (!form.lot_number) {
+              callback(new Error('请完成验证码验证'));
+            } else {
+              callback();
+            }
+          },
+          trigger: 'change'
+        }
+      ]
+    };
   });
 
-  /**
-   * 验证码倒计时（单位：秒）
-   */
-  const codeCountdown = ref(0);
-  let timer: any = null; // 倒计时定时器，用于清除计时任务
+  /** 极验验证成功回调 */
+  const handleCaptchaSuccess = (result: GeetestResult) => {
+    form.lot_number = result.lot_number;
+    form.captcha_output = result.captcha_output;
+    form.pass_token = result.pass_token;
+    form.gen_time = result.gen_time;
 
-  /**
-   * 发送验证码
-   */
-  const onSendVerificationCode = () => {
-    const messageLoading = EleMessage.loading({
-      message: '请求中..',
-      plain: true
-    });
-
-    sendLoginVerificationCode(form.username)
-      .then((message) => {
-        EleMessage.success(message);
-        messageLoading.close();
-
-        codeCountdown.value = 180; // 启动倒计时（180秒）
-        clearInterval(timer);
-
-        timer = setInterval(() => {
-          codeCountdown.value--;
-          if (codeCountdown.value <= 0) {
-            clearInterval(timer);
-          }
-        }, 1000);
-      })
-      .catch((exception) => {
-        messageLoading.close();
-        EleMessage.error(exception.message);
-      });
+    // 手动触发表单验证
+    formRef.value?.validateField('captcha');
   };
 
-  /**
-   * 加载状态
-   */
-  const loading = ref(false);
-
-  /**
-   * 当前路由
-   */
-  const { currentRoute } = useRouter();
-  const { goHomeRoute, cleanPageTabs } = usePageTab();
-
-  /**
-   * 统一登录
-   */
-  const onSubmit = () => {
+  /** 提交 */
+  const submit = () => {
     formRef.value?.validate?.((valid) => {
       if (!valid) {
         return;
@@ -250,57 +186,25 @@
 
       loading.value = true;
 
-      /**
-       * 账密登录
-       */
-      if (tabActive.value === 1) {
-        passwordLogin(form)
-          .then((message) => {
-            EleMessage.success(message);
-            cleanPageTabs();
-            goHome();
-          })
-          .catch((exception) => {
-            loading.value = false;
-            EleMessage.error(exception.message);
-          });
-      }
+      const loginType = tabActive.value;
+      login(loginType, form).catch((exception: Error) => {
+        loading.value = false;
+        EleMessage.error({ message: exception.message, plain: true });
 
-      /**
-       * 验证码登录
-       */
-      if (tabActive.value === 2) {
-        verificationCodeLogin(form)
-          .then((message) => {
-            EleMessage.success(message);
-            cleanPageTabs();
-            goHome();
-          })
-          .catch((exception) => {
-            loading.value = false;
-            EleMessage.error(exception.message);
-          });
-      }
+        captchaRef.value?.reset();
+        form.lot_number = '';
+        form.captcha_output = '';
+        form.pass_token = '';
+        form.gen_time = '';
+      });
     });
   };
 
-  /**
-   * 跳转到首页
-   */
-  const goHome = () => {
-    const { query } = unref(currentRoute);
-    goHomeRoute(query.from as string);
-  };
+  /** 选项卡切换事件 */
+  const handleTabChange = (_active: number) => {};
 
-  /**
-   * 判断是否为手机/邮箱号码
-   * @param value 用户名
-   */
-  function isValidUsername(value: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^1[3-9]\d{9}$/;
-    return emailRegex.test(value) || phoneRegex.test(value);
-  }
+  /** 如果已登录直接进入首页 */
+  checkLogin().catch(() => {});
 </script>
 
 <style lang="scss" scoped>
@@ -332,6 +236,7 @@
       :deep(.ele-card-body) {
         display: flex;
         padding: 0;
+        height: 480px;
       }
     }
   }
@@ -368,6 +273,7 @@
     }
   }
 
+  /* 标题 */
   .login-title {
     color: rgba(255, 255, 255, 0.98);
     font-size: 28px;
@@ -420,23 +326,24 @@
       width: 100%;
     }
   }
-</style>
-
-<style lang="scss" scoped>
-  .form-item-extra {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-  }
 
   .router-link {
     color: #1677ff;
     text-decoration: none;
   }
-</style>
 
-<style lang="scss">
-  html.dark .login-wrapper {
-    background: #000;
+  .form-item-extra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  :deep(.geetest-captcha-wrapper) {
+    height: 40px;
+
+    .geetest-captcha-container {
+      height: 40px;
+    }
   }
 </style>

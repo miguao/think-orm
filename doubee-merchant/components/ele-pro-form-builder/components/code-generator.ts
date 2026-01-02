@@ -1,4 +1,4 @@
-import type { EleProFormProps } from '../../ele-app/plus';
+import type { EleProFormProps } from '../../ele-app/plusx';
 import { eachTree, mapTree, pick, omit } from '../../utils/common';
 import type {
   ProFormItemProps,

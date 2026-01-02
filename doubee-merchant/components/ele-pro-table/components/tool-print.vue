@@ -138,7 +138,7 @@
                 v-if="col.rowspan !== 0 && col.colspan !== 0"
                 :rowspan="col.rowspan"
                 :colspan="col.colspan"
-                style="padding-left: 0; padding-right: 0"
+                :style="{ paddingLeft: 0, paddingRight: 0 }"
                 class="ele-print-expand-td"
               >
                 <slot
@@ -170,10 +170,10 @@
                   verticalAlign: 'top',
                   borderLeftColor: col.hideLeftBorder ? 'transparent' : void 0
                 }"
-                :class="[
-                  'ele-print-tree-index',
-                  { 'is-placeholder': !col.text }
-                ]"
+                class="ele-print-tree-index"
+                :class="{
+                  'is-placeholder': col.text == null || col.text === ''
+                }"
               >
                 {{ col.text }}
               </td>
@@ -257,12 +257,14 @@
     TableLocale,
     ExportDataType,
     BeforeExport,
+    ExportPlugin,
     Datasource,
     DatasourceFunction,
     FetchFunction,
     ColItem,
     TablePrintOptions,
-    TableExportParams
+    TableExportParams,
+    GetDatasourceResultFunction
   } from '../types';
   import {
     getExportData,
@@ -339,7 +341,14 @@
     /** 默认是否勾选层级序号 */
     defaultShowTreeIndex: Boolean,
     /** 打印前的钩子函数 */
-    beforePrint: Function as PropType<BeforeExport>
+    beforePrint: Function as PropType<BeforeExport>,
+    /** 打印插件 */
+    printPlugin: Function as PropType<ExportPlugin>,
+    /** 获取数据源返回结果方法 */
+    getDatasourceResult: {
+      type: Function as PropType<GetDatasourceResultFunction>,
+      required: true
+    }
   });
 
   /** 弹窗是否显示 */
@@ -430,6 +439,7 @@
         colItems.value
       );
     const tableColumns =
+      params?.tableColumns ||
       params?.columns ||
       getCheckedColumns(
         props.columns,
@@ -452,36 +462,49 @@
       isShowTreeIndex,
       isShowHeader
     );
+    const printParams = {
+      data: printDataValue,
+      columns: printColumns,
+      headerData,
+      bodyData,
+      footerData,
+      bodyCols,
+      dataType: printDataType,
+      hideLoading,
+      closeModal,
+      showHeader: isShowHeader,
+      showFooter: isShowFooter,
+      showTreeIndex: isShowTreeIndex,
+      tableColumns
+    };
     if (typeof props.beforePrint === 'function') {
-      const flag = props.beforePrint({
-        data: printDataValue,
-        columns: printColumns,
-        headerData,
-        bodyData,
-        footerData,
-        bodyCols,
-        dataType: printDataType,
-        hideLoading,
-        closeModal,
-        showHeader: isShowHeader,
-        showFooter: isShowFooter,
-        showTreeIndex: isShowTreeIndex,
-        tableColumns
-      });
+      const flag = props.beforePrint(printParams);
       if (flag === false) {
         return;
       }
     }
-    printOptions.data = printDataValue;
-    printOptions.headerData = headerData;
-    printOptions.bodyData = bodyData;
-    printOptions.footerData = footerData;
-    printOptions.hasHeader = !!printOptions.headerData.length;
-    printOptions.hasFooter = !!printOptions.footerData.length;
-    printOptions.bodyCols = bodyCols;
-    nextTick(() => {
-      printOptions.printing = true;
-    });
+    if (props.printPlugin == null) {
+      printOptions.data = printDataValue;
+      printOptions.headerData = headerData;
+      printOptions.bodyData = bodyData;
+      printOptions.footerData = footerData;
+      printOptions.hasHeader = !!printOptions.headerData.length;
+      printOptions.hasFooter = !!printOptions.footerData.length;
+      printOptions.bodyCols = bodyCols;
+      nextTick(() => {
+        printOptions.printing = true;
+      });
+      return;
+    }
+    props
+      .printPlugin(printParams)
+      .then(() => {
+        hideLoading();
+        closeModal();
+      })
+      .catch(() => {
+        hideLoading();
+      });
   };
 
   /** 处理打印 */
@@ -501,16 +524,48 @@
     ) {
       return;
     }
+    const columns = getCheckedColumns(
+      props.columns,
+      colItems.value,
+      true,
+      void 0,
+      columnsPrintFilter,
+      false,
+      colItems.value
+    );
+    const tableColumns = getCheckedColumns(
+      props.columns,
+      colItems.value,
+      true,
+      void 0,
+      columnsPrintFilter,
+      true,
+      colItems.value
+    );
     showLoading();
     props.fetch((params) => {
-      (props.datasource as DatasourceFunction)(params)
+      (props.datasource as DatasourceFunction)({
+        ...params,
+        columns,
+        tableColumns
+      })
         .then((result) => {
           if (result == null) {
             hideLoading();
             closeModal();
             return;
           }
-          printData({ data: result as DataItem[] });
+          if (Array.isArray(result)) {
+            printData({ data: result as DataItem[] });
+            return;
+          }
+          const { data } = props.getDatasourceResult(result);
+          if (data == null) {
+            hideLoading();
+            closeModal();
+            return;
+          }
+          printData({ data });
         })
         .catch((e) => {
           console.error(e);

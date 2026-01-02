@@ -241,7 +241,9 @@ function normalizeOption(
     { default: isFn ? content : isStr ? void 0 : () => content }
   );
   const key = (opt.inner ? groupKey : void 0) ?? '';
-  opt.message = isStr ? `${key}_${content ?? ''}` : void 0;
+  opt.message = isStr
+    ? `${key}_${opt.type || 'info'}_${content ?? ''}`
+    : void 0;
   opt.grouping = isStr ? opt.grouping : false;
   return omit(opt, [
     'showClose',

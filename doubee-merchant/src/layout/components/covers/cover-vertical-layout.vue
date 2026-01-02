@@ -1,12 +1,20 @@
 <template>
-  <div :style="{ height: '100%', display: 'flex', flexDirection: 'column' }">
+  <div :style="{ display: 'flex', flexDirection: 'column' }">
     <div
-      class="setting-layout-cover-bg-primary"
-      :style="{ height: '14px' }"
-    ></div>
+      class="ele-setting-layout-cover-bg-primary"
+      :style="{
+        height: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        paddingRight: '4px'
+      }"
+    >
+      <IconSkeleton :style="{ width: '8px', height: '8px' }" />
+    </div>
     <div :style="{ flex: 1, display: 'flex' }">
       <div
-        class="setting-layout-cover-bg-light setting-layout-cover-border-lighter"
+        class="ele-setting-layout-cover-bg-light ele-setting-layout-cover-border-lighter"
         :style="{
           width: '28px',
           borderRightStyle: 'solid',
@@ -14,7 +22,7 @@
         }"
       ></div>
       <div
-        class="setting-layout-cover-bg-light"
+        class="ele-setting-layout-cover-bg-light"
         :style="{
           flex: 1,
           height: '8px',

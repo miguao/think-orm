@@ -4,7 +4,7 @@
 import NProgress from 'nprogress';
 import type { _RouteLocationBase } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
-import { REDIRECT_PATH, LAYOUT_PATH } from '@/config/setting';
+import { LOGIN_PATH, REDIRECT_PATH, LAYOUT_PATH } from '@/config/setting';
 import { useUserStore } from '@/store/modules/user';
 import { getToken } from '@/utils/token-util';
 import { setPageTitle } from '@/utils/page-title-util';
@@ -38,14 +38,14 @@ router.beforeEach(async (to) => {
     // 未登录跳转登录界面
     if (!isWhiteList(to.path)) {
       const query = { from: encodeURIComponent(to.fullPath) };
-      return { path: '/login', query: to.path === LAYOUT_PATH ? {} : query };
+      return { path: LOGIN_PATH, query: to.path === LAYOUT_PATH ? {} : query };
     }
     return;
   }
   // 注册动态路由
   const userStore = useUserStore();
   if (!userStore.menus) {
-    const { menus, homePath } = await userStore.fetchUserInfo();
+    const { menus, homePath } = await userStore.fetchUserInfo(to);
     if (menus) {
       getMenuRoutes(menus, homePath).forEach((r) => {
         router.addRoute(r);

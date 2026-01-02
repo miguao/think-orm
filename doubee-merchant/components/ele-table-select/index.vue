@@ -3,6 +3,9 @@
   <EleBasicSelect
     ref="selectRef"
     :value="modelValue"
+    :selectedLabel="selectedLabel"
+    :selected="selectedItems"
+    :visible="selectVisible"
     :multiple="multiple"
     :disabled="disabled"
     :size="size"
@@ -13,19 +16,22 @@
     :tagType="tagType"
     :automaticDropdown="automaticDropdown"
     :filterable="filterable"
+    :selectClass="selectClass"
+    :selectStyle="selectStyle"
+    :inputStyle="inputStyle"
+    :selectTagsStyle="selectTagsStyle"
+    :popperClass="selectPopperClass"
+    :popperWidth="popperWidth"
+    :popperHeight="popperHeight"
+    :popperType="popperType"
+    :popperProps="popperProps"
+    :popperSlots="{ footer: 'modalFooter', ...(popperSlots || {}) }"
+    :popperTitle="popperTitle"
     :teleported="teleported"
     :persistent="persistent"
     :placement="placement"
     :transition="transition"
-    :popperWidth="popperWidth"
     :popperOptions="popperOptions"
-    :popperClass="selectPopperClass"
-    :selectStyle="selectStyle"
-    :inputStyle="inputStyle"
-    :selectTagsStyle="selectTagsStyle"
-    :selectedLabel="selectedLabel"
-    :selected="selectedItems"
-    :visible="selectVisible"
     @update:visible="updateVisible"
     @filterChange="handleSelectFilter"
     @removeTag="handleSelectRemove"
@@ -33,47 +39,100 @@
     @focus="handleSelectFocus"
     @blur="handleSelectBlur"
   >
-    <slot name="popperTopExtra"></slot>
-    <EleProTable
-      @update:selectedRowKeys="updateSelectedRowKeys"
-      @update:currentRowKey="updateCurrentRowKey"
-      @selectionChange="handleTableSelectionChange"
-      @currentChange="handleTableCurrentChange"
-      @rowClick="handleTableRowClick"
-      @select="handleTableSelect"
-      @selectAll="handleTableSelectAll"
-      @done="handleTableDone"
-      v-bind="tableProps || {}"
-      ref="tableRef"
-      :rowKey="valueKey"
-      :reserveCurrent="true"
-      :highlightCurrentRow="!multiple"
-      :currentRowKey="currentRowKey"
-      :selectedRowKeys="selectedRowKeys"
+    <template
+      v-for="name in Object.keys($slots).filter(
+        (k) => k !== 'default' && !ownSlots.includes(k)
+      )"
+      #[name]="slotProps"
     >
-      <template
-        v-for="name in Object.keys($slots).filter(
-          (k) =>
-            ![
-              'popperTopExtra',
-              'popperBottomExtra',
-              'maxTagPlaceholder'
-            ].includes(k)
-        )"
-        #[name]="slotProps"
+      <slot :name="name" v-bind="slotProps || {}"></slot>
+    </template>
+    <component
+      v-if="wrapperComponent"
+      :is="wrapperComponent"
+      v-bind="wrapperComponentProps || {}"
+    >
+      <slot name="popperTopExtra"></slot>
+      <EleProTable
+        @update:selectedRowKeys="handleUpdateTableSelectedRowKeys"
+        @update:currentRowKey="handleUpdateTableCurrentRowKey"
+        @selectionChange="handleTableSelectionChange"
+        @currentChange="handleTableCurrentChange"
+        @rowClick="handleTableRowClick"
+        @select="handleTableSelect"
+        @selectAll="handleTableSelectAll"
+        @done="handleTableDone"
+        v-bind="tableProps || {}"
+        ref="proTableRef"
+        :rowKey="valueKey"
+        :reserveCurrent="true"
+        :highlightCurrentRow="!multiple"
+        :currentRowKey="tableCurrentRowKey"
+        :selectedRowKeys="tableSelectedRowKeys"
       >
-        <slot :name="name" v-bind="slotProps || {}"></slot>
-      </template>
-    </EleProTable>
-    <slot name="popperBottomExtra"></slot>
-    <template v-if="$slots.maxTagPlaceholder" #maxTagPlaceholder="slotProps">
-      <slot name="maxTagPlaceholder" v-bind="slotProps || {}"></slot>
+        <template
+          v-for="(slotName, compSlotName) in getSlotsMap(
+            $slots,
+            tableSlots,
+            [],
+            ownSlots,
+            !tableSlots
+          )"
+          #[compSlotName]="slotProps"
+        >
+          <slot :name="slotName" v-bind="slotProps || {}"></slot>
+        </template>
+      </EleProTable>
+      <slot name="popperBottomExtra"></slot>
+    </component>
+    <template v-else>
+      <slot name="popperTopExtra"></slot>
+      <EleProTable
+        @update:selectedRowKeys="handleUpdateTableSelectedRowKeys"
+        @update:currentRowKey="handleUpdateTableCurrentRowKey"
+        @selectionChange="handleTableSelectionChange"
+        @currentChange="handleTableCurrentChange"
+        @rowClick="handleTableRowClick"
+        @select="handleTableSelect"
+        @selectAll="handleTableSelectAll"
+        @done="handleTableDone"
+        v-bind="tableProps || {}"
+        ref="proTableRef"
+        :rowKey="valueKey"
+        :reserveCurrent="true"
+        :highlightCurrentRow="!multiple"
+        :currentRowKey="tableCurrentRowKey"
+        :selectedRowKeys="tableSelectedRowKeys"
+      >
+        <template
+          v-for="(slotName, compSlotName) in getSlotsMap(
+            $slots,
+            tableSlots,
+            [],
+            ownSlots,
+            !tableSlots
+          )"
+          #[compSlotName]="slotProps"
+        >
+          <slot :name="slotName" v-bind="slotProps || {}"></slot>
+        </template>
+      </EleProTable>
+      <slot name="popperBottomExtra"></slot>
+    </template>
+    <template v-if="isModalType && !$slots.modalFooter" #modalFooter>
+      <EleButtons
+        :items="[
+          { preset: 'cancel', onClick: () => updateVisible(false) },
+          { preset: 'confirm', onClick: () => handleConfirm() }
+        ]"
+      />
     </template>
   </EleBasicSelect>
 </template>
 
 <script lang="ts" setup>
-  import { ref, computed, watch, nextTick, onMounted } from 'vue';
+  import { ref, computed, watch, nextTick, onMounted, provide } from 'vue';
+  import { getValue, getSlotsMap } from '../utils/common';
   import type {
     EleBasicSelectInstance,
     EleProTableInstance
@@ -81,26 +140,28 @@
   import { useResponsive } from '../ele-pro-layout/util';
   import EleBasicSelect from '../ele-basic-select/index.vue';
   import type {
+    SelectValue,
     SingleValue,
     MultipleValue,
-    SelectValue,
     SelectedItem
   } from '../ele-basic-select/types';
   import {
+    SELECT_DATA_KEY,
     isEmptyValue,
     valueIsChanged,
     useFormValidate
   } from '../ele-basic-select/util';
+  import type { DataItem, DataKey, Column } from '../ele-data-table/types';
+  import EleButtons from '../ele-buttons/index.vue';
   import EleProTable from '../ele-pro-table/index.vue';
-  import { isDisableRow } from '../ele-data-table/util';
-  import type { DataKey, DataItem } from '../ele-data-table/types';
   import { tableSelectProps, tableSelectEmits } from './props';
+  const ownSlots = ['popperTopExtra', 'popperBottomExtra'];
 
   defineOptions({ name: 'EleTableSelect' });
 
-  const props = defineProps(tableSelectProps as any);
+  const props = defineProps(tableSelectProps);
 
-  const emit = defineEmits(tableSelectEmits as any);
+  const emit = defineEmits(tableSelectEmits);
 
   const { validateChange } = useFormValidate();
 
@@ -109,41 +170,30 @@
   /** 下拉选择组件 */
   const selectRef = ref<EleBasicSelectInstance>(null);
 
-  /** 表格组件 */
-  const tableRef = ref<EleProTableInstance>(null);
+  /** 高级表格组件 */
+  const proTableRef = ref<EleProTableInstance>(null);
 
   /** 下拉框是否显示 */
   const selectVisible = ref<boolean>(false);
 
-  /** 选中的标签 */
+  /** 选中的标签数据 */
   const selectedItems = ref<SelectedItem[]>([]);
 
-  /** 单选选中显示文本 */
-  const selectedLabel = computed<string>(() => {
-    const selected = selectedItems.value;
-    return !props.multiple && selected.length ? selected[0].label : '';
-  });
+  /** 弹窗模式临时选中的标签数据 */
+  const tempSelectedItems = ref<SelectedItem[]>([]);
 
-  /** 表格单选选中值 */
-  const currentRowKey = computed<DataKey | undefined>(() => {
-    if (props.multiple || isEmptyValue(props.modelValue)) {
-      return;
-    }
-    return props.modelValue as DataKey;
-  });
+  /** 弹窗模式临时选中值 */
+  const tempSelectValue = ref<SelectValue>();
 
-  /** 表格多选选中值 */
-  const selectedRowKeys = computed<DataKey[] | undefined>(() => {
-    if (!props.multiple || isEmptyValue(props.modelValue)) {
-      return;
-    }
-    return props.modelValue as DataKey[];
+  /** 是否是弹窗模式 */
+  const isModalType = computed<boolean>(() => {
+    return props.popperType === 'modal' || props.popperType === 'drawer';
   });
 
   /** 下拉框类名 */
   const selectPopperClass = computed<string>(() => {
     const classes: string[] = ['ele-table-select-popper'];
-    if (isResponsive.value) {
+    if (isResponsive.value && !isModalType.value) {
       classes.push('is-responsive');
     }
     if (props.popperClass) {
@@ -152,137 +202,43 @@
     return classes.join(' ');
   });
 
+  /** 单选选中显示文本 */
+  const selectedLabel = computed<string>(() => {
+    const selected = selectedItems.value;
+    return !props.multiple && selected.length ? selected[0].label : '';
+  });
+
+  /** 表格单选选中值 */
+  const tableCurrentRowKey = computed<DataKey | undefined>(() => {
+    if (isModalType.value) {
+      if (props.multiple || isEmptyValue(tempSelectValue.value)) {
+        return;
+      }
+      return tempSelectValue.value as DataKey;
+    }
+    if (props.multiple || isEmptyValue(props.modelValue)) {
+      return;
+    }
+    return props.modelValue as DataKey;
+  });
+
+  /** 表格多选选中值 */
+  const tableSelectedRowKeys = computed<DataKey[] | undefined>(() => {
+    if (isModalType.value) {
+      if (!props.multiple || isEmptyValue(tempSelectValue.value)) {
+        return;
+      }
+      return tempSelectValue.value as DataKey[];
+    }
+    if (!props.multiple || isEmptyValue(props.modelValue)) {
+      return;
+    }
+    return props.modelValue as DataKey[];
+  });
+
   /** 更新气泡位置 */
   const updatePopover = () => {
     selectRef.value && selectRef.value.updatePopper();
-  };
-
-  /** 从缓存数据中获取值对应的数据 */
-  const getItemByValue = (value?: SingleValue): DataItem | undefined => {
-    if (isEmptyValue(value)) {
-      return;
-    }
-    if (props.cacheData != null) {
-      const temp = props.cacheData.find((d) => d[props.valueKey] === value);
-      if (temp != null) {
-        return temp;
-      }
-    }
-    // 已废弃属性兼容
-    if (!isEmptyValue(props.initValue as any)) {
-      if (!props.multiple) {
-        return props.initValue as DataItem;
-      }
-      return (props.initValue as DataItem[]).find(
-        (d) => d[props.valueKey] === value
-      );
-    }
-  };
-
-  /** 多选从缓存数据中获取值对应的数据 */
-  const getCacheItemByValue = (
-    value: SingleValue,
-    cacheKeys: DataKey[],
-    cacheData: DataItem[] | undefined,
-    tKeys: DataKey[],
-    initValue?: DataItem[]
-  ) => {
-    if (cacheData != null) {
-      const index = cacheKeys.indexOf(value as DataKey);
-      if (index !== -1) {
-        return cacheData[index];
-      }
-    }
-    if (initValue != null) {
-      const i = tKeys.indexOf(value as DataKey);
-      if (i !== -1) {
-        return initValue[i];
-      }
-    }
-  };
-
-  /** 获取多选的选中标签数据 */
-  const getMultipleItems = (): SelectedItem[] => {
-    const modelValue = props.modelValue as MultipleValue;
-    if (isEmptyValue(modelValue, true)) {
-      return [];
-    }
-    const selected: SelectedItem[] = [];
-    const keys: MultipleValue = [];
-    if (tableRef.value) {
-      const data = tableRef.value.getSelectionRows() || [];
-      data.forEach((item) => {
-        if (!item._isMock) {
-          const value = item[props.valueKey];
-          const index = modelValue.indexOf(value);
-          if (index !== -1) {
-            selected.push({ value, label: item[props.labelKey], index });
-            keys.push(value);
-          }
-        }
-      });
-    }
-    if (keys.length !== modelValue.length) {
-      const { valueKey, cacheData, initValue } = props;
-      const cacheKeys = cacheData ? cacheData.map((d) => d[valueKey]) : [];
-      const tKeys = initValue ? initValue.map((d: any) => d[valueKey]) : [];
-      modelValue.forEach((value) => {
-        if (!keys.includes(value)) {
-          const item = getCacheItemByValue(
-            value,
-            cacheKeys,
-            cacheData,
-            tKeys,
-            initValue as DataItem[]
-          );
-          const label = item ? item[props.labelKey] : String(value);
-          const index = modelValue.indexOf(value);
-          selected.push({ value, label, index });
-        }
-      });
-    }
-    selected.sort((a, b) => (a.index as number) - (b.index as number));
-    return selected;
-  };
-
-  /** 更新选中标签数据 */
-  const updateSelectedItems = (force?: boolean) => {
-    // 单选模式
-    if (!props.multiple) {
-      const value = props.modelValue as SingleValue;
-      const d = selectedItems.value.length ? selectedItems.value[0] : null;
-      if (isEmptyValue(value)) {
-        if (d != null) {
-          selectedItems.value = [];
-        }
-        return;
-      }
-      if (force || !d || d.value !== value) {
-        const temp = tableRef.value ? tableRef.value.getCurrentRow() : null;
-        const t = temp && temp[props.valueKey] === value ? temp : void 0;
-        const item = t || getItemByValue(value);
-        const label = item ? item[props.labelKey] : String(value);
-        selectedItems.value = [{ label, value }];
-      }
-      return;
-    }
-    // 多选模式
-    if (isEmptyValue(props.modelValue, true)) {
-      if (selectedItems.value.length) {
-        selectedItems.value = [];
-        nextTick(() => {
-          updatePopover();
-        });
-      }
-      return;
-    }
-    const keys = selectedItems.value.map((d) => d.value);
-    if (force || valueIsChanged(props.modelValue, keys, true)) {
-      selectedItems.value = getMultipleItems();
-      nextTick(() => {
-        updatePopover();
-      });
-    }
   };
 
   /** 让多选搜索框获取焦点 */
@@ -290,31 +246,13 @@
     selectRef.value && selectRef.value.focusSearchInput();
   };
 
-  /** 初始值改变处理(已废弃) */
-  const handleInitValueChange = (initValue: DataItem | DataItem[]) => {
-    const valueKey = props.valueKey;
-    if (!props.multiple) {
-      const key = (initValue as DataItem)[valueKey];
-      if (key === props.modelValue) {
-        updateSelectedItems();
-      } else {
-        updateModelValue(key);
-      }
-      return;
-    }
-    const keys = (initValue as DataItem[]).map((d) => d[valueKey]);
-    if (!valueIsChanged(props.modelValue, keys, true)) {
-      updateSelectedItems();
-    } else {
-      updateModelValue(keys);
-    }
-  };
-
   /** 更新选中值 */
   const updateModelValue = (modelValue: SelectValue) => {
     if (valueIsChanged(modelValue, props.modelValue, props.multiple)) {
       emit('update:modelValue', modelValue);
-      validateChange();
+      if (props.validateEvent) {
+        validateChange();
+      }
       emit('change', modelValue);
     }
   };
@@ -323,29 +261,152 @@
   const updateVisible = (visible: boolean) => {
     if (selectVisible.value !== visible) {
       selectVisible.value = visible;
-      if (visible && props.tableProps?.virtual && tableRef.value) {
-        const virtualTableRef = tableRef.value.getTableRef() as any;
-        if (virtualTableRef != null && !virtualTableRef.wrapWidth) {
-          nextTick(() => {
-            virtualTableRef.updateWrapSize();
-            nextTick(() => {
-              updatePopover();
-            });
-          });
+      if (visible) {
+        // 弹窗模式同步数据到临时数据
+        if (isModalType.value) {
+          if (isEmptyValue(props.modelValue)) {
+            tempSelectedItems.value = [];
+            tempSelectValue.value = void 0;
+          } else {
+            tempSelectedItems.value = [...selectedItems.value];
+            tempSelectValue.value = props.multiple
+              ? [...(props.modelValue as MultipleValue)]
+              : props.modelValue;
+          }
         }
+        // 虚拟表格更新容器尺寸
+        if (props.tableProps?.virtual && proTableRef.value) {
+          const virtualTableRef = proTableRef.value.getTableRef() as any;
+          if (virtualTableRef && !virtualTableRef.wrapWidth) {
+            nextTick(() => {
+              virtualTableRef.updateWrapSize();
+              nextTick(() => {
+                updatePopover();
+              });
+            });
+          }
+        }
+      }
+      if (props.visible !== visible) {
+        emit('update:visible', visible);
       }
       emit('visibleChange', visible);
     }
   };
 
-  /** 删除多选标签 */
+  /** 更新选中值对应的标签数据 */
+  const getChangedSelectedItems = (
+    selectValue: SelectValue | undefined,
+    selectedItems: SelectedItem[],
+    force?: boolean
+  ): SelectedItem[] | undefined => {
+    const tableData = [
+      ...(props.cacheData || []),
+      ...((props.multiple
+        ? (props.initValue as any)
+        : props.initValue
+          ? [props.initValue]
+          : void 0) || []), // 已废弃属性兼容
+      ...((props.multiple && proTableRef.value
+        ? proTableRef.value.getSelectionRows()
+        : void 0) || [])
+    ];
+    if (!props.multiple) {
+      const temp = proTableRef.value ? proTableRef.value.getCurrentRow() : null;
+      if (temp) {
+        tableData.push(temp);
+      }
+    }
+    // 单选模式
+    if (!props.multiple) {
+      const value = selectValue as SingleValue;
+      const d = selectedItems.length ? selectedItems[0] : null;
+      if (isEmptyValue(value)) {
+        if (d != null) {
+          return [];
+        }
+        return;
+      }
+      if (force || !d || d.value !== value) {
+        const item = tableData
+          ? tableData.find((d) => getValue(d, props.valueKey) === value)
+          : void 0;
+        let label = getValue<any, DataItem>(item, props.labelKey);
+        if (label == null && (!item || item._isMock)) {
+          label = String(value);
+        }
+        return [{ value, label, data: item }];
+      }
+      return;
+    }
+    // 多选模式
+    if (isEmptyValue(selectValue, true)) {
+      if (selectedItems.length) {
+        return [];
+      }
+      return;
+    }
+    if (
+      !force &&
+      !valueIsChanged(
+        selectValue,
+        selectedItems.map((d) => d.value),
+        true
+      )
+    ) {
+      return;
+    }
+    const selected: SelectedItem[] = [];
+    const dataKeys = tableData
+      ? tableData.map((d) => getValue<any, DataItem>(d, props.valueKey))
+      : [];
+    (selectValue as MultipleValue).forEach((value, index) => {
+      const dataIndex = dataKeys.indexOf(value as DataKey);
+      const item = dataIndex === -1 ? void 0 : tableData[dataIndex];
+      let label = getValue<any, DataItem>(item, props.labelKey);
+      if (label == null && (!item || item._isMock)) {
+        label = String(value);
+      }
+      selected.push({ value, label, index, data: item });
+    });
+    return selected;
+  };
+
+  /** 检查更新选中标签数据 */
+  const checkUpdateSelectedItems = (force?: boolean) => {
+    const items = getChangedSelectedItems(
+      props.modelValue,
+      selectedItems.value,
+      force
+    );
+    if (items) {
+      selectedItems.value = items;
+      nextTick(() => {
+        updatePopover();
+      });
+    }
+  };
+
+  /** 检查更新弹窗模式临时选中标签数据 */
+  const checkUpdateTempSelectedItems = (force?: boolean) => {
+    const items = getChangedSelectedItems(
+      tempSelectValue.value,
+      tempSelectedItems.value,
+      force
+    );
+    if (items) {
+      tempSelectedItems.value = items;
+    }
+  };
+
+  /** 删除多选标签事件 */
   const handleSelectRemove = (item: SelectedItem) => {
     const values = (props.modelValue || []) as MultipleValue;
     updateModelValue(values.filter((v) => v !== item.value));
     emit('removeTag', item.value);
   };
 
-  /** 清空 */
+  /** 清空事件 */
   const handleSelectClear = () => {
     updateModelValue(props.multiple ? [] : null);
     updateVisible(false);
@@ -367,60 +428,94 @@
     emit('filterChange', keywords);
   };
 
+  /** 更新选中值事件 */
+  const handleUpdateModelValue = (modelValue: SelectValue) => {
+    if (isModalType.value) {
+      tempSelectValue.value = modelValue;
+    } else {
+      updateModelValue(modelValue);
+    }
+  };
+
+  /** 检查更新选中标签数据事件 */
+  const handleCheckUpdateSelectedItems = (force?: boolean) => {
+    if (isModalType.value) {
+      checkUpdateTempSelectedItems(force);
+    } else {
+      checkUpdateSelectedItems(force);
+    }
+  };
+
+  /** 表格数据选择事件 */
+  const handleDataSelect = (data: DataItem | DataItem[]) => {
+    if (!isModalType.value) {
+      if (!props.multiple) {
+        updateVisible(false);
+      }
+      emit('select', data);
+    }
+  };
+
   /** 表格多选选中值改变事件 */
-  const updateSelectedRowKeys = (rowKeys: DataKey[]) => {
+  const handleUpdateTableSelectedRowKeys = (rowKeys: DataKey[]) => {
     if (props.multiple) {
-      updateModelValue(rowKeys);
+      const oldValues = (props.modelValue || []) as MultipleValue;
+      const values = [...rowKeys];
+      values.sort((a, b) => {
+        const aOldIndex = oldValues.indexOf(a);
+        const bOldIndex = oldValues.indexOf(b);
+        const aIndex = aOldIndex === -1 ? values.length : aOldIndex;
+        const bIndex = bOldIndex === -1 ? values.length : bOldIndex;
+        return aIndex - bIndex;
+      });
+      handleUpdateModelValue(values);
     }
   };
 
   /** 表格单选选中值改变事件 */
-  const updateCurrentRowKey = (rowKey?: DataKey) => {
+  const handleUpdateTableCurrentRowKey = (rowKey?: DataKey) => {
     if (!props.multiple) {
-      updateModelValue(rowKey);
-    }
-  };
-
-  /** 表格单选选中数据改变事件 */
-  const handleTableCurrentChange = (row?: DataItem | null) => {
-    if (!props.multiple && row != null) {
-      updateSelectedItems(true);
+      handleUpdateModelValue(rowKey);
     }
   };
 
   /** 表格多选选中数据改变事件 */
   const handleTableSelectionChange = () => {
     if (props.multiple) {
-      updateSelectedItems(true);
+      handleCheckUpdateSelectedItems(true);
+    }
+  };
+
+  /** 表格单选选中数据改变事件 */
+  const handleTableCurrentChange = (row?: DataItem | null) => {
+    if (!props.multiple && row != null) {
+      handleCheckUpdateSelectedItems(true);
     }
   };
 
   /** 表格行点击事件 */
-  const handleTableRowClick = (row: DataItem) => {
+  const handleTableRowClick = (
+    row: DataItem,
+    _column: Column,
+    _e: MouseEvent,
+    disabled: boolean,
+    selection?: DataItem[]
+  ) => {
     if (!props.multiple) {
-      updateVisible(false);
-      emit('select', row);
-    } else if (
-      props.tableProps?.rowClickChecked &&
-      tableRef.value &&
-      !isDisableRow(
-        row,
-        tableRef.value.getData().indexOf(row),
-        tableRef.value.tableProps.columns
-      )
-    ) {
-      emit('select', tableRef.value.getSelectionRows() || []);
+      handleDataSelect(row);
+    } else if (props.tableProps?.rowClickChecked && !disabled) {
+      handleDataSelect(selection || []);
     }
   };
 
   /** 表格多选复选框勾选事件 */
   const handleTableSelect = (selection: DataItem[]) => {
-    emit('select', selection);
+    handleDataSelect(selection);
   };
 
   /** 表格多选全选复选框勾选事件 */
   const handleTableSelectAll = (selection: DataItem[]) => {
-    emit('select', selection);
+    handleDataSelect(selection);
   };
 
   /** 表格渲染完成事件 */
@@ -430,23 +525,96 @@
     });
   };
 
+  /** 弹窗模式确定按钮点击事件 */
+  const handleConfirm = () => {
+    const selected = tempSelectedItems.value.map((item) => item.data);
+    const selectedData = props.multiple ? selected : selected[0];
+    if (props.beforeConfirm && props.beforeConfirm(selectedData) === false) {
+      return;
+    }
+    const values = tempSelectedItems.value.map((item) => item.value);
+    if (!props.multiple) {
+      updateModelValue(values[0]);
+      emit('select', selectedData);
+      updateVisible(false);
+      return;
+    }
+    updateModelValue(values);
+    emit('select', selectedData);
+    updateVisible(false);
+  };
+
+  /** 处理初始值更新(已废弃属性兼容) */
+  const handleInitValueChange = (initValue: DataItem | DataItem[]) => {
+    if (!props.multiple) {
+      const value = getValue<any, DataItem>(initValue, props.valueKey);
+      if (value === props.modelValue) {
+        checkUpdateSelectedItems();
+      } else {
+        updateModelValue(value);
+      }
+      return;
+    }
+    const values = (initValue as DataItem[]).map((d) =>
+      getValue<any, DataItem>(d, props.valueKey)
+    );
+    if (!valueIsChanged(props.modelValue, values, true)) {
+      checkUpdateSelectedItems();
+    } else {
+      updateModelValue(values);
+    }
+  };
+
+  /** 禁用时自动关闭下拉框 */
+  watch(
+    () => props.disabled,
+    (disabled) => {
+      if (disabled) {
+        updateVisible(false);
+      }
+    }
+  );
+
+  /** 同步下拉框显示状态 */
+  watch(
+    () => props.visible,
+    (visible) => {
+      updateVisible(visible);
+    }
+  );
+
+  /** 更新选中标签数据 */
+  watch(
+    () => props.cacheData,
+    () => {
+      checkUpdateSelectedItems(true);
+      if (isModalType.value && selectVisible.value) {
+        checkUpdateTempSelectedItems(true);
+      }
+    }
+  );
+
   /** 同步选中值更新 */
   watch(
     () => props.modelValue,
     () => {
-      updateSelectedItems();
+      checkUpdateSelectedItems();
     },
     { deep: true }
   );
 
-  /** 更新选中数据 */
+  /** 同步弹窗模式临时选中值更新 */
   watch(
-    () => props.cacheData,
+    tempSelectValue,
     () => {
-      updateSelectedItems(true);
-    }
+      if (isModalType.value && selectVisible.value) {
+        checkUpdateTempSelectedItems();
+      }
+    },
+    { deep: true }
   );
 
+  /** 同步初始值更新(已废弃属性兼容) */
   watch(
     () => props.initValue,
     (initValue) => {
@@ -457,36 +625,59 @@
     { deep: true }
   );
 
-  /** 禁用时自动关闭气泡 */
-  watch(
-    () => props.disabled,
-    (disabled) => {
-      if (disabled) {
-        updateVisible(false);
-      }
-    }
-  );
-
   /** 回显默认值 */
   onMounted(() => {
     if (!isEmptyValue(props.initValue as any, props.multiple)) {
       handleInitValueChange(props.initValue as DataItem | DataItem[]);
     } else if (!isEmptyValue(props.modelValue, props.multiple)) {
-      updateSelectedItems();
+      checkUpdateSelectedItems();
     }
+  });
+
+  /** 操作选中标签数据方法 */
+  const provideMethods = {
+    clearSelectedItems: handleSelectClear,
+    removeSelectedItem: (item: SelectedItem) => {
+      if (props.multiple) {
+        handleSelectRemove(item);
+      } else if (props.modelValue === item.value) {
+        handleSelectClear();
+      }
+    },
+    updateSelectedItems: (items: SelectedItem[]) => {
+      const values = items.map((item) => item.value);
+      updateModelValue(props.multiple ? values : values[0]);
+    },
+    clearTempSelectedItems: () => {
+      tempSelectedItems.value = [];
+      tempSelectValue.value = null;
+    },
+    removeTempSelectedItem: (item: SelectedItem) => {
+      const index = tempSelectedItems.value.indexOf(item);
+      tempSelectedItems.value.splice(index, 1);
+      const values = tempSelectedItems.value.map((item) => item.value);
+      tempSelectValue.value = props.multiple ? values : values[0];
+    },
+    updateTempSelectedItems: (items: SelectedItem[]) => {
+      tempSelectedItems.value = items;
+      const values = tempSelectedItems.value.map((item) => item.value);
+      tempSelectValue.value = props.multiple ? values : values[0];
+    }
+  };
+
+  /** 下拉组件数据注入 */
+  provide(SELECT_DATA_KEY, {
+    selectedItems,
+    tempSelectedItems,
+    ...provideMethods
   });
 
   defineExpose({
     selectRef,
-    tableRef,
-    selectVisible,
-    selectedItems,
-    selectedLabel,
-    currentRowKey,
-    selectedRowKeys,
+    tableRef: proTableRef,
     updatePopover,
-    updateSelectedItems,
     updateVisible,
-    focusSearchInput
+    focusSearchInput,
+    ...provideMethods
   });
 </script>

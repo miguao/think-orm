@@ -1,4 +1,4 @@
-import { PROJECT_NAME } from '@/config/setting';
+const PROJECT_NAME = import.meta.env.VITE_APP_NAME;
 
 /**
  * 修改浏览器标题

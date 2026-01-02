@@ -7,22 +7,22 @@
     :props="{ label: 'name' }"
     :expandOnClickNode="false"
     :defaultExpandAll="true"
-    class="file-picker-left"
+    class="ele-file-picker-left"
     @node-click="handleGroupSelect"
     @node-contextmenu="handleGroupContextmenu"
   >
     <template #default="scope">
       <img
         src="/ele-file-list/ic_file_folder.png"
-        class="file-picker-tree-icon"
+        class="ele-file-picker-tree-icon"
       />
       <span class="el-tree-node__label" :title="scope.data.name">
         {{ scope.data.name }}
       </span>
       <ElIcon
         v-if="scope.data.id !== 0 && scope.data.id !== -1"
-        class="file-picker-tree-more"
-        @click.stop="(e) => handleMoreIconClick(e, scope.data)"
+        class="ele-file-picker-tree-more"
+        @click.stop="(e: MouseEvent) => handleMoreIconClick(e, scope.data)"
       >
         <MoreOutlined style="transform: scale(1.1)" />
       </ElIcon>
@@ -31,10 +31,10 @@
   <ElLink
     type="primary"
     underline="never"
-    class="file-picker-left-add"
+    class="ele-file-picker-left-add"
     @click="handleAddBtnClick"
   >
-    添加分组
+    {{ lang.groupAddTitle }}
   </ElLink>
 </template>
 
@@ -43,11 +43,13 @@
   import type { ElTree } from 'element-plus';
   import { queryChild } from 'ele-admin-plus';
   import { MoreOutlined } from '@/components/icons';
-  import type { UserFile } from '@/api/system/user-file/model';
+  import type { FilePickerLocale, UserFile } from '../types';
 
   defineProps<{
     /** 分组数据 */
     groupData: UserFile[];
+    /** 组件文案 */
+    lang: FilePickerLocale;
   }>();
 
   const emit = defineEmits<{
@@ -84,7 +86,7 @@
     const triggerEl = queryChild(
       e.currentTarget as HTMLElement,
       'el-tree-node__content'
-    )?.querySelector?.('.file-picker-tree-more');
+    )?.querySelector?.('.ele-file-picker-tree-more');
     // @ts-ignore
     triggerEl && triggerEl.click();
   };

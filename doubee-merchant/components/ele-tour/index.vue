@@ -2,7 +2,9 @@
 <template>
   <Teleport to="body">
     <div
-      :class="['ele-tour', { 'show-mask': showMask }, { 'is-open': visible }]"
+      v-bind="$attrs"
+      class="ele-tour"
+      :class="[{ 'show-mask': showMask }, { 'is-open': visible }]"
       :style="{ zIndex: zIndex }"
     >
       <div class="ele-tour-box" :style="boxStyle"></div>
@@ -16,7 +18,7 @@
         :hideAfter="0"
       >
         <template #body>
-          <ReceiverView v-if="steps && step" class="ele-popover-body">
+          <div v-if="steps && step" class="ele-popover-body">
             <div v-if="step.title" class="ele-tour-title">
               <slot name="title" :step="step" :current="modelValue">
                 {{ step.title }}
@@ -62,7 +64,7 @@
                 </div>
               </div>
             </slot>
-          </ReceiverView>
+          </div>
         </template>
       </EleTooltip>
     </div>
@@ -74,21 +76,20 @@
   import { ref, shallowRef, onMounted, watch, nextTick } from 'vue';
   import { ElButton } from 'element-plus';
   import EleTooltip from '../ele-tooltip/index.vue';
-  import ReceiverView from '../ele-config-provider/components/receiver-view';
   import type { StyleValue } from '../ele-app/types';
   import type { EleTooltipProps, EleTooltipInstance } from '../ele-app/plus';
   import { useLocale } from '../ele-config-provider/receiver';
   import { getOffset, getPopperProps, scrollIntoView } from './util';
-  import type { TourStep, TourLocale } from './types';
+  import type { TourStep } from './types';
   import { tourProps, tourEmits } from './props';
 
-  defineOptions({ name: 'EleTour' });
+  defineOptions({ name: 'EleTour', inheritAttrs: false });
 
   const props = defineProps(tourProps);
 
   const emit = defineEmits(tourEmits);
 
-  const { lang } = useLocale<TourLocale>('tour', props);
+  const { lang } = useLocale('tour', props);
 
   /** 气泡触发组件 */
   const triggerRef = ref<any>(null);

@@ -9,3 +9,4 @@ export * from './utils/menu-util';
 export * from './utils/message';
 export * from './utils/message-box';
 export * from './utils/validate';
+export * from './utils/modal-hook';

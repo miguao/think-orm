@@ -1,7 +1,7 @@
 <template>
   <div
+    class="ele-icon-border-color-base"
     :class="[
-      'ele-icon-border-color-base',
       { 'ele-icon-bg-primary': type === 'primary' },
       { 'ele-icon-bg-fill': type !== 'primary' && type !== 'bordered' }
     ]"

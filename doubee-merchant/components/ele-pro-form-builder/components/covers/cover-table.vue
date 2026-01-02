@@ -11,7 +11,7 @@
     <div v-for="i in 4" :key="i" :style="{ display: 'flex' }">
       <div
         v-for="j in 4"
-        :key="i + '-' + j"
+        :key="`${i}-${j}`"
         class="ele-icon-border-color-base"
         :style="{
           flex: 1,

@@ -14,7 +14,6 @@
     :itemTypeData="itemTypeData"
     :httpRequest="httpRequest"
     :screenSize="screenSize"
-    :lang="lang"
     @editError="handleAddError"
     @editDone="handleAddDone"
     @update:modelValue="handleUpdateAddVisible"
@@ -42,7 +41,6 @@
     :itemTypeData="itemTypeData"
     :httpRequest="httpRequest"
     :screenSize="screenSize"
-    :lang="lang"
     @editError="handleEditError"
     @editDone="handleEditDone"
     @update:modelValue="handleUpdateEditVisible"
@@ -56,37 +54,13 @@
       <slot :name="name" v-bind="slotProps || {}"></slot>
     </template>
   </EditModal>
-  <ElePopconfirm
-    v-if="delPopConfirmProps"
-    ref="delConfirmRef"
-    :width="200"
-    :triggerKeys="[]"
-    :persistent="false"
-    :popperOptions="{
-      strategy: 'fixed',
-      modifiers: [{ name: 'offset', options: { offset: [12, 6] } }]
-    }"
-    :virtualTriggering="true"
-    :virtualRef="delConfirmVirtualRef"
-    placement="top-end"
-    :content="lang.deleteConfirm"
-    v-bind="delPopConfirmProps"
-    @confirm="handleConfirm"
-  />
   <slot></slot>
 </template>
 
 <script lang="ts" setup>
   import type { PropType } from 'vue';
-  import { ref, nextTick, unref, watch } from 'vue';
   import type { UserComponent } from '../../ele-app/types';
-  import type {
-    ElePopconfirmInstance,
-    ElePopconfirmProps
-  } from '../../ele-app/plus';
-  import { omit } from '../../utils/common';
   import type { DataItem } from '../../ele-data-table/types';
-  import ElePopconfirm from '../../ele-popconfirm/index.vue';
   import type {
     ProFormItemTypeData,
     ScreenSize
@@ -97,7 +71,6 @@
     BtnClickAction,
     CrudField,
     EditApi,
-    DeletePopOption,
     GetAndCacheCodeFunction,
     CrudLocale
   } from '../types';
@@ -106,7 +79,7 @@
 
   defineOptions({ name: 'TableExtra' });
 
-  const props = defineProps({
+  defineProps({
     /** 添加弹窗是否打开 */
     addVisible: Boolean as PropType<boolean>,
     /** 添加弹窗数据 */
@@ -115,8 +88,6 @@
     editVisible: Boolean as PropType<boolean>,
     /** 修改弹窗数据 */
     editData: Object as PropType<DataItem>,
-    /** 删除气泡配置 */
-    deletePopOption: Object as PropType<DeletePopOption>,
     /** 添加配置 */
     addConfig: [Object, Boolean] as PropType<EditConfig | boolean>,
     /** 修改配置 */
@@ -165,23 +136,6 @@
     editDone: (_msg?: string) => true
   });
 
-  /** 删除确认组件 */
-  const delConfirmRef = ref<ElePopconfirmInstance>(null);
-
-  /** 删除确认虚拟触发节点 */
-  const delConfirmVirtualRef = ref<any>();
-
-  /** 删除确认自定义属性 */
-  const delPopConfirmProps = ref<ElePopconfirmProps>();
-
-  /** 删除确认对应的数据 */
-  let delConfirmCurrentData: DataItem | undefined;
-
-  /** 删除确认事件 */
-  const handleConfirm = (e: MouseEvent) => {
-    emit('btnClick', 'delConfirm', e, delConfirmCurrentData);
-  };
-
   /** 添加保存失败事件 */
   const handleAddError = (e: Error) => {
     emit('addError', e);
@@ -211,39 +165,4 @@
   const handleUpdateEditVisible = (visible?: boolean) => {
     emit('update:editVisible', visible);
   };
-
-  /** 打开删除确认 */
-  const openDelConfirm = (
-    triggerEl: any,
-    item?: DataItem,
-    confirmProps?: ElePopconfirmProps
-  ) => {
-    if (triggerEl == null || delConfirmVirtualRef.value === triggerEl) {
-      return;
-    }
-    delConfirmRef.value && delConfirmRef.value.hidePopper();
-    nextTick(() => {
-      delPopConfirmProps.value = confirmProps || {};
-      delConfirmVirtualRef.value = triggerEl;
-      delConfirmCurrentData = item;
-      nextTick(() => {
-        if (delConfirmRef.value) {
-          unref(delConfirmRef.value.tooltipRef)?.handleOpen?.();
-        }
-      });
-    });
-  };
-
-  watch(
-    () => props.deletePopOption,
-    (option) => {
-      if (option) {
-        openDelConfirm(
-          option.triggerEl,
-          option.item,
-          omit(option.confirmProps, ['isPopConfirm']) as ElePopconfirmProps
-        );
-      }
-    }
-  );
 </script>

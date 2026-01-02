@@ -32,6 +32,7 @@
           :selected="modelValue"
           :menuStyle="menuStyle"
           :iconProps="iconProps"
+          :iconSize="iconSize"
           :size="size"
           @itemClick="handleItemClick"
           @wrapperContext="handleWrapperContext"
@@ -57,6 +58,7 @@
           :selected="modelValue"
           :menuStyle="menuStyle"
           :iconProps="iconProps"
+          :iconSize="iconSize"
           :size="size"
           @itemClick="handleItemClick"
           @wrapperContext="handleWrapperContext"
@@ -159,9 +161,12 @@
   };
 
   /** 菜单项点击事件 */
-  const handleItemClick = (item: DropdownItem) => {
+  const handleItemClick = (item: DropdownItem, e: MouseEvent) => {
     if (props.hideOnClick && !item.children?.length) {
       hidePopper();
+    }
+    if (item.onClick) {
+      item.onClick(e);
     }
     emit('command', item.command);
   };

@@ -31,6 +31,17 @@
           </el-button>
         </template>
 
+        <template #icon="{ row }">
+          <el-image
+            :src="UPLOAD_URL + row.icon"
+            :alt="row.name"
+            preview-teleported
+            :preview-src-list="[UPLOAD_URL + row.icon]"
+            fit="cover"
+            style="width: 28px; height: 28px; border-radius: 8px"
+          />
+        </template>
+
         <template #status="{ row }">
           <el-switch
             v-model="row.status"
@@ -73,6 +84,8 @@
 
   defineOptions({ name: 'PaymentBank' });
 
+  const UPLOAD_URL = import.meta.env.VITE_UPLOAD_URL;
+
   /** 表格实例 */
   const tableRef = ref<InstanceType<typeof EleProTable> | null>(null);
 
@@ -83,6 +96,13 @@
       columnKey: 'selection',
       width: 50,
       align: 'center'
+    },
+    {
+      prop: 'icon',
+      label: '银行图标',
+      width: 100,
+      align: 'center',
+      slot: 'icon'
     },
     {
       prop: 'name',

@@ -18,6 +18,7 @@
         :src="imageUrl"
       />
     </slot>
+    <slot name="itemExtra" :item="item"></slot>
     <div
       v-if="item.status === 'uploading' || item.status === 'exception'"
       class="ele-upload-progress"

@@ -1,5 +1,5 @@
 import type { PropType, ExtractPropTypes } from 'vue';
-import { SelectProps as elSelectProps } from 'element-plus/es/components/select/src/select';
+import { selectProps as elSelectProps } from 'element-plus/es/components/select/src/select';
 import type { SelectOption, SelectOptionFunction } from './types';
 
 /**

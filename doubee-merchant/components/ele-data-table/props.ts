@@ -113,7 +113,13 @@ export const elDataTableEmits = {
     _cell: HTMLTableCellElement,
     _e: MouseEvent
   ) => true,
-  rowClick: (_row: DataItem, _column: Column, _e: MouseEvent) => true,
+  rowClick: (
+    _row: DataItem,
+    _column: Column,
+    _e: MouseEvent,
+    _disabled?: boolean,
+    _selection?: DataItem[]
+  ) => true,
   rowContextmenu: (_row: DataItem, _column: Column, _e: MouseEvent) => true,
   rowDblclick: (_row: DataItem, _column: Column, _e: MouseEvent) => true,
   headerClick: (_column: Column, _e: MouseEvent) => true,

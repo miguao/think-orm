@@ -4,8 +4,8 @@
     v-bind="tabProps"
     ref="tabRef"
     :type="tabType === 'card' || tabType === 'border-card' ? tabType : void 0"
+    class="ele-tabs"
     :class="[
-      'ele-tabs',
       { 'ele-tabs-wrap': isOnlyTab },
       { 'is-small': tabSize === 'small' },
       { 'is-large': tabSize === 'large' },
@@ -17,7 +17,8 @@
       { 'is-tag': tabType === 'tag' },
       { 'is-center': center },
       { 'is-sortable': sortable },
-      { 'is-flex-table': flexTable }
+      { 'is-flex-table': flexTable && flexTable !== 'auto' },
+      { 'is-flex-auto-table': flexTable === 'auto' }
     ]"
     @update:modelValue="updateModelValue"
     @tabClick="handleTabClick"
@@ -65,18 +66,10 @@
             {{ item.label }}
           </slot>
         </div>
-        <ElIcon
-          v-if="tabType === 'simple' || tabType === 'indicator'"
-          class="ele-tab-corner-left"
-        >
-          <CornerLeftFilled />
-        </ElIcon>
-        <ElIcon
-          v-if="tabType === 'simple' || tabType === 'indicator'"
-          class="ele-tab-corner-right"
-        >
-          <CornerRightFilled />
-        </ElIcon>
+        <template v-if="tabType === 'simple' || tabType === 'indicator'">
+          <div class="ele-tab-corner-left"></div>
+          <div class="ele-tab-corner-right"></div>
+        </template>
       </template>
     </ElTabPane>
     <EleDropdown
@@ -118,9 +111,8 @@
     nextTick
   } from 'vue';
   import SortableJs from 'sortablejs';
-  import { ElTabs, ElTabPane, ElIcon } from 'element-plus';
+  import { ElTabs, ElTabPane } from 'element-plus';
   import type { TabPaneName, TabsPaneContext } from 'element-plus';
-  import { CornerLeftFilled, CornerRightFilled } from '../icons/index';
   import { omit, pick } from '../utils/common';
   import { useTimer, useMousewheel, useTouchEvent } from '../utils/hook';
   import type { ElTabsProps, ElTabsInstance } from '../ele-app/el';
@@ -176,7 +168,9 @@
       } else if (param.distanceX && param.distanceX < 80) {
         scrollTabs('next');
       }
-    }
+    },
+    touchstartOptions: { passive: true },
+    touchmoveOptions: { passive: true }
   });
 
   /** 页签拖动检查定时器 */
@@ -352,7 +346,11 @@
     e: MouseEvent
   ) => {
     const itemEl = e.currentTarget as HTMLElement;
-    if (!props.contextMenu || ctxMenuDropdownVirtualRef.value === itemEl) {
+    if (!props.contextMenu) {
+      return;
+    }
+    if (ctxMenuDropdownVirtualRef.value === itemEl) {
+      ctxMenuDropdownItems.value = getContextMenus(item, tabName) || [];
       return;
     }
     e.preventDefault();
@@ -423,7 +421,7 @@
     }
     sortableIns = new SortableJs(navEl as HTMLElement, {
       draggable: '.el-tabs__item',
-      delay: 20,
+      delay: 150,
       onUpdate: ({ oldDraggableIndex, newDraggableIndex }) => {
         if (
           typeof oldDraggableIndex === 'number' &&
@@ -539,6 +537,16 @@
     () => {
       initMousewheelEvent();
     }
+  );
+
+  watch(
+    () => props.contextMenus,
+    (ctxMenus) => {
+      if (Array.isArray(ctxMenus) && ctxMenuDropdownItems.value !== ctxMenus) {
+        ctxMenuDropdownItems.value = ctxMenus;
+      }
+    },
+    { deep: true }
   );
 
   defineExpose({

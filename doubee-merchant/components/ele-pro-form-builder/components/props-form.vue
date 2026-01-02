@@ -140,7 +140,10 @@
   import { ref, reactive, watch } from 'vue';
   import { ElEmpty, ElInput } from 'element-plus';
   import type { UserComponent } from '../../ele-app/types';
-  import type { EleProFormInstance, EleProFormProps } from '../../ele-app/plus';
+  import type {
+    EleProFormInstance,
+    EleProFormProps
+  } from '../../ele-app/plusx';
   import { findTree } from '../../utils/common';
   import type {
     ProFormItemKey,

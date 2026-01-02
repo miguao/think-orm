@@ -17,7 +17,8 @@
     :requireAsteriskPosition="requireAsteriskPosition"
     :showMessage="showMessage"
     :inlineMessage="inlineMessage"
-    :class="['ele-pro-form', { 'is-editable': editable }]"
+    class="ele-pro-form"
+    :class="{ 'is-editable': editable }"
     @validate="handleFormValidate"
     @submit="handleFormSubmit"
   >
@@ -94,7 +95,8 @@
     watch,
     nextTick,
     onBeforeUnmount,
-    useModel
+    useModel,
+    inject
   } from 'vue';
   import { ElForm } from 'element-plus';
   import type {
@@ -102,17 +104,13 @@
     ElFormInstanceMethods,
     ElFormItemProp
   } from '../ele-app/el';
-  import { useLocale } from '../ele-config-provider/receiver';
+  import { useLocale, injectContext } from '../ele-config-provider/receiver';
   import { eachTree } from '../utils/common';
   import { translateJsCode } from './components/render-core';
   import { ChildrenRender } from './components/render-util';
   import type { ChildrenRenderInstance } from './components/render-util';
   import ProFormFooter from './components/pro-form-footer.vue';
-  import type {
-    ProFormItemProps,
-    ProFormItemKey,
-    ProFormLocale
-  } from './types';
+  import type { ProFormItemProps, ProFormItemKey } from './types';
   import { proFormProps, proFormEmits } from './props';
   const footerSlotExcludes = [
     'default',
@@ -132,7 +130,8 @@
   const formItems = useModel(props, 'items');
 
   /** 国际化语言 */
-  const { lang } = useLocale<ProFormLocale>('proForm', props);
+  const { lang } = useLocale('proForm', props);
+  const config = inject(injectContext, null);
 
   /** 表单实例 */
   const formRef = ref<ElFormInstance>(null);
@@ -184,7 +183,7 @@
 
   /** 更新表单数据属性值 */
   const updateValue = (prop: string, value: unknown) => {
-    if (prop != null) {
+    if (prop != null && config?.label && config?.size === 1) {
       emit('updateValue', prop, value);
     }
   };

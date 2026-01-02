@@ -1,7 +1,8 @@
 <template>
   <div class="ele-pro-form-builder-item-tool-wrapper">
     <div
-      :class="['ele-pro-form-builder-item-handle', { 'is-disabled': !handle }]"
+      class="ele-pro-form-builder-item-handle"
+      :class="{ 'is-disabled': !handle }"
     >
       <ElIcon v-if="handle" class="ele-pro-form-builder-item-handle-icon">
         <DragOutlined />

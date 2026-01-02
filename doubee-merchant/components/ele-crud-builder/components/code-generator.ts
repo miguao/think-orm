@@ -1,4 +1,4 @@
-import type { EleCrudProps } from '../../ele-app/plus';
+import type { EleCrudProps } from '../../ele-app/plusx';
 import {
   templateEngine,
   obj2Str

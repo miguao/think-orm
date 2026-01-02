@@ -1,7 +1,15 @@
+import type { InjectionKey } from 'vue';
 import { inject } from 'vue';
 import { formItemContextKey } from 'element-plus';
 import { debugWarn } from 'element-plus/es/utils/error';
-import type { SelectValue, MultipleValue } from '../ele-basic-select/types';
+import type { SelectValue, MultipleValue, SelectDataProvider } from './types';
+
+/**
+ * 下拉组件数据注入键名
+ */
+export const SELECT_DATA_KEY = Symbol(
+  'selectData'
+) as InjectionKey<SelectDataProvider>;
 
 /**
  * 判断是否是空值
@@ -9,8 +17,13 @@ import type { SelectValue, MultipleValue } from '../ele-basic-select/types';
  * @param multiple 值是否是数组
  */
 export function isEmptyValue(value?: SelectValue, multiple?: boolean) {
-  const isNull = value == null || value === '';
-  return isNull || (multiple && !(value as MultipleValue).length);
+  if (value == null || value === '') {
+    return true;
+  }
+  if (multiple && !(value as MultipleValue).length) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -43,7 +56,12 @@ export function valueIsChanged(
   if ((value1 as MultipleValue).length !== (value2 as MultipleValue).length) {
     return true;
   }
-  return (value1 as MultipleValue).some((v) => !(value2 as any).includes(v));
+  for (let i = 0; i < (value1 as MultipleValue).length; i++) {
+    if ((value1 as MultipleValue)[i] !== (value2 as any)[i]) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

@@ -13,8 +13,8 @@
   >
     <template #item="{ element }">
       <div
+        class="ele-pro-form-builder-outline-item"
         :class="[
-          'ele-pro-form-builder-outline-item',
           {
             'is-active':
               element.key != null &&
@@ -48,7 +48,7 @@
         />
         <div
           class="ele-pro-form-builder-outline-item-body"
-          :title="(element.prop ?? '') + ' ' + (element.label ?? '')"
+          :title="`${element.prop ?? ''} ${element.label ?? ''}`"
           @click="handleUpdateCurrentFormItemId(element.key)"
         >
           <ElIcon
@@ -112,7 +112,7 @@
             title="更多"
             @click.stop="(e) => handleOpenTableTool(element, e)"
           >
-            <AppstoreAddOutlined style="transform: scale(1.1)" />
+            <AppstoreAddOutlined :style="{ transform: 'scale(1.1)' }" />
           </ElIcon>
           <ElIcon
             v-if="
@@ -143,14 +143,14 @@
                 fixedChildTypes.some((d) => d.type === element.type)
               "
             />
-            <PlusOutlined v-else style="transform: scale(1.1)" />
+            <PlusOutlined v-else :style="{ transform: 'scale(1.1)' }" />
           </ElIcon>
           <ElIcon
             title=""
             class="ele-pro-form-builder-outline-item-handle"
             @click.stop=""
           >
-            <DragOutlined style="transform: scale(1.1)" />
+            <DragOutlined :style="{ transform: 'scale(1.1)' }" />
           </ElIcon>
           <div
             class="ele-pro-form-builder-outline-item-table-tool-trigger"

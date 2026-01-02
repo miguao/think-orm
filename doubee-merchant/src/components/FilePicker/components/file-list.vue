@@ -1,26 +1,29 @@
 <template>
-  <div class="file-picker-main">
-    <div class="file-picker-body">
-      <div class="file-picker-toolbar">
+  <div class="ele-file-picker-main">
+    <div class="ele-file-picker-body">
+      <div class="ele-file-picker-toolbar">
         <ElUpload
           action=""
           :accept="accept"
           :showFileList="false"
           :beforeUpload="handleUpload"
         >
-          <ElButton type="primary" class="ele-btn-icon" :icon="UploadOutlined">
-            上传
-          </ElButton>
+          <BtnItems :items="[{ preset: 'upload' }]" />
         </ElUpload>
-        <div class="file-picker-search">
+        <div class="ele-file-picker-search">
           <ElInput
             :clearable="true"
             v-model="searchKeyword"
-            placeholder="请输入文件名"
+            :placeholder="lang.searchPlaceholder"
             @clear="handleSearch"
             @change="handleSearch"
           />
-          <ElButton type="primary" @click="handleSearch">搜索</ElButton>
+          <ElButton
+            type="primary"
+            :icon="SearchOutlined"
+            class="ele-btn-icon"
+            @click="handleSearch"
+          />
         </div>
         <EleSegmented
           v-model="isGridMode"
@@ -29,7 +32,7 @@
         />
       </div>
       <template v-if="fileData.length">
-        <div class="file-picker-file-list" @scroll="handleFileListScroll">
+        <div class="ele-file-picker-file-list" @scroll="handleFileListScroll">
           <EleFileList
             :boxChoose="true"
             :icons="localIcons"
@@ -62,12 +65,7 @@
           @update:pageSize="handlePageSizeChange"
         />
       </template>
-      <ElEmpty
-        v-else
-        :imageSize="80"
-        description="无数据"
-        v-bind="emptyProps || {}"
-      />
+      <ElEmpty v-else :imageSize="80" v-bind="emptyProps || {}" />
     </div>
     <FileSelections
       ref="fileSelectionsRef"
@@ -77,6 +75,7 @@
       :limit="limit"
       :selectionListProps="selectionListProps"
       :baseIndex="baseIndex"
+      :lang="lang"
       @clearSelections="clearSelections"
       @removeItem="removeItem"
     />
@@ -102,16 +101,17 @@
     localSmallIcons
   } from 'ele-admin-plus/es/ele-file-list/icons';
   import {
-    UploadOutlined,
+    SearchOutlined,
     MenuOutlined,
     AppstoreOutlined,
     EditOutlined,
     DragOutlined,
     DeleteOutlined
   } from '@/components/icons';
-  import { uploadFile } from '@/api/system/file';
-  import { pageUserFiles, addUserFile } from '@/api/system/user-file';
-  import type { UserFile } from '@/api/system/user-file/model';
+  import { isImageUrl } from '@/utils/common';
+  import BtnItems from '@/components/BtnItems/index.vue';
+  import type { FilePickerLocale, UserFile } from '../types';
+  import { listFileApi, uploadFileApi } from '../config';
   import FileSelections from './file-selections.vue';
 
   const props = defineProps<{
@@ -135,6 +135,8 @@
     baseIndex?: number;
     /** 消息提示组件 */
     messageIns?: any;
+    /** 组件文案 */
+    lang: FilePickerLocale;
   }>();
 
   const emit = defineEmits<{
@@ -212,7 +214,9 @@
         ? selections.length >= props.limit
         : selections.length > props.limit)
     ) {
-      props.messageIns?.error?.(`最多只能选择 ${props.limit} 个`);
+      props.messageIns?.error?.(
+        props.lang.limitMessage.replace(/\{\s*limit\s*\}/g, String(props.limit))
+      );
       return false;
     }
   };
@@ -326,17 +330,17 @@
   const fileContextMenus = (item: FileItem) => {
     const menus: DropdownItem[] = [
       {
-        title: '重命名',
+        title: props.lang.renameTitle,
         command: 'rename',
         icon: markRaw(EditOutlined)
       },
       {
-        title: '移动到',
+        title: props.lang.moveTitle,
         command: 'move',
         icon: markRaw(DragOutlined)
       },
       {
-        title: '删除',
+        title: props.lang.delete,
         command: 'remove',
         icon: markRaw(DeleteOutlined),
         divided: true,
@@ -345,10 +349,10 @@
     ];
     if (item.thumbnail) {
       menus[0].divided = true;
-      menus.unshift({ title: '预览', command: 'preview' });
+      menus.unshift({ title: props.lang.preview, command: 'preview' });
     } else {
       menus[0].divided = true;
-      menus.unshift({ title: '打开', command: 'preview' });
+      menus.unshift({ title: props.lang.open, command: 'preview' });
     }
     return menus;
   };
@@ -365,7 +369,7 @@
     }
     if (props.accept === 'image/*') {
       if (!file.type.startsWith('image')) {
-        props.messageIns?.error?.('只能选择图片');
+        props.messageIns?.error?.(props.lang.imageMessage);
         return;
       }
     } else if (props.accept === '.xls,.xlsx') {
@@ -375,12 +379,17 @@
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ].includes(file.type)
       ) {
-        props.messageIns?.error?.('只能选择 excel 文件');
+        props.messageIns?.error?.(props.lang.excelMessage);
         return;
       }
     }
     if (props.fileLimit && file.size / 1024 / 1024 > props.fileLimit) {
-      props.messageIns?.error?.(`大小不能超过 ${props.fileLimit}MB`);
+      props.messageIns?.error?.(
+        props.lang.sizeLimitMessage.replace(
+          /\{\s*limit\s*\}/g,
+          String(props.fileLimit)
+        )
+      );
       return;
     }
     return true;
@@ -390,29 +399,15 @@
   const handleUpload = (file: File) => {
     if (checkFile(file)) {
       const loading = props.messageIns?.loading?.({
-        message: '上传中..',
+        message: props.lang.uploadLoading,
         plain: true,
         mask: true
       });
-      uploadFile(file)
-        .then((data) => {
-          addUserFile({
-            name: data.name,
-            isDirectory: 0,
-            parentId: fileParentId.value,
-            path: data.path,
-            length: data.length,
-            contentType: data.contentType
-          })
-            .then(() => {
-              loading?.close?.();
-              props.messageIns?.success?.('上传成功');
-              queryData();
-            })
-            .catch((e) => {
-              loading?.close?.();
-              props.messageIns?.error?.(e.message);
-            });
+      uploadFileApi(file)
+        .then((msg) => {
+          loading?.close?.();
+          props.messageIns?.success?.(msg);
+          queryData();
         })
         .catch((e) => {
           loading?.close?.();
@@ -436,11 +431,16 @@
 
   /** 判断是否是图片文件 */
   const isImageFile = (item: UserFile) => {
-    return (
+    if (!item.url) {
+      return false;
+    }
+    if (
       typeof item.contentType === 'string' &&
-      item.contentType.startsWith('image/') &&
-      item.url
-    );
+      item.contentType.startsWith('image/')
+    ) {
+      return true;
+    }
+    return isImageUrl(item.url);
   };
 
   /** 格式化文件大小 */
@@ -474,7 +474,7 @@
       }
     }
     const parentId = fileParentId.value;
-    pageUserFiles({
+    listFileApi({
       page: currentPage.value,
       limit: pageSize.value,
       parentId: parentId === -1 ? void 0 : parentId,

@@ -601,6 +601,9 @@ export function generateAddTableRowData(
       );
       if (childTr.children) {
         childTr.children.push(childTd);
+        if (!gridData) {
+          childTr.children.push(generateChildFormItem('form8026'));
+        }
       } else {
         childTr.children = [childTd];
       }

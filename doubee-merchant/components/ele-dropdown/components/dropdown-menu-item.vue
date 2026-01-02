@@ -2,10 +2,10 @@
   <div v-if="item.divided" class="ele-dropdown-menu-divider"></div>
   <div
     ref="itemRef"
+    class="ele-dropdown-menu-item"
     :class="[
-      'ele-dropdown-menu-item',
       { 'is-disabled': !!item.disabled },
-      { 'is-active': selected === item.command },
+      { 'is-active': item.command != null && selected === item.command },
       { 'is-danger': !!item.danger }
     ]"
     @click.stop="handleItemClick"
@@ -74,7 +74,7 @@
   });
 
   const emit = defineEmits({
-    itemClick: (_item: DropdownItem) => true,
+    itemClick: (_item: DropdownItem, _e: MouseEvent) => true,
     wrapperContext: (_e: MouseEvent) => true
   });
 
@@ -88,11 +88,11 @@
   const placement = ref<'rightEnd' | 'leftStart' | 'leftEnd'>();
 
   /** 菜单项点击事件 */
-  const handleItemClick = () => {
+  const handleItemClick = (e: MouseEvent) => {
     if (props.item.disabled) {
       return;
     }
-    emit('itemClick', props.item);
+    emit('itemClick', props.item, e);
   };
 
   /** 菜单项鼠标进入事件 */

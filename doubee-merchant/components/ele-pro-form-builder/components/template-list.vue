@@ -28,7 +28,7 @@
 
 <script lang="ts" setup>
   import { ElEmpty } from 'element-plus';
-  import type { EleProFormProps } from '../../ele-app/plus';
+  import type { EleProFormProps } from '../../ele-app/plusx';
   import type { TemplateItem } from '../types';
   import { deepCloneObject } from './build-core';
   import { itemsGenerateNewKey } from './build-util';

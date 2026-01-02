@@ -1,8 +1,8 @@
 <!-- 表头工具栏 -->
 <template>
   <div
+    class="ele-toolbar"
     :class="[
-      'ele-toolbar',
       { 'is-default': 'plain' !== theme },
       { 'is-plain': 'plain' === theme }
     ]"

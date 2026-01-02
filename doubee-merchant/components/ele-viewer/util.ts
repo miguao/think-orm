@@ -1,3 +1,8 @@
+import { computed, watch, onMounted } from 'vue';
+import { useLayoutState } from '../ele-pro-layout/util';
+import SvgRender from '../ele-qr-code-svg/components/svg-render.vue';
+import { useSvgOption } from '../ele-qr-code-svg/util';
+
 /**
  * 计算旋转后的宽高
  * @param w 宽
@@ -11,4 +16,39 @@ export function getRotatedBounds(w: number, h: number, r: number) {
   const width = Math.abs(w * cosR) + Math.abs(h * sinR);
   const height = Math.abs(w * sinR) + Math.abs(h * cosR);
   return { width, height };
+}
+
+/**
+ * 内容容器样式处理
+ * @param updateStyle 更新样式
+ */
+export function useContentRatio(updateStyle?: any) {
+  const state = useLayoutState();
+  const to = computed(() => state.modalsEl || 'body');
+  const { svgProps, svgKey, imageId } = useSvgOption();
+  const updateSpinnerStyle = () => {
+    updateStyle &&
+      updateStyle({
+        font: {
+          color: 'rgba(122, 122, 122, 0.35)',
+          fontSize: 16,
+          fontWeight: 'normal',
+          fontFamily: 'sans-serif',
+          fontStyle: 'normal'
+        },
+        commonStyle: {
+          position: 'fixed',
+          pointerEvents: 'none',
+          zIndex: 9999
+        },
+        contents: [svgKey.value]
+      });
+  };
+  onMounted(() => {
+    updateSpinnerStyle();
+  });
+  watch(svgKey, () => {
+    updateSpinnerStyle();
+  });
+  return { LoadingSpinner: SvgRender, slotProps: svgProps, show: imageId, to };
 }

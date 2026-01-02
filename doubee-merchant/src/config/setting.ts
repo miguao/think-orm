@@ -1,11 +1,8 @@
-/** 接口地址 */
-export const API_BASE_URL: string = import.meta.env.VITE_API_URL;
+/** 登录页面的路由地址 */
+export const LOGIN_PATH = '/login';
 
-/** 项目名称 */
-export const PROJECT_NAME: string = import.meta.env.VITE_APP_NAME;
-
-/** 不需要登录的路由 */
-export const WHITE_LIST: string[] = ['/login', '/register', '/forget'];
+/** 不需要登录的路由地址 */
+export const WHITE_LIST: string[] = [LOGIN_PATH, '/forget'];
 
 /** 首页路径, 为空则取第一个菜单的地址 */
 export const HOME_PATH: string | undefined = void 0;
@@ -22,11 +19,8 @@ export const TOKEN_CACHE_NAME = 'token';
 /** 主题配置本地缓存的名称 */
 export const THEME_CACHE_NAME = 'theme';
 
+/** token请求头名称 */
+export const TOKEN_HEADER_NAME = 'Authorization';
+
 /** i18n本地缓存的名称 */
 export const I18N_CACHE_NAME = 'i18n-lang';
-
-/** 高德地图key, 请到高德地图官网自行申请 */
-export const MAP_KEY = '006d995d433058322319fa797f2876f5';
-
-/** EleAdminPlus授权码 */
-export const LICENSE_CODE = import.meta.env.VITE_LICENSE;

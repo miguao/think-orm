@@ -1,4 +1,6 @@
 /** 暗黑主题(css-var) */
+@use 'ele-admin-plus/es/style/util.scss' as *;
+
 @forward 'element-plus/theme-chalk/src/dark/var.scss' with (
   $colors: (
     'primary': (
@@ -75,3 +77,8 @@
 );
 @use 'element-plus/theme-chalk/src/dark/css-vars.scss';
 @use 'ele-admin-plus/es/style/themes/dark-css-var.scss';
+
+/* 登录界面背景修改 */
+html.dark .login-wrapper {
+  background: none;
+}

@@ -1,9 +1,8 @@
 <!-- 标签页自定义容器 -->
 <template>
   <div
+    class="ele-tab-wrap ele-tabs-wrap"
     :class="[
-      'ele-tab-wrap',
-      'ele-tabs-wrap',
       { 'is-small': size === 'small' },
       { 'is-large': size === 'large' },
       { 'is-simple': type === 'simple' },

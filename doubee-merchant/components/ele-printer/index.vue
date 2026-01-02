@@ -2,11 +2,9 @@
 <template>
   <Teleport :to="container" :disabled="isStatic && !visible">
     <table
-      :class="[
-        'ele-printer',
-        { 'is-open': visible },
-        { 'is-static': isStatic }
-      ]"
+      v-bind="$attrs"
+      class="ele-printer"
+      :class="[{ 'is-open': visible }, { 'is-static': isStatic }]"
     >
       <thead v-if="$slots.header">
         <tr>
@@ -20,9 +18,9 @@
       <tbody>
         <tr>
           <td>
-            <ReceiverView class="ele-printer-body" :style="bodyStyle">
+            <div class="ele-printer-body" :style="bodyStyle">
               <slot></slot>
-            </ReceiverView>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -41,12 +39,11 @@
 
 <script lang="ts" setup>
   import { shallowRef, ref, watch, nextTick, computed, onMounted } from 'vue';
-  import ReceiverView from '../ele-config-provider/components/receiver-view';
   import { getPrintContainer, mergeOptions, usePrinter } from './util';
   import type { PrintOption } from './types';
   import { printerProps, printerEmits } from './props';
 
-  defineOptions({ name: 'ElePrinter' });
+  defineOptions({ name: 'ElePrinter', inheritAttrs: false });
 
   const props = defineProps(printerProps);
 

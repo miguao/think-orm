@@ -22,11 +22,8 @@
     :disabled="disabled"
     :teleported="teleported"
     :hideOnSinglePage="hideOnSinglePage"
-    :class="[
-      'ele-pagination',
-      { 'is-circle': type === 'circle' },
-      { 'is-infinite': isInfinite }
-    ]"
+    class="ele-pagination"
+    :class="[{ 'is-circle': type === 'circle' }, { 'is-infinite': isInfinite }]"
     @update:currentPage="handleUpdateCurrentPage"
     @update:pageSize="handleUpdatePageSize"
   >

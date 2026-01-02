@@ -17,7 +17,8 @@
           <ElButton
             type="primary"
             :icon="item.icon"
-            :class="['ele-cropper-tool', item.className]"
+            class="ele-cropper-tool"
+            :class="item.className"
             @mouseover="(e: MouseEvent) => handleItemHover(item, e)"
             @click="handleUploadButtonClick"
           />
@@ -26,7 +27,8 @@
           v-else
           type="primary"
           :icon="item.icon"
-          :class="['ele-cropper-tool', item.className]"
+          class="ele-cropper-tool"
+          :class="item.className"
           @mouseover="(e: MouseEvent) => handleItemHover(item, e)"
           @click="handleClick(item.name)"
         >
@@ -127,7 +129,7 @@
     ok: CheckOutlined
   };
 
-  const { lang } = useLocale<CropperLocale>('cropper', props);
+  const { lang } = useLocale('cropper', props);
 
   const [startHideTipTimer, stopHideTipTimer] = useTimer(200);
 
@@ -177,7 +179,7 @@
   };
 
   /** 按钮点击事件 */
-  const handleClick = (name: Omit<ToolName, 'upload'>) => {
+  const handleClick = (name: Exclude<ToolName, 'upload'>) => {
     startHideTipTimer(() => {
       hideTooltip();
     });
@@ -220,7 +222,7 @@
             .map((t, j) => {
               const name = t.trim() as ToolName;
               return {
-                key: i + '-' + j + name,
+                key: `${i}-${j}-${name}`,
                 name,
                 icon: markRaw(TOOL_ICONS[name]),
                 className: `ele-cropper-${name}`
