@@ -159,7 +159,7 @@
     }
     const values = Array.isArray(val) ? val : [val];
     values.forEach((v) => {
-      const temp = data.value.find((d) => d.value == v);
+      const temp = data.value.find((d) => d.id == v);
       if (temp != null) {
         result.push(temp);
       } else {
