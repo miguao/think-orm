@@ -22,8 +22,6 @@ class HomeController extends AbstractController
     #[GetMapping("/")]
     public function index()
     {
-//        print_r(StringUtils::generateUniqueAppNumber());
-//        exit;
 //        $get = $this->request->get();
 //        print_r($this->geeTestService->getBehavioralVerificationCode($get['lot_number'], $get['captcha_output'], $get['pass_token'], $get['gen_time']));
         return $this->json(message: "hello,word");
