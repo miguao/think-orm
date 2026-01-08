@@ -56,6 +56,6 @@ class OrderController extends AbstractController
     {
         $map = $this->request->all();
         $tradeNo = $this->request->route('trade_no');
-        return $this->orderService->callback($map);
+        return $this->orderService->callback($tradeNo, $map);
     }
 }
