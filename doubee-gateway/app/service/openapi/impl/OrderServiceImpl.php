@@ -101,14 +101,18 @@ class OrderServiceImpl implements OrderService
         });
     }
 
-    public function callback(string $trade_no, array $map): Response
+    public function callback(string $tradeNo, array $map): Response
     {
-        $paymentOrder = PaymentOrder::newQuery()->where('trade_no', $trade_no)->find();
+        $paymentOrder = PaymentOrder::newQuery()->where('trade_no', $tradeNo)->find();
         if (!$paymentOrder) {
-            throw new JsonException("订单不存在");
+            throw new JsonException("订单不存在或已失效");
         }
 
         $channel = PaymentChannel::query()->find($paymentOrder->channel_id);
+        if (!$channel) {
+            throw new JsonException("渠道信息不存在");
+        }
+
         $handler = PluginFactory::getInstance()->getPaymentHandler(
             $channel->plugin_identifier,
             $paymentOrder,

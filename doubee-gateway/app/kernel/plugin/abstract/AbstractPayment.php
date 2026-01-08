@@ -90,14 +90,16 @@ abstract class AbstractPayment implements Payment
     {
         Db::transaction(function () {
             $order = $this->order;
-            $order->completion_time = DateUtils::current();
-            $order->status = 1;
-            $order->save();
+            if ($order->status == 0) {
+                $order->completion_time = DateUtils::current();
+                $order->status = 1;
+                $order->save();
 
-            try {
-                Queue::push(OrderNotificationJob::class, $order->toArray());
-            } catch (Exception $exception) {
-                // 队列投递失败则写入订单日志
+                try {
+                    Queue::push(OrderNotificationJob::class, $order->toArray());
+                } catch (Exception $exception) {
+                    // 队列投递失败则写入订单日志
+                }
             }
         });
     }
