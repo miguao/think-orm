@@ -9,6 +9,8 @@ use app\kernel\plugin\entity\Plugin;
 use app\kernel\plugin\handler\Payment;
 use app\model\PaymentOrder;
 use app\utils\DateUtils;
+use Exception;
+use think\facade\Db;
 use think\facade\Queue;
 
 abstract class AbstractPayment implements Payment
@@ -86,11 +88,17 @@ abstract class AbstractPayment implements Payment
 
     public function successful(): void
     {
-        $order = $this->order;
-        $order->completion_time = DateUtils::current();
-        $order->status = 1;
-        $order->save();
+        Db::transaction(function () {
+            $order = $this->order;
+            $order->completion_time = DateUtils::current();
+            $order->status = 1;
+            $order->save();
 
-        Queue::push(OrderNotificationJob::class, $order->toArray());
+            try {
+                Queue::push(OrderNotificationJob::class, $order->toArray());
+            } catch (Exception $exception) {
+                // 队列投递失败则写入订单日志
+            }
+        });
     }
 }
