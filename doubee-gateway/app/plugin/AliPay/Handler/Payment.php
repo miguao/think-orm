@@ -28,9 +28,10 @@ class Payment extends AbstractPayment
         Factory::setOptions($config);
 
         try {
+            $tradeNo = $this->order->trade_no;
             $request = Factory::payment()->faceToFace()
-                ->asyncNotify($this->notificationUrl)
-                ->preCreate($this->order->subject, $this->order->trade_no, $this->amount);
+                ->asyncNotify('https://doubee.nanoa.cn/openapi/api/payment/order/callback/' . $tradeNo)
+                ->preCreate($this->order->subject, $tradeNo, $this->amount);
 
             if ((new ResponseChecker())->success($request)) {
                 $payment = new PaymentEntity();
