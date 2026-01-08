@@ -6,6 +6,7 @@ namespace app\controller\openapi\api\payment;
 
 use app\controller\AbstractController;
 use app\kernel\route\annotation\Controller;
+use app\kernel\route\annotation\GetMapping;
 use app\kernel\route\annotation\Inject;
 use app\kernel\route\annotation\PostMapping;
 use app\kernel\route\annotation\RequestMapping;
@@ -49,6 +50,16 @@ class OrderController extends AbstractController
 
         $trade = $this->orderService->trade($map);
         return $this->json(message: "下单成功", data: $trade);
+    }
+
+    #[GetMapping("query")]
+    public function query(): Json
+    {
+        $map = $this->request->get();
+        $this->validator((array)$map, ['trade_no' => 'requireWithout:out_trade_no']);
+
+        $data = $this->orderService->query($this->request->get('trade_no'), $this->request->get('out_trade_no'));
+        return $this->json(data: $data);
     }
 
     #[RequestMapping("callback/:trade_no")]

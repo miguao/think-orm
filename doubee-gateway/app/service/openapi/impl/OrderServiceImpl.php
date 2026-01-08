@@ -101,6 +101,22 @@ class OrderServiceImpl implements OrderService
         });
     }
 
+    public function query(?string $tradeNo = null, ?string $outTradeNo = null): array
+    {
+        $query = PaymentOrder::query()
+            ->when(!empty($tradeNo),
+                fn($query) => $query->where('trade_no', $tradeNo),
+                fn($query) => $query->where('out_trade_no', $outTradeNo)
+            );
+
+        $order = $query->find();
+        if (!$order) {
+            throw new JsonException('订单不存在');
+        }
+
+        return $order->toArray();
+    }
+
     public function callback(string $tradeNo, array $map): Response
     {
         $paymentOrder = PaymentOrder::newQuery()->where('trade_no', $tradeNo)->find();

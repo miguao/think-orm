@@ -24,6 +24,14 @@ interface OrderService
     public function trade(array $map): array;
 
     /**
+     * 查询订单
+     * @param string|null $tradeNo
+     * @param string|null $outTradeNo
+     * @return array
+     */
+    public function query(?string $tradeNo = null, ?string $outTradeNo = null): array;
+
+    /**
      * 异步回调
      * @param string $tradeNo
      * @param array $map
