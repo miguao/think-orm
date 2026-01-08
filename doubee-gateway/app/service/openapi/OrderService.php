@@ -23,5 +23,11 @@ interface OrderService
      */
     public function trade(array $map): array;
 
+    /**
+     * 异步回调
+     * @param string $trade_no
+     * @param array $map
+     * @return Response
+     */
     public function callback(string $trade_no, array $map): Response;
 }
