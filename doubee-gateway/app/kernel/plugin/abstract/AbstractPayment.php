@@ -92,6 +92,7 @@ abstract class AbstractPayment implements Payment
             $order = $this->order;
             if ($order->status == 0) {
                 $order->completion_time = DateUtils::current();
+                $order->notification_status = 3;
                 $order->status = 1;
                 $order->save();
 
