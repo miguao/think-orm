@@ -60,9 +60,9 @@ class Payment extends AbstractPayment
 
         if (Factory::payment()->common()->verifyNotify($map)) {
             $this->successful();
-            return Response::create('success', 'text');
+            return Response::create("success");
         }
 
-        return Response::create('fail', 'text');
+        return Response::create("fail");
     }
 }
