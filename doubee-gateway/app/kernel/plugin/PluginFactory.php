@@ -65,9 +65,9 @@ class PluginFactory
      * @param string $identifier
      * @param PaymentOrder $paymentOrder
      * @param array $config
-     * @param string $clientIp
-     * @param float $amount
-     * @param string $notificationUrl
+     * @param string|null $clientIp
+     * @param float|null $amount
+     * @param string|null $notificationUrl
      * @param string|null $redirectUrl
      * @return Payment|null
      */
@@ -75,9 +75,9 @@ class PluginFactory
         string       $identifier,
         PaymentOrder $paymentOrder,
         array        $config,
-        string       $clientIp,
-        float        $amount,
-        string       $notificationUrl,
+        ?string      $clientIp = null,
+        ?float       $amount = null,
+        ?string      $notificationUrl = null,
         ?string      $redirectUrl = null
     ): ?Payment
     {

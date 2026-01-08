@@ -8,6 +8,7 @@ use app\exception\JsonException;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\Response;
 
 interface OrderService
 {
@@ -22,5 +23,5 @@ interface OrderService
      */
     public function trade(array $map): array;
 
-    public function callback(array $map);
+    public function callback(array $map): Response;
 }

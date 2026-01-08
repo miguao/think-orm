@@ -10,6 +10,7 @@ use app\kernel\route\annotation\Inject;
 use app\kernel\route\annotation\PostMapping;
 use app\kernel\route\annotation\RequestMapping;
 use app\service\openapi\OrderService;
+use think\Response;
 use think\response\Json;
 
 #[Controller("/openapi/api/payment/order")]
@@ -51,7 +52,7 @@ class OrderController extends AbstractController
     }
 
     #[RequestMapping("callback/:trade_no")]
-    public function callback(): Json
+    public function callback(): Response
     {
         $map = $this->request->all();
         $tradeNo = $this->request->route('trade_no');

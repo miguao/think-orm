@@ -6,15 +6,10 @@ namespace app\kernel\plugin\abstract;
 
 use app\kernel\plugin\entity\Plugin;
 use app\kernel\plugin\handler\Payment;
-use app\kernel\route\annotation\Inject;
 use app\model\PaymentOrder;
-use think\Request;
 
 abstract class AbstractPayment implements Payment
 {
-    #[Inject]
-    protected Request $request;
-
     /**
      * 插件信息
      * @var Plugin
@@ -35,21 +30,21 @@ abstract class AbstractPayment implements Payment
 
     /**
      * 客户端IP
-     * @var string
+     * @var string|null
      */
-    protected string $clientIp;
+    protected ?string $clientIp;
 
     /**
      * 支付金额
-     * @var float
+     * @var float|null
      */
-    protected float $amount;
+    protected ?float $amount;
 
     /**
      * 异步通知地址
-     * @var string
+     * @var string|null
      */
-    protected string $notificationUrl;
+    protected ?string $notificationUrl;
 
     /**
      * 同步跳转地址
@@ -62,18 +57,18 @@ abstract class AbstractPayment implements Payment
      * @param Plugin $plugin
      * @param PaymentOrder $order
      * @param array $config
-     * @param string $clientIp
-     * @param float $amount
-     * @param string $notificationUrl
+     * @param string|null $clientIp
+     * @param float|null $amount
+     * @param string|null $notificationUrl
      * @param string|null $redirectUrl
      */
     public function __construct(
         Plugin       $plugin,
         PaymentOrder $order,
         array        $config,
-        string       $clientIp,
-        float        $amount,
-        string       $notificationUrl,
+        ?string      $clientIp = null,
+        ?float       $amount = null,
+        ?string      $notificationUrl = null,
         ?string      $redirectUrl = null
     )
     {

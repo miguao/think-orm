@@ -15,6 +15,7 @@ use app\service\openapi\OrderService;
 use app\utils\DateUtils;
 use app\utils\StringUtils;
 use think\facade\Db;
+use think\Response;
 
 class OrderServiceImpl implements OrderService
 {
@@ -100,23 +101,20 @@ class OrderServiceImpl implements OrderService
         });
     }
 
-    public function callback(array $map)
+    public function callback(array $map): Response
     {
-        $paymentOrder = PaymentOrder::query()->where('trade_no', $map['out_trade_no'])->find();
+        $paymentOrder = PaymentOrder::newQuery()->where('trade_no', $map['out_trade_no'])->find();
+        if (!$paymentOrder) {
+            throw new JsonException("订单不存在");
+        }
 
-        print_r($paymentOrder->toArray());
-        exit;
-
+        $channel = PaymentChannel::query()->find($paymentOrder->channel_id);
         $handler = PluginFactory::getInstance()->getPaymentHandler(
             $channel->plugin_identifier,
             $paymentOrder,
             (array)$channel->config,
-            $payerIp,
-            $amount,
-            $map['notification_url'],
-            $redirectUrl
         );
 
-        return $handler->create();
+        return $handler->async();
     }
 }
