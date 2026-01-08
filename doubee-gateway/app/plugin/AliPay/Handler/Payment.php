@@ -4,37 +4,33 @@ declare(strict_types=1);
 
 namespace app\plugin\AliPay\Handler;
 
+use Alipay\EasySDK\Kernel\Config;
+use Alipay\EasySDK\Kernel\Factory;
+use Alipay\EasySDK\Kernel\Util\ResponseChecker;
 use app\kernel\plugin\abstract\AbstractPayment;
 use app\kernel\plugin\entity\Payment as PaymentEntity;
 use app\kernel\plugin\exception\PluginException;
-use EasyAlipay\Builder;
-use EasyAlipay\Crypto\Rsa;
 
 class Payment extends AbstractPayment
 {
     public function create(): PaymentEntity
     {
-        $payment = new PaymentEntity();
-        $instance = Builder::factory([
-            'privateKey' => Rsa::fromPkcs1($this->config['apply_private_key']),
-            'publicKey' => Rsa::fromSpki($this->config['alipay_public_key']),
-            'params' => [
-                'app_id' => $this->config['app_id'],
-            ],
-        ]);
+        $config = new Config();
+        $config->protocol = 'https';
+        $config->gatewayHost = 'openapi.alipay.com';
+        $config->signType = 'RSA2';
+        $config->appId = $this->config['app_id'];
+        $config->merchantPrivateKey = $this->config['apply_private_key'];
+        $config->alipayPublicKey = $this->config['alipay_public_key'];
 
-        $request = $instance->chain('alipay.trade.precreate')->post([
-            'out_trade_no' => $this->order->trade_no,
-            'subject' => $this->order->subject,
-            'total_amount' => $this->amount,
-        ], ['query' => [
-            'notify_url' => $this->notificationUrl
-        ]]);
-        $responseBody = $request->getBody();
-        $responseData = json_decode($responseBody->getContents(), true);
-        if ($responseData['code'] == 10000 && isset($responseData['qr_code'])) {
-            $payment->setPayUrl($responseData['qr_code']);
-            return $payment;
+        Factory::setOptions($config);
+
+        $request = Factory::payment()->faceToFace()
+            ->asyncNotify($this->notificationUrl)
+            ->preCreate($this->order->subject, $this->order->trade_no, $this->amount);
+        if ((new ResponseChecker())->success($request)) {
+            print_r($request);
+            exit;
         }
 
         throw new PluginException("下单失败，请稍后重试。");
@@ -42,5 +38,7 @@ class Payment extends AbstractPayment
 
     public function async()
     {
+        $map = $this->request->all();
+        print_r($map);
     }
 }

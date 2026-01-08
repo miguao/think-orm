@@ -6,10 +6,15 @@ namespace app\kernel\plugin\abstract;
 
 use app\kernel\plugin\entity\Plugin;
 use app\kernel\plugin\handler\Payment;
+use app\kernel\route\annotation\Inject;
 use app\model\PaymentOrder;
+use think\Request;
 
 abstract class AbstractPayment implements Payment
 {
+    #[Inject]
+    protected Request $request;
+
     /**
      * 插件信息
      * @var Plugin

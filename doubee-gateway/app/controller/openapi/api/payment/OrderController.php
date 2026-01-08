@@ -54,8 +54,7 @@ class OrderController extends AbstractController
     public function callback(): Json
     {
         $map = $this->request->all();
-        print_r($this->request->route('trade_no'));
-        exit;
+        $tradeNo = $this->request->route('trade_no');
         return $this->orderService->callback($map);
     }
 }
