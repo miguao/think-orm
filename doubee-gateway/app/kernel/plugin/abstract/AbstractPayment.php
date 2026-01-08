@@ -4,9 +4,12 @@ declare (strict_types=1);
 
 namespace app\kernel\plugin\abstract;
 
+use app\job\OrderNotificationJob;
 use app\kernel\plugin\entity\Plugin;
 use app\kernel\plugin\handler\Payment;
 use app\model\PaymentOrder;
+use app\utils\DateUtils;
+use think\facade\Queue;
 
 abstract class AbstractPayment implements Payment
 {
@@ -83,6 +86,11 @@ abstract class AbstractPayment implements Payment
 
     public function successful(): void
     {
+        $order = $this->order;
+        $order->completion_time = DateUtils::current();
+        $order->status = 1;
+        $order->save();
 
+        Queue::push(OrderNotificationJob::class, $order->toArray());
     }
 }
