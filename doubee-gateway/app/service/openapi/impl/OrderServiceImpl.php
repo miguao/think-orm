@@ -101,9 +101,9 @@ class OrderServiceImpl implements OrderService
         });
     }
 
-    public function callback(array $map): Response
+    public function callback(string $trade_no, array $map): Response
     {
-        $paymentOrder = PaymentOrder::newQuery()->where('trade_no', $map['out_trade_no'])->find();
+        $paymentOrder = PaymentOrder::newQuery()->where('trade_no', $trade_no)->find();
         if (!$paymentOrder) {
             throw new JsonException("订单不存在");
         }

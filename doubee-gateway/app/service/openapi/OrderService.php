@@ -23,5 +23,5 @@ interface OrderService
      */
     public function trade(array $map): array;
 
-    public function callback(array $map): Response;
+    public function callback(string $trade_no, array $map): Response;
 }
