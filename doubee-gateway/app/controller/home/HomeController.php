@@ -12,7 +12,6 @@ use app\model\PaymentChannel;
 use app\model\PaymentOrder;
 use app\service\admin\GeeTestService;
 use app\utils\StringUtils;
-use think\response\Json;
 
 class HomeController extends AbstractController
 {

@@ -50,9 +50,12 @@ class OrderController extends AbstractController
         return $this->json(message: "下单成功", data: $trade);
     }
 
-    #[RequestMapping("callback")]
+    #[RequestMapping("callback/:trade_no")]
     public function callback(): Json
     {
-        return $this->json();
+        $map = $this->request->all();
+        print_r($this->request->route('trade_no'));
+        exit;
+        return $this->orderService->callback($map);
     }
 }

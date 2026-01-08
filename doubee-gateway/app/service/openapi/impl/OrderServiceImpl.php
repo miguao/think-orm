@@ -25,7 +25,7 @@ class OrderServiceImpl implements OrderService
             throw new JsonException("商户号不存在");
         }
         if ($merchant->status != 1) {
-            throw new JsonException("当前商户状态异常，如有异常请联系客服。");
+            throw new JsonException("当前商户状态异常，如有疑问请联系客服。");
         }
 
         // 查询商户应用
@@ -37,14 +37,14 @@ class OrderServiceImpl implements OrderService
             throw new JsonException("应用不存在");
         }
 
-        // 根据银行代码查找对应银行信息
-        $bank = PaymentType::query()->where("code", $map['bank_code'])->find();
-        if (!$bank) {
-            throw new JsonException("银行代码不存在");
+        // 查询支付类型
+        $paymentType = PaymentType::query()->where("code", $map['payment_type'])->find();
+        if (!$paymentType) {
+            throw new JsonException("支付类型不存在");
         }
 
-        // 根据银行ID查找可用支付通道
-        $channel = PaymentChannel::query()->where("bank_id", $bank->id)->find();
+        // 查询可用支付通道
+        $channel = PaymentChannel::query()->where("type_id", $paymentType->id)->find();
         if (!$channel) {
             throw new JsonException("无可用通道，请尝试其他支付方式。");
         }
@@ -54,7 +54,7 @@ class OrderServiceImpl implements OrderService
             throw new JsonException("下单金额不能为0或低于0");
         }
 
-        $signature = StringUtils::generateSignature($map, $application->secret);
+        $signature = StringUtils::generateSignature($map, $merchant->merchant_key);
         if ($map['sign'] != $signature) {
             throw new JsonException("签名错误");
         }
@@ -63,22 +63,24 @@ class OrderServiceImpl implements OrderService
             $merchantId = (int)$merchant->id;
             $applicationId = (int)$application->id;
             $channelId = (int)$channel->id;
-            $banKId = (int)$channel->bank_id;
+            $typeId = (int)$channel->typeId;
 
             $tradeNo = StringUtils::generateTradeNo();
             $outTradeNo = $map['out_trade_no'];
+            $payerIp = $map['payer_ip'] ?? null;
+            $redirectUrl = $map['redirect_url'] ?? null;
 
             $paymentOrder = new PaymentOrder();
             $paymentOrder->merchant_id = $merchantId;
             $paymentOrder->application_id = $applicationId;
             $paymentOrder->channel_id = $channelId;
-            $paymentOrder->bank_id = $banKId;
+            $paymentOrder->type_id = $typeId;
             $paymentOrder->trade_no = $tradeNo;
             $paymentOrder->out_trade_no = $outTradeNo;
             $paymentOrder->subject = $map['subject'];
             $paymentOrder->amount = $amount;
             $paymentOrder->actual_amount = $amount;
-            $paymentOrder->payer_ip = request()->ip();
+            $paymentOrder->payer_ip = $payerIp;
             $paymentOrder->creation_time = DateUtils::current();
             $paymentOrder->status = 0;
             $paymentOrder->save();
@@ -87,14 +89,34 @@ class OrderServiceImpl implements OrderService
                 $channel->plugin_identifier,
                 $paymentOrder,
                 (array)$channel->config,
-                "127.0.0.1",
+                $payerIp,
                 $amount,
                 $map['notification_url'],
-                null
+                $redirectUrl
             );
 
             $pay = $handler->create();
             return ['url' => $pay->getPayUrl()];
         });
+    }
+
+    public function callback(array $map)
+    {
+        $paymentOrder = PaymentOrder::query()->where('trade_no', $map['out_trade_no'])->find();
+
+        print_r($paymentOrder->toArray());
+        exit;
+
+        $handler = PluginFactory::getInstance()->getPaymentHandler(
+            $channel->plugin_identifier,
+            $paymentOrder,
+            (array)$channel->config,
+            $payerIp,
+            $amount,
+            $map['notification_url'],
+            $redirectUrl
+        );
+
+        return $handler->create();
     }
 }

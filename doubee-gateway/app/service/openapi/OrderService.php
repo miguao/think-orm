@@ -21,4 +21,6 @@ interface OrderService
      * @throws ModelNotFoundException
      */
     public function trade(array $map): array;
+
+    public function callback(array $map);
 }
