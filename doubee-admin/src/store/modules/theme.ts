@@ -104,11 +104,11 @@ const DEFAULT_STATE: ThemeState = {
   /** 是否需要页签栏 */
   tabBar: false,
   /** 布局类型 */
-  layout: 'top',
+  layout: 'side',
   /** 侧栏布局类型 */
   sidebarLayout: 'default',
   /** 顶栏风格 */
-  headerStyle: 'dark',
+  headerStyle: 'light',
   /** 侧栏风格 */
   sidebarStyle: 'dark',
   /** 双侧栏二级风格 */

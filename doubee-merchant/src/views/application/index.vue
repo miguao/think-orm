@@ -51,6 +51,10 @@
 
         <template #action="{ row }">
           <el-link type="primary" underline="never" @click="openDetails(row)">
+            轮询策略
+          </el-link>
+          <el-divider direction="vertical" />
+          <el-link type="primary" underline="never" @click="openDetails(row)">
             详情
           </el-link>
         </template>

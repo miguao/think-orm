@@ -12,9 +12,9 @@ export interface Config {
 
 export interface ConfigField {
   id?: number;
-  config_id?: number;
-  key?: string;
-  title?: string;
+  config_id: number;
+  key: string;
+  title: string;
   value?: string;
   component_type?: string;
   component_data?: string;
@@ -30,6 +30,7 @@ export interface ConfigField {
 }
 
 export interface SearchParam extends PageParam {
+  'equal-config_id'?: number;
   'search-name'?: string;
   'search-key'?: string;
 }

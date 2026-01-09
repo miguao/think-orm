@@ -98,9 +98,9 @@
         <i18n-icon :icon-style="{ transform: 'scale(1.15)' }" />
       </layout-tool>
       <!-- 消息通知 -->
-      <layout-tool :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }">
+      <!-- <layout-tool :class="{ 'hidden-sm-and-down': tabBar && tabInHeader }">
         <header-notice />
-      </layout-tool>
+      </layout-tool> -->
       <!-- 用户信息 -->
       <layout-tool>
         <header-user />
@@ -121,11 +121,11 @@
         />
       </layout-tool>
       <!-- 主题设置 -->
-      <!-- <layout-tool @click="openSetting">
+      <layout-tool @click="openSetting">
         <el-icon>
           <MoreOutlined />
         </el-icon>
-      </layout-tool> -->
+      </layout-tool>
     </template>
     <!-- 页签栏右侧下拉菜单 -->
     <template v-if="tabBar && !tabInHeader" #tabExtra="{ active }">

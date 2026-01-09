@@ -11,7 +11,12 @@
   >
     <template #default>
       <el-space>
-        <el-button type="primary" class="ele-btn-icon" :icon="Setting">
+        <el-button
+          type="primary"
+          class="ele-btn-icon"
+          :icon="Setting"
+          @click="openFieldSetting(props.data)"
+        >
           字段配置
         </el-button>
       </el-space>
@@ -59,6 +64,9 @@
       </div>
     </template>
   </ele-drawer>
+
+  <!-- 字段配置弹窗 -->
+  <config-field v-model="showFieldSetting" :data="props.data" />
 </template>
 <script setup lang="ts">
   import type { Config } from '@/api/system/config/model';
@@ -66,9 +74,10 @@
   import { Setting } from '@element-plus/icons-vue';
   import type { FormInstance } from 'element-plus';
   import { reactive, ref, watch } from 'vue';
+  import ConfigField from './config-field.vue';
 
   const props = defineProps<{
-    data?: Config | null;
+    data: Config;
   }>();
 
   const emit = defineEmits<{
@@ -93,6 +102,14 @@
 
   // 表单验证规则
   const rules = reactive({});
+
+  /** 字段配置弹窗是否打开 */
+  const showFieldSetting = ref(false);
+
+  /** 打开字段配置 */
+  const openFieldSetting = (data: Config) => {
+    showFieldSetting.value = true;
+  };
 
   /** 监听弹窗打开 */
   watch(visible, () => {
