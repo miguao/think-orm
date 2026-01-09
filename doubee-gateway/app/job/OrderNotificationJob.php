@@ -54,7 +54,7 @@ class OrderNotificationJob implements JobInterface
             'out_trade_no' => $order->out_trade_no,
             'subject' => $order->subject,
             'amount' => $order->amount,
-            'payment_type' => $order->type,
+            'payment_type' => 'ALIPAY',
             'notification_url' => $order->notification_url,
             'redirect_url' => $order->redirect_url,
             'payer_ip' => $order->payer_ip,
