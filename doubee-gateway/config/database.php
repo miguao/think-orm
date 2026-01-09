@@ -28,11 +28,11 @@ return [
             // 服务器地址
             'hostname' => env('DB_HOST', '127.0.0.1'),
             // 数据库名
-            'database' => env('DB_NAME', ''),
+            'database' => env('DB_NAME', null),
             // 用户名
             'username' => env('DB_USER', 'root'),
             // 密码
-            'password' => env('DB_PASS', ''),
+            'password' => env('DB_PASS', null),
             // 端口
             'hostport' => env('DB_PORT', '3306'),
             // 数据库连接参数
@@ -40,7 +40,7 @@ return [
             // 数据库编码默认采用utf8
             'charset' => env('DB_CHARSET', 'utf8'),
             // 数据库表前缀
-            'prefix' => env('DB_PREFIX', ''),
+            'prefix' => env('DB_PREFIX', null),
 
             // 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)
             'deploy' => 0,
@@ -65,15 +65,15 @@ return [
             // 服务器地址
             'hostname' => env('MONGO_HOST', '127.0.0.1'),
             // 数据库名
-            'database' => env('MONGO_DATABASE', ''),
+            'database' => env('MONGO_DATABASE', null),
             // 用户名
-            'username' => env('MONGO_USERNAME', ''),
+            'username' => env('MONGO_USERNAME', null),
             // 密码
-            'password' => env('MONGO_PASSWORD', ''),
+            'password' => env('MONGO_PASSWORD', null),
             // 端口
             'hostport' => env('MONGO_PORT', '27017'),
             // 数据库表前缀
-            'prefix' => env('MONGO_PREFIX', ''),
+            'prefix' => env('MONGO_PREFIX', null),
             // 是否_id转换为id
             'pk_convert_id' => true,
         ],
