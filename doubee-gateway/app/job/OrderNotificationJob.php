@@ -41,7 +41,7 @@ class OrderNotificationJob implements JobInterface
         Log::info("进入队列第三ban步，查到订单数据：" . json_encode($order->toArray()));
 
         $params = [
-            'merchant_no' => $order->merchant_no,
+            'merchant_no' => $order->merchant->merchant_no,
             'application_no' => $order->application->application_no,
             'out_trade_no' => $order->out_trade_no,
             'subject' => $order->subject,
