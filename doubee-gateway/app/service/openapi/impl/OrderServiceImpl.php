@@ -80,7 +80,7 @@ class OrderServiceImpl implements OrderService
             $paymentOrder->out_trade_no = $outTradeNo;
             $paymentOrder->subject = $map['subject'];
             $paymentOrder->amount = $amount;
-            $paymentOrder->actual_amount = $amount;
+            $paymentOrder->paid_amount = $amount;
             $paymentOrder->payer_ip = $payerIp;
             $paymentOrder->notification_url = $map['notification_url'];
             $paymentOrder->creation_time = DateUtils::current();

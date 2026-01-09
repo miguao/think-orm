@@ -43,13 +43,19 @@ class OrderNotificationJob implements JobInterface
         $params = [
             'merchant_no' => $order->merchant->merchant_no,
             'application_no' => $order->application->application_no,
+            'trade_no' => $order->trade_no,
             'out_trade_no' => $order->out_trade_no,
+            'platform_trade_no' => $order->platform_trade_no,
             'subject' => $order->subject,
             'amount' => $order->amount,
+            'paid_amount' => $order->paid_amount,
             'payment_type' => 'ALIPAY',
             'notification_url' => $order->notification_url,
             'redirect_url' => $order->redirect_url,
             'payer_ip' => $order->payer_ip,
+            'creation_time' => $order->creation_time,
+            'completion_time' => $order->completion_time,
+            'status' => $order->status,
         ];
         $params['sign'] = StringUtils::generateSignature($params, $order->merchant->merchant_key);
         $params['sign_type'] = 'MD5';
@@ -66,7 +72,7 @@ class OrderNotificationJob implements JobInterface
 
             Log::info("进入队列第七步，获取响应数据");
 
-            if ($body === 'success') {
+            if ($body === "SUCCESS") {
                 Log::info("进入队列第八步，更新订单状态");
 
                 $order->notification_status = 1;
