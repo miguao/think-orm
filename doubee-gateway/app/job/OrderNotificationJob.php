@@ -38,7 +38,7 @@ class OrderNotificationJob implements JobInterface
             ->with(['application', 'type', 'merchant'])
             ->find($data['id']);
 
-        Log::info("进入队列第三ban步，查到订单数据：" . json_encode($order));
+        Log::info("进入队列第三ban步，查到订单数据：" . json_encode($order->toArray()));
 
         if (!$order || empty($order->notification_url)) {
             Log::info("进入队列第四步，数据异常，直接结束");
