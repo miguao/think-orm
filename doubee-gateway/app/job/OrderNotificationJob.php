@@ -60,7 +60,7 @@ class OrderNotificationJob implements JobInterface
         $params['sign'] = StringUtils::generateSignature($params, $order->merchant->merchant_key);
         $params['sign_type'] = 'MD5';
 
-        Log::info("进入队列第五步，拼接验签参数");
+        Log::info("进入队列第五步，拼接验签参数：" . json_encode($params, JSON_UNESCAPED_UNICODE));
 
         try {
             $client = new Client(['verify' => false, 'timeout' => 10, 'http_errors' => false]);
