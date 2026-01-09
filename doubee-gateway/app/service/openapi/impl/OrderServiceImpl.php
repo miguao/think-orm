@@ -60,24 +60,18 @@ class OrderServiceImpl implements OrderService
             throw new JsonException("签名错误");
         }
 
-        return Db::transaction(function () use ($map, $merchant, $application, $channel, $amount) {
-            $merchantId = (int)$merchant->id;
-            $applicationId = (int)$application->id;
-            $channelId = (int)$channel->id;
-            $typeId = (int)$channel->typeId;
-
+        return Db::transaction(function () use ($map, $merchant, $application, $channel, $amount, $paymentType) {
             $tradeNo = StringUtils::generateTradeNo();
-            $outTradeNo = $map['out_trade_no'];
             $payerIp = $map['payer_ip'] ?? null;
             $redirectUrl = $map['redirect_url'] ?? null;
 
             $paymentOrder = new PaymentOrder();
-            $paymentOrder->merchant_id = $merchantId;
-            $paymentOrder->application_id = $applicationId;
-            $paymentOrder->channel_id = $channelId;
-            $paymentOrder->type_id = $typeId;
+            $paymentOrder->merchant_no = $merchant->merchant_no;
+            $paymentOrder->application_no = $application->application_no;
+            $paymentOrder->channel_id = (int)$channel->id;
+            $paymentOrder->payment_type = (string)$paymentType->code;
             $paymentOrder->trade_no = $tradeNo;
-            $paymentOrder->out_trade_no = $outTradeNo;
+            $paymentOrder->out_trade_no = $map['out_trade_no'];
             $paymentOrder->subject = $map['subject'];
             $paymentOrder->amount = $amount;
             $paymentOrder->paid_amount = $amount;
@@ -93,7 +87,7 @@ class OrderServiceImpl implements OrderService
                 (array)$channel->config,
                 $payerIp,
                 $amount,
-                $map['notification_url'],
+                'https://doubee.nanoa.cn/openapi/api/payment/order/callback/' . $tradeNo,
                 $redirectUrl
             );
 
