@@ -23,7 +23,7 @@ class OrderNotificationJob implements JobInterface
 
     public function fire(Job $job, array $data): void
     {
-        Log::info("进入队列第一步");
+        Log::info("进入队列第一步: " . json_encode($data));
 
         $attempts = $job->attempts();
         if ($attempts > $this->maxAttempts) {

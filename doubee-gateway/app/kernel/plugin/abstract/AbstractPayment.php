@@ -11,6 +11,7 @@ use app\model\PaymentOrder;
 use app\utils\DateUtils;
 use Exception;
 use think\facade\Db;
+use think\facade\Log;
 use think\facade\Queue;
 
 abstract class AbstractPayment implements Payment
@@ -98,6 +99,7 @@ abstract class AbstractPayment implements Payment
 
                 try {
                     Queue::push(OrderNotificationJob::class, $order->toArray());
+                    Log::info("推送队列，成功存入数据：" . json_encode($order->toArray()));
                 } catch (Exception $exception) {
                     // 队列投递失败则写入订单日志
                 }
