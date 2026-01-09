@@ -82,6 +82,7 @@ class OrderServiceImpl implements OrderService
             $paymentOrder->amount = $amount;
             $paymentOrder->actual_amount = $amount;
             $paymentOrder->payer_ip = $payerIp;
+            $paymentOrder->notification_url = $map['notification_url'];
             $paymentOrder->creation_time = DateUtils::current();
             $paymentOrder->status = 0;
             $paymentOrder->save();
