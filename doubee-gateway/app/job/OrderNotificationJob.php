@@ -40,14 +40,6 @@ class OrderNotificationJob implements JobInterface
 
         Log::info("进入队列第三ban步，查到订单数据：" . json_encode($order->toArray()));
 
-        if (!$order || empty($order->notification_url)) {
-            Log::info("进入队列第四步，数据异常，直接结束");
-
-            // 数据异常，直接结束
-            $job->delete();
-            return;
-        }
-
         $params = [
             'merchant_no' => $order->merchant_no,
             'application_no' => $order->application->application_no,
