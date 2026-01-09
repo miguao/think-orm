@@ -30,7 +30,7 @@ class Payment extends AbstractPayment
         try {
             $tradeNo = $this->order->trade_no;
             $request = Factory::payment()->faceToFace()
-                ->asyncNotify('https://doubee.nanoa.cn/openapi/api/payment/order/callback/' . $tradeNo)
+                ->asyncNotify($this->notificationUrl)
                 ->preCreate($this->order->subject, $tradeNo, $this->amount);
 
             if ((new ResponseChecker())->success($request)) {
