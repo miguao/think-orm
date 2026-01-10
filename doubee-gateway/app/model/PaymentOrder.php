@@ -24,7 +24,7 @@ class PaymentOrder extends Model
      */
     public function application(): HasOne
     {
-        return $this->hasOne(MerchantApplication::class, "id", "application_id");
+        return $this->hasOne(MerchantApplication::class, "application_no", "application_no");
     }
 
     /**
