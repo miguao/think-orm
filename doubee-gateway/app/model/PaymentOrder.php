@@ -42,6 +42,6 @@ class PaymentOrder extends Model
      */
     public function type(): HasOne
     {
-        return $this->hasOne(PaymentType::class, "id", "type_id");
+        return $this->hasOne(PaymentType::class, "code", "payment_type");
     }
 }
