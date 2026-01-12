@@ -76,7 +76,7 @@ class AppController extends AbstractAdminController
         $map = $this->request->post();
         $this->validator((array)$map, ['id' => 'require'], ['id.require' => '应用ID不能为空']);
 
-        $application = MerchantApplication::query()->find((int)$map["id"]);
+        $application = MerchantApplication::find((int)$map["id"]);
         if (!$application) {
             throw new JsonException("应用不存在");
         }

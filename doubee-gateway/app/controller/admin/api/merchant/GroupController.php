@@ -76,7 +76,7 @@ class GroupController extends AbstractAdminController
         $data = $this->database->get($get);
 
         $groupId = (int)$map['group_id'];
-        $roleData = MerchantGroup::query()->with(['permissions'])->find($groupId);
+        $roleData = MerchantGroup::with(['permissions'])->find($groupId);
         if (!$roleData) {
             throw new JsonException("用户组不存在");
         }

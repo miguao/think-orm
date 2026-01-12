@@ -55,7 +55,7 @@ class Database implements DatabaseInterface
         /**
          * @var Query $query
          */
-        $query = $get->model::query();
+        $query = $get->model::newQuery;
         $tableName = $this->getTable($get->model);
 
         if (count($get->leftJoinWhere) > 0) {
@@ -136,7 +136,7 @@ class Database implements DatabaseInterface
         /**
          * @var Query $query
          */
-        $query = $save->model::query();
+        $query = $save->model::newQuery;
 
         $model = $save->id ? $query->find($save->id) : null;
         $modify = false;
@@ -200,7 +200,7 @@ class Database implements DatabaseInterface
             $data = $m['data'];
             if (!empty($data)) {
                 //删除中间表关系
-                $middle['middle']::query()->where($middle['localKey'], $id)->delete();
+                $middle['middle']::where($middle['localKey'], $id)->delete();
             }
             $localKey = $middle['localKey'];
             $foreignKey = $middle['foreignKey'];
@@ -236,7 +236,7 @@ class Database implements DatabaseInterface
             /**
              * @var Query $query
              */
-            $query = $delete->model::query();
+            $query = $delete->model::newQuery;
             foreach ($delete->where as $where) {
                 $query = $query->where(...$where);
             }

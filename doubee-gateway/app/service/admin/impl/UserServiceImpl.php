@@ -27,7 +27,7 @@ class UserServiceImpl implements UserService
 
     public function login(string $email, string $password): string
     {
-        $user = SystemUser::newQuery()->where("email", $email)->find();
+        $user = SystemUser::where("email", $email)->find();
         if (!$user) {
             throw new JsonException("用户不存在");
         }
@@ -69,7 +69,7 @@ class UserServiceImpl implements UserService
 
     public function findByUserPermissions(int $userId): array
     {
-        $user = SystemUser::query()->with(['roles' => function (Query $query) {
+        $user = SystemUser::with(['roles' => function (Query $query) {
             $query->with(['permissions' => function (Query $query) {
                 $query->where("status", 1)->order("sort", "desc");
             }]);

@@ -79,7 +79,7 @@ class RoleController extends AbstractAdminController
         $data = $this->database->get($get);
 
         $roleId = (int)$map['role_id'];
-        $roleData = SystemUserRole::query()->with(['permissions'])->find($roleId);
+        $roleData = SystemUserRole::with(['permissions'])->find($roleId);
         if (!$roleData) {
             throw new JsonException("角色不存在");
         }

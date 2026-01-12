@@ -12,7 +12,7 @@ class ConfigServiceImpl implements ConfigService
 {
     public function getConfig(string $key, bool $public = false, bool $status = false): array
     {
-        $config = SystemConfig::newQuery()->where('key', $key);
+        $config = SystemConfig::where('key', $key);
         if (!$status) {
             $config = $config->where('status', 1);
         }

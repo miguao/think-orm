@@ -52,7 +52,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
             throw new UnauthorizedException($exception->getMessage());
         }
 
-        $user = SystemUser::query()->find($userId);
+        $user = SystemUser::find($userId);
         if (!$user) {
             throw new UnauthorizedException("用户不存在");
         }

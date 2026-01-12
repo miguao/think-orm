@@ -36,7 +36,7 @@ class UserServiceImpl implements UserService
             default => throw new JsonException("用户名不正确"),
         };
 
-        $merchant = Merchant::newQuery()->where($field, $username)->find();
+        $merchant = Merchant::where($field, $username)->find();
         if (!$merchant) {
             throw new JsonException("用户不存在");
         }
@@ -69,7 +69,7 @@ class UserServiceImpl implements UserService
         }
 
         $field = ValidatorUtils::isValidPhoneNumber($username) ? 'phone' : 'email';
-        $merchant = Merchant::newQuery()->where($field, $username)->find();
+        $merchant = Merchant::where($field, $username)->find();
         if (!$merchant) {
             throw new JsonException("用户不存在");
         }
@@ -95,7 +95,7 @@ class UserServiceImpl implements UserService
         }
 
         $field = ValidatorUtils::isValidPhoneNumber($username) ? 'phone' : 'email';
-        $merchant = Merchant::newQuery()->where($field, $username)->find();
+        $merchant = Merchant::where($field, $username)->find();
         if (!$merchant) {
             throw new JsonException("该手机号或邮箱尚未注册，请先注册账号");
         }
@@ -126,7 +126,7 @@ class UserServiceImpl implements UserService
 
     public function emailRegister(string $email, string $password, string $code): string
     {
-        $merchant = Merchant::newQuery()->where('email', $email)->find();
+        $merchant = Merchant::where('email', $email)->find();
         if ($merchant) {
             throw new JsonException("该邮箱已被注册，请使用其他邮箱。");
         }
@@ -174,7 +174,7 @@ class UserServiceImpl implements UserService
         }
 
         $field = ValidatorUtils::isValidPhoneNumber($username) ? 'phone' : 'email';
-        $merchant = Merchant::newQuery()->where($field, $username)->find();
+        $merchant = Merchant::where($field, $username)->find();
         if ($merchant) {
             throw new JsonException("该手机号或邮箱已注册，请使用其他账号或尝试登录");
         }
@@ -197,7 +197,7 @@ class UserServiceImpl implements UserService
         }
 
         $field = ValidatorUtils::isValidPhoneNumber($username) ? 'phone' : 'email';
-        $merchant = Merchant::newQuery()->where($field, $username)->find();
+        $merchant = Merchant::where($field, $username)->find();
         if (!$merchant) {
             throw new JsonException("该手机号或邮箱尚未注册，请先注册账号");
         }
@@ -226,7 +226,7 @@ class UserServiceImpl implements UserService
         }
 
         $field = ValidatorUtils::isValidPhoneNumber($username) ? 'phone' : 'email';
-        $merchant = Merchant::newQuery()->where($field, $username)->find();
+        $merchant = Merchant::where($field, $username)->find();
         if (!$merchant) {
             throw new JsonException("该手机号或邮箱尚未注册，请先注册账号");
         }
@@ -263,7 +263,7 @@ class UserServiceImpl implements UserService
 
     public function findByUserPermissions(int $userId): array
     {
-        $user = Merchant::query()->with(['merchantGroup' => function (Query $query) {
+        $user = Merchant::with(['merchantGroup' => function (Query $query) {
             $query->with(['permissions' => function (Query $query) {
                 $query->where("status", 1)->order("sort", "desc");
             }]);

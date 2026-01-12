@@ -56,7 +56,7 @@ class MerchantController extends AbstractAdminController
             $map['creation_time'] = DateUtils::current();
         } else {
             if (isset($map['password']) && $map['password'] !== "") {
-                $user = Merchant::query()->find($map['id']);
+                $user = Merchant::find($map['id']);
                 $map['password'] = StringUtils::generatePassword($map['password'], $user->salting);
             }
         }
