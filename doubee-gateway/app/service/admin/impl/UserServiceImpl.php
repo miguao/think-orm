@@ -32,11 +32,11 @@ class UserServiceImpl implements UserService
             throw new JsonException("用户不存在");
         }
 
-        if ($user->get("password") != StringUtils::generatePassword(trim($password), $user->get("salting"))) {
+        if ($user->getAttr("password") != StringUtils::generatePassword(trim($password), $user->getAttr("salting"))) {
             throw new JsonException("密码错误");
         }
 
-        if ($user->get("status") != 1) {
+        if ($user->getAttr("status") != 1) {
             throw new JsonException("You have been banned");
         }
 
@@ -46,12 +46,12 @@ class UserServiceImpl implements UserService
     public function setLoginSuccess(SystemUser $user): string
     {
         $loginTime = DateUtils::current();
-        $user->set("last_login_time", $user->login_time);
-        $user->set("login_time", $loginTime);
-        $user->set("last_login_ip", $user->login_ip);
-        $user->set("login_ip", $this->request->ip());
-        $user->set("last_login_ua", $user->login_ua);
-        $user->set("login_ua", $this->request->header("User-Agent"));
+        $user->setAttr("last_login_time", $user->getAttr("login_time"));
+        $user->setAttr("login_time", $loginTime);
+        $user->setAttr("last_login_ip", $user->getAttr("login_ip"));
+        $user->setAttr("login_ip", $this->request->ip());
+        $user->setAttr("last_login_ua", $user->getAttr("login_ua"));
+        $user->setAttr("login_ua", $this->request->header("User-Agent"));
         $user->save();
 
         $payload = [
@@ -62,7 +62,7 @@ class UserServiceImpl implements UserService
 
         $token = JWT::encode($payload, env("SYSTEM_JWT_KEY"), "HS256");
 
-        $this->logService->createLoginLog($user, $user->get("login_ip"), $user->get("login_ua"));
+        $this->logService->createLoginLog($user, $user->getAttr("login_ip"), $user->getAttr("login_ua"));
 
         return $token;
     }
@@ -81,25 +81,25 @@ class UserServiceImpl implements UserService
 
         $menus = [];
         $permissions = [];
-        foreach ($user->get("roles") as $role) {
-            foreach ($role->get("permissions") as $permission) {
-                if ($permission->get("type") == SystemUserPermissionType::API->value) {
+        foreach ($user->getAttr("roles") as $role) {
+            foreach ($role->getAttr("permissions") as $permission) {
+                if ($permission->getAttr("type") == SystemUserPermissionType::API->value) {
                     $permissions[] = [
-                        'id' => $permission->get("id"),
-                        'path' => $permission->get("path"),
+                        'id' => $permission->getAttr("id"),
+                        'path' => $permission->getAttr("path"),
                     ];
                 }
 
-                if ($permission->get("type") == SystemUserPermissionType::MENU->value || $permission->get("type") == SystemUserPermissionType::DIRECTORY->value) {
+                if ($permission->getAttr("type") == SystemUserPermissionType::MENU->value || $permission->getAttr("type") == SystemUserPermissionType::DIRECTORY->value) {
                     $menus[] = [
-                        'id' => $permission->get("id"),
-                        'parent_id' => $permission->get("parent_id"),
-                        'icon' => $permission->get("icon"),
-                        'name' => $permission->get("name"),
-                        'path' => $permission->get("path"),
-                        'component' => $permission->get("component"),
-                        'hide' => $permission->get("hide"),
-                        'metadata' => $permission->get("metadata"),
+                        'id' => $permission->getAttr("id"),
+                        'parent_id' => $permission->getAttr("parent_id"),
+                        'icon' => $permission->getAttr("icon"),
+                        'name' => $permission->getAttr("name"),
+                        'path' => $permission->getAttr("path"),
+                        'component' => $permission->getAttr("component"),
+                        'hide' => $permission->getAttr("hide"),
+                        'metadata' => $permission->getAttr("metadata"),
                     ];
                 }
             }
