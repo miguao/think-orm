@@ -32,11 +32,11 @@ class UserServiceImpl implements UserService
             throw new JsonException("用户不存在");
         }
 
-        if ($user->password != StringUtils::generatePassword(trim($password), $user->salting)) {
+        if ($user->get("password") != StringUtils::generatePassword(trim($password), $user->get("salting"))) {
             throw new JsonException("密码错误");
         }
 
-        if ($user->status != 1) {
+        if ($user->get("status") != 1) {
             throw new JsonException("You have been banned");
         }
 
@@ -46,12 +46,12 @@ class UserServiceImpl implements UserService
     public function setLoginSuccess(SystemUser $user): string
     {
         $loginTime = DateUtils::current();
-        $user->last_login_time = $user->login_time;
-        $user->login_time = $loginTime;
-        $user->last_login_ip = $user->login_ip;
-        $user->login_ip = $this->request->ip();
-        $user->last_login_ua = $user->login_ua;
-        $user->login_ua = $this->request->header("User-Agent");
+        $user->set("last_login_time", $user->login_time);
+        $user->set("login_time", $loginTime);
+        $user->set("last_login_ip", $user->login_ip);
+        $user->set("login_ip", $this->request->ip());
+        $user->set("last_login_ua", $user->login_ua);
+        $user->set("login_ua", $this->request->header("User-Agent"));
         $user->save();
 
         $payload = [
@@ -62,7 +62,7 @@ class UserServiceImpl implements UserService
 
         $token = JWT::encode($payload, env("SYSTEM_JWT_KEY"), "HS256");
 
-        $this->logService->createLoginLog($user, $user->login_ip, $user->login_ua);
+        $this->logService->createLoginLog($user, $user->get("login_ip"), $user->get("login_ua"));
 
         return $token;
     }
@@ -81,25 +81,25 @@ class UserServiceImpl implements UserService
 
         $menus = [];
         $permissions = [];
-        foreach ($user->roles as $role) {
-            foreach ($role->permissions as $permission) {
-                if ($permission->type == SystemUserPermissionType::API->value) {
+        foreach ($user->get("roles") as $role) {
+            foreach ($role->get("permissions") as $permission) {
+                if ($permission->get("type") == SystemUserPermissionType::API->value) {
                     $permissions[] = [
-                        'id' => $permission->id,
-                        'path' => $permission->path,
+                        'id' => $permission->get("id"),
+                        'path' => $permission->get("path"),
                     ];
                 }
 
-                if ($permission->type == SystemUserPermissionType::MENU->value || $permission->type == SystemUserPermissionType::DIRECTORY->value) {
+                if ($permission->get("type") == SystemUserPermissionType::MENU->value || $permission->get("type") == SystemUserPermissionType::DIRECTORY->value) {
                     $menus[] = [
-                        'id' => $permission->id,
-                        'parent_id' => $permission->parent_id,
-                        'icon' => $permission->icon,
-                        'name' => $permission->name,
-                        'path' => $permission->path,
-                        'component' => $permission->component,
-                        'hide' => $permission->hide,
-                        'metadata' => $permission->metadata,
+                        'id' => $permission->get("id"),
+                        'parent_id' => $permission->get("parent_id"),
+                        'icon' => $permission->get("icon"),
+                        'name' => $permission->get("name"),
+                        'path' => $permission->get("path"),
+                        'component' => $permission->get("component"),
+                        'hide' => $permission->get("hide"),
+                        'metadata' => $permission->get("metadata"),
                     ];
                 }
             }
