@@ -42,7 +42,7 @@ class TypeController extends AbstractAdminController
         $map = $this->request->post();
         $save = new Save(PaymentType::class);
         $save->setMap($map);
-        $save->addForceMap("creation_time", DateUtils::current());
+        $save->enableCreateTime();
         try {
             $this->database->save($save);
         } catch (Exception $exception) {

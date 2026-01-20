@@ -56,14 +56,14 @@ class MerchantController extends AbstractAdminController
             $map['creation_time'] = DateUtils::current();
         } else {
             if (isset($map['password']) && $map['password'] !== "") {
-                $user = Merchant::find($map['id']);
+                $user = Merchant::query()->find($map['id']);
                 $map['password'] = StringUtils::generatePassword($map['password'], $user->salting);
             }
         }
 
         $save = new Save(Merchant::class);
         $save->setMap($map);
-        $save->addForceMap("creation_time", DateUtils::current());
+        $save->enableCreateTime();
         try {
             $model = $this->database->save($save);
             // 创建关联应用

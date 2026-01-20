@@ -21,7 +21,7 @@ class OrderServiceImpl implements OrderService
 {
     public function trade(array $map): array
     {
-        $merchant = Merchant::where("merchant_no", $map['merchant_no'])->find();
+        $merchant = Merchant::query()->where("merchant_no", $map['merchant_no'])->find();
         if (!$merchant) {
             throw new JsonException("商户号不存在");
         }
@@ -30,7 +30,8 @@ class OrderServiceImpl implements OrderService
         }
 
         // 查询商户应用
-        $application = MerchantApplication::where("merchant_id", $merchant->id)
+        $application = MerchantApplication::query()
+            ->where("merchant_id", $merchant->id)
             ->where("application_no", $map['application_no'])
             ->find();
         if (!$application) {
@@ -38,13 +39,13 @@ class OrderServiceImpl implements OrderService
         }
 
         // 查询支付类型
-        $paymentType = PaymentType::where("code", $map['payment_type'])->find();
+        $paymentType = PaymentType::query()->where("code", $map['payment_type'])->find();
         if (!$paymentType) {
             throw new JsonException("支付类型不存在");
         }
 
         // 查询可用支付通道
-        $channel = PaymentChannel::where("type_id", $paymentType->id)->find();
+        $channel = PaymentChannel::query()->where("type_id", $paymentType->id)->find();
         if (!$channel) {
             throw new JsonException("无可用通道，请尝试其他支付方式。");
         }
@@ -97,10 +98,11 @@ class OrderServiceImpl implements OrderService
 
     public function query(?string $tradeNo = null, ?string $outTradeNo = null): array
     {
-        $query = PaymentOrder::when(!empty($tradeNo),
-            fn($query) => $query->where('trade_no', $tradeNo),
-            fn($query) => $query->where('out_trade_no', $outTradeNo)
-        );
+        $query = PaymentOrder::query()
+            ->when(!empty($tradeNo),
+                fn($query) => $query->where('trade_no', $tradeNo),
+                fn($query) => $query->where('out_trade_no', $outTradeNo)
+            );
 
         $order = $query->find();
         if (!$order) {
@@ -112,12 +114,12 @@ class OrderServiceImpl implements OrderService
 
     public function callback(string $tradeNo, array $map): Response
     {
-        $paymentOrder = PaymentOrder::where('trade_no', $tradeNo)->find();
+        $paymentOrder = PaymentOrder::newQuery()->where('trade_no', $tradeNo)->find();
         if (!$paymentOrder) {
             throw new JsonException("订单不存在或已失效");
         }
 
-        $channel = PaymentChannel::find($paymentOrder->channel_id);
+        $channel = PaymentChannel::query()->find($paymentOrder->channel_id);
         if (!$channel) {
             throw new JsonException("渠道信息不存在");
         }

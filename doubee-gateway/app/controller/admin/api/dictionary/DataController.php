@@ -48,7 +48,7 @@ class DataController extends AbstractAdminController
 
         $save = new Save(SystemDictionaryData::class);
         $save->setMap($map);
-        $save->addForceMap("creation_time", DateUtils::current());
+        $save->enableCreateTime();
         try {
             $this->database->save($save);
         } catch (Exception $exception) {

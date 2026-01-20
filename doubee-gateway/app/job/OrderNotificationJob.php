@@ -34,7 +34,8 @@ class OrderNotificationJob implements JobInterface
         }
 
         Log::info("进入队列第三步，查询订单信息");
-        $order = PaymentOrder::with(['application', 'type', 'merchant'])
+        $order = PaymentOrder::query()
+            ->with(['application', 'type', 'merchant'])
             ->find($data['id']);
 
         Log::info("进入队列第三ban步，查到订单数据：" . json_encode($order->toArray()));

@@ -48,7 +48,7 @@ class RoleController extends AbstractAdminController
         $save = new Save(SystemUserRole::class);
         $save->setMap($map);
         $save->setMiddle("permissions", SystemUserPermissionRelation::class, "permission_id", "role_id");
-        $save->addForceMap("creation_time", DateUtils::current());
+        $save->enableCreateTime();
 
         try {
             $this->database->save($save);
@@ -79,7 +79,7 @@ class RoleController extends AbstractAdminController
         $data = $this->database->get($get);
 
         $roleId = (int)$map['role_id'];
-        $roleData = SystemUserRole::with(['permissions'])->find($roleId);
+        $roleData = SystemUserRole::query()->with(['permissions'])->find($roleId);
         if (!$roleData) {
             throw new JsonException("角色不存在");
         }

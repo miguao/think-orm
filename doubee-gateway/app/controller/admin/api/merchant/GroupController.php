@@ -46,7 +46,7 @@ class GroupController extends AbstractAdminController
         $save->setMap($map);
         $save->setMiddle("permissions", MerchantPermissionRelation::class, "permission_id", "group_id");
 
-        $save->addForceMap("creation_time", DateUtils::current());
+        $save->enableCreateTime();
         try {
             $this->database->save($save);
         } catch (Exception $exception) {
@@ -76,7 +76,7 @@ class GroupController extends AbstractAdminController
         $data = $this->database->get($get);
 
         $groupId = (int)$map['group_id'];
-        $roleData = MerchantGroup::with(['permissions'])->find($groupId);
+        $roleData = MerchantGroup::query()->with(['permissions'])->find($groupId);
         if (!$roleData) {
             throw new JsonException("用户组不存在");
         }

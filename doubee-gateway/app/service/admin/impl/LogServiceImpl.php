@@ -15,7 +15,7 @@ class LogServiceImpl implements LogService
     public function createLoginLog(SystemUser $user, string $loginIp, string $userAgent): void
     {
         try {
-            SystemLoginLog::insert([
+            SystemLoginLog::query()->insert([
                 'user' => $user->toArray(),
                 'login_ip' => $loginIp,
                 'location' => '四川省',

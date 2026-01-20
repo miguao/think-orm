@@ -54,7 +54,7 @@ class UserController extends AbstractAdminController
             $map['creation_time'] = DateUtils::current();
         } else {
             if (isset($map['password']) && $map['password'] !== "") {
-                $user = SystemUser::find($map['id']);
+                $user = SystemUser::query()->find($map['id']);
                 $map['password'] = StringUtils::generatePassword($map['password'], $user->salting);
             }
         }
